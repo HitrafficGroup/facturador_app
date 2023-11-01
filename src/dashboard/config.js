@@ -1,64 +1,49 @@
-import FlagIcon from '@mui/icons-material/Flag';
-import MenuOpenIcon from '@mui/icons-material/MenuOpen';
-import HomeIcon from '@mui/icons-material/Home';
-import BugReportIcon from '@mui/icons-material/BugReport';
+
 import { SvgIcon } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
-import AssignmentIcon from '@mui/icons-material/Assignment';
+import PersonIcon from '@mui/icons-material/Person';
+import StorefrontIcon from '@mui/icons-material/Storefront';
+import DescriptionIcon from '@mui/icons-material/Description';
+import PostAddIcon from '@mui/icons-material/PostAdd';
+
+//
+
 export const items = [
   {
-    title: 'Controladores',
+    title: 'Personas',
     path: '/equipos',
     icon: (
       <SvgIcon fontSize="small">
-        <MenuOpenIcon />
+        <PersonIcon />
       </SvgIcon>
     )
   },
   {
-    title: 'Inicio',
-    path: '/controlador_HT200/home',
+    title: 'Productos y Servicios',
+    path: '/home',
     icon: (
       <SvgIcon fontSize="small">
-        <HomeIcon />
+        <StorefrontIcon />
       </SvgIcon>
     )
   },
   {
-    title: 'Parametros Iniciales',
-    path: '/controlador_HT200/unit',
+    title: 'Proformas',
+    path: '/unit',
     icon: (
       <SvgIcon fontSize="small">
-        <FlagIcon />
+        <DescriptionIcon />
       </SvgIcon>
     )
   },
   {
-    title: 'Configuración Básica',
-    path: '/controlador_HT200/config',
+    title: 'Ordenes de Pedido',
+    path: '/config',
     icon: (
       <SvgIcon fontSize="small">
-        <SettingsIcon />
+        <PostAddIcon />
       </SvgIcon>
     )
   },
-  {
-    title: 'Registro de Errores',
-    path: '/controlador_HT200/errores',
-    icon: (
-      <SvgIcon fontSize="small">
-        <BugReportIcon />
-      </SvgIcon>
-    )
-  },
-  {
-    title: 'Resumen del Controlador',
-    path: '/controlador_HT200/resumen',
-    icon: (
-      <SvgIcon fontSize="small">
-        <AssignmentIcon />
-      </SvgIcon>
-    )
-  }
+  
 
 ];
