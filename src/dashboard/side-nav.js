@@ -13,7 +13,7 @@ import {
   useMediaQuery
 } from '@mui/material';
 
-import logo from "../assets/logov2.png"
+import logo from "../assets/logofinal.png"
 import { items } from './config';
 import { items_views } from './config-views';
 import { SideNavItem } from './side-nav-item';
@@ -56,7 +56,7 @@ export const SideNav = (props) => {
               p: '12px'
             }}
           >
-          <img src={logo} alt='logo de la empresa' height={55} width={200}/> 
+          <img src={logo} alt='logo de la empresa' height={160} width={200}/> 
           </Box>
         </Box>
         <Divider sx={{ borderColor: 'neutral.700' }} />

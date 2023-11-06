@@ -10,7 +10,7 @@ import PostAddIcon from '@mui/icons-material/PostAdd';
 export const items = [
   {
     title: 'Personas',
-    path: '/equipos',
+    path: 'personas',
     icon: (
       <SvgIcon fontSize="small">
         <PersonIcon />
@@ -19,7 +19,7 @@ export const items = [
   },
   {
     title: 'Productos y Servicios',
-    path: '/home',
+    path: 'productos',
     icon: (
       <SvgIcon fontSize="small">
         <StorefrontIcon />
@@ -28,7 +28,7 @@ export const items = [
   },
   {
     title: 'Proformas',
-    path: '/unit',
+    path: 'proformas',
     icon: (
       <SvgIcon fontSize="small">
         <DescriptionIcon />
@@ -37,7 +37,7 @@ export const items = [
   },
   {
     title: 'Ordenes de Pedido',
-    path: '/config',
+    path: 'ordenes',
     icon: (
       <SvgIcon fontSize="small">
         <PostAddIcon />
