@@ -330,12 +330,9 @@ export default function LoginView(){
                                         type="text"
                                         endAdornment={
                                         <InputAdornment position="end">
-                                            <IconButton
-                                            aria-label="toggle password visibility"
-                
-                                            edge="end"
-                                            >
-                                                <AlternateEmailIcon/>
+                                            <IconButton aria-label="toggle password visibility" edge="end"
+                                                >
+                                            <AlternateEmailIcon/>
                                             </IconButton>
                                         </InputAdornment>
                                         }
