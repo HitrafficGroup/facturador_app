@@ -70,7 +70,7 @@ export const error = withAlphas({
 });
 
 export const verde2 = withAlphas( {
-  main: '#52BE80',
+  main: '#2ECC71',
   contrastText: '#fff',
   dark: '#27AE60',
 
@@ -140,6 +140,12 @@ export const azulm=withAlphas({
   dark: '#1A5276',
   
 })
+export const verde123=withAlphas({
+  main: '#616A6B',
+  contrastText: '#fff',
+  dark:'#28B463',
+})
+
 export const amarillo =withAlphas({
   main: '#F1C40F',
   contrastText: '#fff',
@@ -150,6 +156,5 @@ export const gris=withAlphas({
   contrastText: '#fff',
   dark: '#707B7C',
 })
-
 
 
