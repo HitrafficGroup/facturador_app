@@ -4,7 +4,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import DescriptionIcon from '@mui/icons-material/Description';
 import PostAddIcon from '@mui/icons-material/PostAdd';
-
+import SettingsIcon from '@mui/icons-material/Settings';
 //
 
 export const items = [
@@ -43,7 +43,15 @@ export const items = [
         <PostAddIcon />
       </SvgIcon>
     )
-  },
+  },{
+    title: 'Configuraciones',
+    path: 'configuraciones',
+    icon: (
+      <SvgIcon fontSize="small">
+        <SettingsIcon />
+      </SvgIcon>
+    )
+  }
   
 
 ];

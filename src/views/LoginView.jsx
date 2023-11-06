@@ -24,8 +24,11 @@ import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
 import { db,auth } from "../firebase/firebase-config";
 import validator from 'validator';
 import Swal from "sweetalert2";
-import { doc, setDoc } from "firebase/firestore"; 
-import {createUserWithEmailAndPassword } from "firebase/auth";
+import { setUser } from "../features/auth/userSlice";
+import { doc, setDoc,getDoc } from "firebase/firestore"; 
+import {createUserWithEmailAndPassword,signInWithEmailAndPassword } from "firebase/auth";
+import { useDispatch } from 'react-redux';
+
 export default function LoginView(){
     const [showPassword, setShowPassword] = useState(false);
     const [showPassword2, setShowPassword2] = useState(false);
@@ -40,6 +43,7 @@ export default function LoginView(){
     const [password,setPassword] = useState("");
     const [password2,setPassword2] = useState("");
     const [open,setOpen] = useState(false);
+    const dispatch = useDispatch();
     const [formFlags,setFormFlags] = useState({
         ruc:false,
         phone:false,
@@ -98,13 +102,15 @@ export default function LoginView(){
                 email:email,
                 tipo:tipo,
                 usuario:usuario,
-                phone:telefono
+                phone:telefono,
+                id:""
             }
             createUserWithEmailAndPassword(auth, email, password)
             .then(async(userCredential) => {
                 // Signed in 
                 const user = userCredential.user;
                 console.log(user)
+                new_user.id = user.uid
                 await setDoc(doc(db, "usuarios", user.uid), new_user);
                 setOpen(false)
                 Swal.fire({
@@ -125,6 +131,33 @@ export default function LoginView(){
            
     }
   
+    }
+    const IniciarSesion = ()=>{
+        setOpen(true)
+        signInWithEmailAndPassword(auth, email, password)
+        .then(async(userCredential) => {
+            // Signed in 
+            const user = userCredential.user;
+            console.log(user)
+            const ref = doc(db, "usuarios",user.uid);
+            const docSnap = await getDoc(ref);
+            
+            if (docSnap.exists()) {
+              let data = docSnap.data();
+              dispatch(setUser(data));
+              navigate("/dashboard")
+            }
+           
+            // ...
+            setOpen(false)
+        })
+        .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log(errorMessage)
+            setOpen(false)
+        });
+
     }
     const handleChange = (event) => {
       setTipo(event.target.value);
@@ -148,11 +181,13 @@ export default function LoginView(){
                                 <FilledInput
                                     id="filled-adornment-password"
                                         type="text"
+                                        onChange={(event) => {
+                                            setEmail(event.target.value);
+                                        }}
                                         endAdornment={
                                         <InputAdornment position="end">
                                             <IconButton
                                             aria-label="toggle password visibility"
-                
                                             edge="end"
                                             >
                                                 <PersonIcon/>
@@ -167,6 +202,9 @@ export default function LoginView(){
                                 <FilledInput
                                     id="filled-adornment-password"
                                     type={showPassword ? 'text' : 'password'}
+                                    onChange={(event) => {
+                                            setPassword(event.target.value);
+                                        }}
                                     endAdornment={
                                     <InputAdornment position="end">
                                         <IconButton
@@ -181,7 +219,7 @@ export default function LoginView(){
                                     }
                                 />
                                 </FormControl>
-                                <Button variant="contained" color="verde2" fullWidth onClick={()=>{cambiarVista('/registrar')}}>Iniciar Sesion</Button>
+                                <Button variant="contained" color="verde2" fullWidth onClick={IniciarSesion}>Iniciar Sesion</Button>
                                 <Button variant="contained" fullWidth onClick={toggle}>Registrar</Button>
                             </Stack>
                         </div>
