@@ -12,7 +12,9 @@ export default function DashboardView(){
                 <Layout>
                     <SimpleBar style={{ maxHeight: '90vh' }}>
                         <Routes>
-                            <Route path=""   element={<HomeView />} />
+                            <Route path="/"  element={<HomeView />} />
+                            <Route path="/"  element={<HomeView />} />
+                            <Route path="/"  element={<HomeView />} />
                             <Route path="/"  element={<HomeView />} />
                         </Routes>
                     </SimpleBar>
