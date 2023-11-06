@@ -21,11 +21,15 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
 import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
-import { db } from "../firebase/firebase-config";
+import { db,auth } from "../firebase/firebase-config";
 import validator from 'validator';
 import Swal from "sweetalert2";
+import { doc, setDoc } from "firebase/firestore"; 
+import {createUserWithEmailAndPassword } from "firebase/auth";
 export default function LoginView(){
     const [showPassword, setShowPassword] = useState(false);
+    const [showPassword2, setShowPassword2] = useState(false);
+    const [showPassword3, setShowPassword3] = useState(false);
     const [modalRegistro, setModalRegistro] = useState(false);
     const [ruc,setRuc] = useState("");
     const [telefono,setTelefono] = useState("");
@@ -46,32 +50,81 @@ export default function LoginView(){
         password:false,
     })
     const handleClickShowPassword = () => setShowPassword((show) => !show);  
+    const handleClickShowPassword2 = () => setShowPassword2((show) => !show);  
+    const handleClickShowPassword3 = () => setShowPassword3((show) => !show);  
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
     };
+    const handleMouseDownPassword2 = (event) => {
+        event.preventDefault();
+    };
+    const handleMouseDownPassword3 = (event) => {
+        event.preventDefault();
+    };
 
-    const registrarUsuario =()=>{
-    console.log(ruc)
-    validator.isEmail(email) 
-    validator.isNumeric(ruc)
-    validator.isNumeric(telefono)
-    let new_user = {
-        razon:razon,
-        ruc:ruc,
-        password:password,
-        email:email,
-        tipo:tipo,
-        usuario:usuario,
-        phone:telefono
-     }
-
-     console.log(new_user);
-     Swal.fire({
-        title: "Felicidades",
-        text: "Cuenta Registrada Satisfactoriamente!",
-        icon: "success"
-      });
-
+    const registrarUsuario = async()=>{
+        setOpen(true)
+        let banderas = JSON.parse(JSON.stringify(formFlags))
+        if(  validator.isEmail(email) ){
+            banderas.email = false
+        }else{
+            banderas.email = true
+        }
+        if(validator.isNumeric(ruc)){
+            banderas.ruc = false
+        }else{
+            banderas.ruc = true
+        }
+        if(validator.isNumeric(telefono)){
+            banderas.phone = false
+        }else{
+            banderas.phone = true
+        }
+        let is_same = password === password2
+        setFormFlags(banderas)
+        if( banderas.email || banderas.ruc || banderas.phone || !is_same){
+            Swal.fire({
+                title: "Error",
+                text: "Datos Invalidos!",
+                icon: "error"
+            });
+            setOpen(false)
+        }else{
+        
+            let new_user = {
+                razon:razon,
+                ruc:ruc,
+                password:password,
+                email:email,
+                tipo:tipo,
+                usuario:usuario,
+                phone:telefono
+            }
+            createUserWithEmailAndPassword(auth, email, password)
+            .then(async(userCredential) => {
+                // Signed in 
+                const user = userCredential.user;
+                console.log(user)
+                await setDoc(doc(db, "usuarios", user.uid), new_user);
+                setOpen(false)
+                Swal.fire({
+                    title: "Felicidades",
+                    text: "Cuenta Registrada Satisfactoriamente!",
+                    icon: "success"
+                });
+                setModalRegistro(false)
+                // ...
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                setOpen(false)
+                // ..
+            });
+           
+           
+    }
+  
     }
     const handleChange = (event) => {
       setTipo(event.target.value);
@@ -285,16 +338,16 @@ export default function LoginView(){
                                         setPassword(event.target.value);
                                     }}
                                     error={formFlags.password}
-                                    type={showPassword ? 'text' : 'password'}
+                                    type={showPassword2 ? 'text' : 'password'}
                                     endAdornment={
                                     <InputAdornment position="end">
                                         <IconButton
                                         aria-label="toggle password visibility"
-                                        onClick={handleClickShowPassword}
-                                        onMouseDown={handleMouseDownPassword}
+                                        onClick={handleClickShowPassword2}
+                                        onMouseDown={handleMouseDownPassword2}
                                         edge="end"
                                         >
-                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        {showPassword2 ? <VisibilityOff /> : <Visibility />}
                                         </IconButton>
                                     </InputAdornment>
                                     }
@@ -309,16 +362,16 @@ export default function LoginView(){
                                         setPassword2(event.target.value);
                                     }}
   
-                                    type={showPassword ? 'text' : 'password'}
+                                    type={showPassword3 ? 'text' : 'password'}
                                     endAdornment={
                                     <InputAdornment position="end">
                                         <IconButton
                                         aria-label="toggle password visibility"
-                                        onClick={handleClickShowPassword}
-                                        onMouseDown={handleMouseDownPassword}
+                                        onClick={handleClickShowPassword3}
+                                        onMouseDown={handleMouseDownPassword3}
                                         edge="end"
                                         >
-                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        {showPassword3 ? <VisibilityOff /> : <Visibility />}
                                         </IconButton>
                                     </InputAdornment>
                                     }
