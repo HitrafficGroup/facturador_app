@@ -1,9 +1,9 @@
 import { useState } from "react";
 import Stack from '@mui/material/Stack';
 import FilledInput from '@mui/material/FilledInput';
-import InputLabel from '@mui/material/InputLabel';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 import InputAdornment from '@mui/material/InputAdornment';
-import FormControl from '@mui/material/FormControl';
 import PersonIcon from '@mui/icons-material/Person';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
@@ -13,20 +13,76 @@ import Button from '@mui/material/Button';
 import { useNavigate } from 'react-router-dom';
 import {Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import Grid from '@mui/material/Grid';
+import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
+import NumbersIcon from '@mui/icons-material/Numbers';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
+import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
+import { db } from "../firebase/firebase-config";
+import validator from 'validator';
+import Swal from "sweetalert2";
 export default function LoginView(){
-    const [personas,setPersona] = useState();
     const [showPassword, setShowPassword] = useState(false);
     const [modalRegistro, setModalRegistro] = useState(false);
-    const handleClickShowPassword = () => setShowPassword((show) => !show);
-  
+    const [ruc,setRuc] = useState("");
+    const [telefono,setTelefono] = useState("");
+    const [razon,setRazon] = useState("");
+    const [tipo,setTipo] = useState(1);
+    const [email,setEmail] = useState("");
+    const [usuario,setUsuario] = useState("");
+    const [password,setPassword] = useState("");
+    const [password2,setPassword2] = useState("");
+    const [open,setOpen] = useState(false);
+    const [formFlags,setFormFlags] = useState({
+        ruc:false,
+        phone:false,
+        razon:false,
+        tipo:false,
+        email:false,
+        user:false,
+        password:false,
+    })
+    const handleClickShowPassword = () => setShowPassword((show) => !show);  
     const handleMouseDownPassword = (event) => {
-      event.preventDefault();
+        event.preventDefault();
     };
+
+    const registrarUsuario =()=>{
+    console.log(ruc)
+    validator.isEmail(email) 
+    validator.isNumeric(ruc)
+    validator.isNumeric(telefono)
+    let new_user = {
+        razon:razon,
+        ruc:ruc,
+        password:password,
+        email:email,
+        tipo:tipo,
+        usuario:usuario,
+        phone:telefono
+     }
+
+     console.log(new_user);
+     Swal.fire({
+        title: "Felicidades",
+        text: "Cuenta Registrada Satisfactoriamente!",
+        icon: "success"
+      });
+
+    }
+    const handleChange = (event) => {
+      setTipo(event.target.value);
+    };
+  
     const navigate = useNavigate(); 
     const toggle = () => setModalRegistro(!modalRegistro);
     const cambiarVista = (path) => {
       navigate(path);
-  } 
+    } 
+    
 
     return(
             <>
@@ -79,25 +135,200 @@ export default function LoginView(){
                  
                 </div>
                 <Modal isOpen={modalRegistro} toggle={toggle} >
-                    <ModalHeader toggle={toggle}>Registrar Nueva Cuenta</ModalHeader>
+                    <ModalHeader toggle={toggle} >Registrar Nueva Cuenta</ModalHeader>
                     <ModalBody>
-                        <Grid container spacing={2}>
-                            <Grid item xs={8}>
                     
+                        <Grid container spacing={2}>
+                        <Grid item md={7} xs={12}>
+                            <FormControl fullWidth variant="filled">
+                                <InputLabel htmlFor="filled-adornment-password">Ruc</InputLabel>
+                                <FilledInput
+                   
+                                        type="text"
+                                        onChange={(event) => {
+                                            setRuc(event.target.value);
+                                        }}
+                                        error={formFlags.ruc}
+                                        endAdornment={
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                            aria-label="toggle password visibility"
+                                            edge="end"
+                                            >
+                                                <NumbersIcon/>
+                                            </IconButton>
+                                        </InputAdornment>
+                                        }
+                                        label="Password"
+                                    />
+                                </FormControl>
                             </Grid>
-                            <Grid item xs={4}>
-                            
+                            <Grid item md={5} xs={12}>
+                            <FormControl fullWidth variant="filled">
+                                <InputLabel htmlFor="filled-adornment-password">Telefono</InputLabel>
+                                <FilledInput
+                     
+                                        type="text"
+                                        onChange={(event) => {
+                                            setTelefono(event.target.value);
+                                        }}
+                                        error = {formFlags.phone}
+                                        endAdornment={
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                            aria-label="toggle password visibility"
+                                            
+                                            edge="end"
+                                            >
+                                                <PhoneAndroidIcon/>
+                                            </IconButton>
+                                        </InputAdornment>
+                                        }
+                                        label="Password"
+                                    />
+                                </FormControl>
                             </Grid>
-                            <Grid item xs={4}>
-                            
+                            <Grid item xs={12}>
+                            <FormControl fullWidth variant="filled">
+                                <InputLabel htmlFor="filled-adornment-password">Razon Social</InputLabel>
+                                <FilledInput
+                                        onChange={(event) => {
+                                            setRazon(event.target.value);
+                                        }}
+                                        error={false}
+                                        type="text"
+                                        endAdornment={
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                            aria-label="toggle password visibility"
+                
+                                            edge="end"
+                                            >
+                                                <DriveFileRenameOutlineIcon/>
+                                            </IconButton>
+                                        </InputAdornment>
+                                        }
+                                        label="Password"
+                                    />
+                                </FormControl>
                             </Grid>
-                            <Grid item xs={8}>
-                            
+                            <Grid item xs={12}>
+                          
+                            <FormControl fullWidth variant="filled">
+                                <InputLabel htmlFor="filled-adornment-password">Tipo de Persona</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-label"
+                                    error={formFlags.tipo}
+                                    value={tipo}
+                                    label="Tipo de Persona"
+                                    onChange={handleChange}
+                                >
+                                    <MenuItem value={1}>Natural</MenuItem>
+                                    <MenuItem value={2}>Juridica</MenuItem>
+                                </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={12}>
+                            <FormControl fullWidth variant="filled">
+                                <InputLabel htmlFor="filled-adornment-password">Email</InputLabel>
+                                <FilledInput
+                                        onChange={(event) => {
+                                            setEmail(event.target.value);
+                                        }}
+                                        error={formFlags.email}
+                                        type="text"
+                                        endAdornment={
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                            aria-label="toggle password visibility"
+                
+                                            edge="end"
+                                            >
+                                                <AlternateEmailIcon/>
+                                            </IconButton>
+                                        </InputAdornment>
+                                        }
+                                        label="Password"
+                                    />
+                                </FormControl>
+                            </Grid>
+                          
+                            <Grid item xs={12}>
+                            <FormControl fullWidth variant="filled">
+                                <InputLabel htmlFor="filled-adornment-password">Usuario</InputLabel>
+                                <FilledInput
+                                        onChange={(event) => {
+                                            setUsuario(event.target.value);
+                                        }}
+                                        error={formFlags.user}
+                                        type="text"
+                                        endAdornment={
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                            aria-label="toggle password visibility"
+                
+                                            edge="end"
+                                            >
+                                                <PersonIcon/>
+                                            </IconButton>
+                                        </InputAdornment>
+                                        }
+                                        label="Password"
+                                    />
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={12}>
+                            <FormControl fullWidth  variant="filled">
+                                <InputLabel htmlFor="filled-adornment-password">Contraseña</InputLabel>
+                                <FilledInput
+                                    onChange={(event) => {
+                                        setPassword(event.target.value);
+                                    }}
+                                    error={formFlags.password}
+                                    type={showPassword ? 'text' : 'password'}
+                                    endAdornment={
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={handleClickShowPassword}
+                                        onMouseDown={handleMouseDownPassword}
+                                        edge="end"
+                                        >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                    }
+                                />
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={12}>
+                            <FormControl fullWidth  variant="filled">
+                                <InputLabel htmlFor="filled-adornment-password">Repita Contraseña</InputLabel>
+                                <FilledInput
+                                    onChange={(event) => {
+                                        setPassword2(event.target.value);
+                                    }}
+  
+                                    type={showPassword ? 'text' : 'password'}
+                                    endAdornment={
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={handleClickShowPassword}
+                                        onMouseDown={handleMouseDownPassword}
+                                        edge="end"
+                                        >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                    }
+                                />
+                                </FormControl>
                             </Grid>
                         </Grid>
                     </ModalBody>
                     <ModalFooter>
-                    <Button color="primary" onClick={toggle}>
+                    <Button color="primary" onClick={registrarUsuario}>
                         Crear Cuenta
                     </Button>{' '}
                     <Button color="secondary" onClick={toggle}>
@@ -105,6 +336,13 @@ export default function LoginView(){
                     </Button>
                     </ModalFooter>
                 </Modal>
+                <Backdrop
+                    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                    open={open}
+  
+                    >
+                    <CircularProgress color="inherit" />
+                </Backdrop>
             </>
         );
 }
