@@ -9,7 +9,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 
 export const items = [
   {
-    title: 'Personas',
+    title: 'Clientes',
     path: 'personas',
     icon: (
       <SvgIcon fontSize="small">
