@@ -1058,7 +1058,7 @@
           "91452": "SABANILLA"
         }
       },
-      "916": {
+      "915": {
         "canton": "SAMBORONDÓN",
         "parroquias": {
           "91601": "SAMBORONDÓN",
@@ -1067,13 +1067,13 @@
           "91651": "TARIFA"
         }
       },
-      "918": {
+      "916": {
         "canton": "SANTA LUCÍA",
         "parroquias": {
           "91850": "SANTA LUCÍA"
         }
       },
-      "919": {
+      "917": {
         "canton": "SALITRE (URBINA JADO)",
         "parroquias": {
           "91901": "BOCANA",
@@ -1087,7 +1087,7 @@
           "91953": "JUNQUILLAL"
         }
       },
-      "920": {
+      "918": {
         "canton": "SAN JACINTO DE YAGUACHI",
         "parroquias": {
           "92050": "SAN JACINTO DE YAGUACHI",
@@ -1099,45 +1099,45 @@
           "92056": "VIRGEN DE FÁTIMA"
         }
       },
-      "921": {
+      "919": {
         "canton": "PLAYAS",
         "parroquias": {
           "92150": "GENERAL VILLAMIL (PLAYAS)"
         }
       },
-      "922": {
+      "920": {
         "canton": "SIMÓN BOLÍVAR",
         "parroquias": {
           "92250": "SIMÓN BOLÍVAR",
           "92251": "CRNEL.LORENZO DE GARAICOA (PEDREGAL)"
         }
       },
-      "923": {
+      "921": {
         "canton": "CORONEL MARCELINO MARIDUEÑA",
         "parroquias": {
           "92350": "CORONEL MARCELINO MARIDUEÑA (SAN CARLOS)"
         }
       },
-      "924": {
+      "922": {
         "canton": "LOMAS DE SARGENTILLO",
         "parroquias": {
           "92450": "LOMAS DE SARGENTILLO",
           "92451": "ISIDRO AYORA (SOLEDAD)"
         }
       },
-      "925": {
+      "923": {
         "canton": "NOBOL",
         "parroquias": {
           "92550": "NARCISA DE JESÚS"
         }
       },
-      "927": {
+      "924": {
         "canton": "GENERAL ANTONIO ELIZALDE",
         "parroquias": {
           "92750": "GENERAL ANTONIO ELIZALDE (BUCAY)"
         }
       },
-      "928": {
+      "925": {
         "canton": "ISIDRO AYORA",
         "parroquias": {
           "92850": "ISIDRO AYORA"
@@ -1940,7 +1940,7 @@
           "150158": "SAN JUAN DE MUYUNA"
         }
       },
-      "1503": {
+      "1502": {
         "canton": "ARCHIDONA",
         "parroquias": {
           "150350": "ARCHIDONA",
@@ -1951,7 +1951,7 @@
           "150355": "PUERTO MURIALDO"
         }
       },
-      "1504": {
+      "1503": {
         "canton": "EL CHACO",
         "parroquias": {
           "150450": "EL CHACO",
@@ -1962,7 +1962,7 @@
           "150455": "SARDINAS"
         }
       },
-      "1507": {
+      "1504": {
         "canton": "QUIJOS",
         "parroquias": {
           "150750": "BAEZA",
@@ -1974,7 +1974,7 @@
           "150756": "SUMACO"
         }
       },
-      "1509": {
+      "1505": {
         "canton": "CARLOS JULIO AROSEMENA TOLA",
         "parroquias": {
           "150950": "CARLOS JULIO AROSEMENA TOLA"
@@ -2157,7 +2157,7 @@
           "170552": "RUMIPAMBA"
         }
       },
-      "1707": {
+      "1706": {
         "canton": "SAN MIGUEL DE LOS BANCOS",
         "parroquias": {
           "170750": "SAN MIGUEL DE LOS BANCOS",
@@ -2166,13 +2166,13 @@
           "170753": "PUERTO QUITO"
         }
       },
-      "1708": {
+      "1707": {
         "canton": "PEDRO VICENTE MALDONADO",
         "parroquias": {
           "170850": "PEDRO VICENTE MALDONADO"
         }
       },
-      "1709": {
+      "1708": {
         "canton": "PUERTO QUITO",
         "parroquias": {
           "170950": "PUERTO QUITO"

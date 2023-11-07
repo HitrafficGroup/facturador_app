@@ -18,17 +18,41 @@ import profile from '../assets/profile3.png';
 import NumbersIcon from '@mui/icons-material/Numbers';
 import Autocomplete from '@mui/material/Autocomplete';
 import dataEcu from "../scripts/provincias.json";
+import TextField from '@mui/material/TextField';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormLabel from '@mui/material/FormLabel';
+import Select from '@mui/material/Select';
 export default function ConfigView() {
+    const [ciudades,setCiudades] = useState([]);
+    const [age, setAge] = useState('');
+    const [factura,setFactura] = useState(false)
 
+    const handleChange = (event) => {
+      setAge(event.target.value);
+    };
     const userState = useSelector(state => state.auth);
     const getData= ()=>{
-        console.log(dataEcu)
+    
         let final_data = []
-        for(let i = 0;i<=24;i++){
-           
-            let aux_cantones = dataEcu[i]
-            console.log(dataEcu[i])
+        for(let i = 1;i<=23;i++){
+            let canton_code = i*100
+            let cantones = dataEcu[i]['cantones']
+            let provincia = dataEcu[i]['provincia']
+       
+            let counter = Object.keys(cantones).length;
+       
+            for (let j = 1 ; j <= counter;j++){
+                let dec = canton_code+j
+                let canton = dataEcu[i]['cantones'][dec]['canton']
+                let nombre = provincia+' - '+ canton
+                final_data.push(nombre)
+            }
+            
         }
+        setCiudades(final_data)
+
     }
     useEffect(() => {
         getData();
@@ -38,7 +62,9 @@ export default function ConfigView() {
             <Container maxWidth="md">
                 <Stack direction="row" spacing={2}>
                     <Grid container spacing={1}>
-                      
+                    <Grid item xs={12}>
+                            <h5 style={{textAlign:'left',color:'#6C737F'}}>Configuracion de la cuenta</h5>
+                        </Grid>
                         <Grid item xs={6}>
                             <FormControl fullWidth variant="filled">
                                 <InputLabel htmlFor="filled-adornment-password">Razon</InputLabel>
@@ -109,25 +135,31 @@ export default function ConfigView() {
                             </FormControl>
                         </Grid>
                         <Grid item xs={6}>
-                            <FormControl fullWidth variant="filled">
-                                <InputLabel htmlFor="filled-adornment-password">Ciudad</InputLabel>
-                                <FilledInput
-                                    type="text"
-                                    value={userState.ruc}
-                                    endAdornment={
-                                        <InputAdornment position="end">
-                                            <IconButton aria-label="toggle password visibility" edge="end">
-                                                <NumbersIcon />
-                                            </IconButton>
-                                        </InputAdornment>
-                                    }
-                                    label="Ruc"
-                                />
+                        <Autocomplete
+                            disablePortal
+                            id="combo-box-demo"
+                            fullWidth
+                            options={ciudades}
+                      
+                            renderInput={(params) => <TextField {...params} label="Ciudad" />}
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <FormControl>
+                                <FormLabel id="demo-row-radio-buttons-group-label">Obligado a llevar contabilidad?</FormLabel>
+                                <RadioGroup
+                                    row
+                                    aria-labelledby="demo-row-radio-buttons-group-label"
+                                    name="row-radio-buttons-group"
+                                >
+                                    <FormControlLabel value="si" control={<Radio />} label="si" />
+                                    <FormControlLabel value="no" control={<Radio />} label="no" />
+                                   
+                                </RadioGroup>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={12}>
-
-                        </Grid>
+                        
+                       
                         <Grid item xs={12}>
 
                         </Grid>
@@ -136,6 +168,47 @@ export default function ConfigView() {
                         <img  src={profile}  style={{height:"60%",width:"60%"}}/>
                     </div>
                 </Stack>
+                <Grid container spacing={1}>
+                    <Grid item xs={12}>
+                            <h5 style={{textAlign:'left',color:'#6C737F'}}>Configuracion del ruc</h5>
+                    </Grid>
+                    <Grid item xs={6}>
+                    <TextField
+                        id="outlined-multiline-flexible"
+                        label="Dirección registrada en el RUC"
+                        multiline
+                        rows={3}
+                        maxRows={3}
+                        fullWidth
+                        />
+                    </Grid>
+                    <Grid item xs={6}>
+                    <TextField
+                        id="outlined-multiline-flexible"
+                        label="Nombre Comercial Registrado en el RUC"
+                        multiline
+                        rows={3}
+                        maxRows={3}
+                        fullWidth
+                        />
+                    </Grid>
+                    <Grid item xs={6}>
+                        <FormControl fullWidth variant="filled">
+                            <InputLabel htmlFor="filled-adornment-password">Ha emitido facturas?</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={age}
+                                label="Has emitido facturas anteriormente"
+                                onChange={handleChange}
+                            >
+                                <MenuItem value={false}>No, mi ruc es nuevo</MenuItem>
+                                <MenuItem value={true}>Si, He emitido facturas anteriormente.</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                </Grid>
+
             </Container>
         </>
     );
