@@ -27,9 +27,10 @@ import FormLabel from '@mui/material/FormLabel';
 import Select from '@mui/material/Select';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import DoneIcon from '@mui/icons-material/Done';
 import FileUploadButton from "../components/fileUploadButton";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import Chip from '@mui/material/Chip';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 import ProfilePhoto from "../components/profile-phot";
@@ -39,15 +40,18 @@ export default function ConfigView() {
     const [showPassword, setShowPassword] = useState(false);
     const [ciudades, setCiudades] = useState([]);
     const [age, setAge] = useState('');
+    const [ciudad,setCiudad] = useState('');
     const [factura, setFactura] = useState(false)
     const [password, setPassword] = useState("");
     const [signatureFile, setSignatureFile] = useState(null);
     const [open, setOpen] = useState(false);
     const [profileFile, setProfileFile] = useState(null);
     const [imagenURL, setImagenURL] = useState(null);
-    const handleChange = (event) => {
-        setAge(event.target.value);
-    };
+    const [contabilidad,setContabilidad] = useState(false);
+    const [direccionRuc,setDireccionRuc]  = useState(false);
+    const [nombreComercial,setNombreComercial]  = useState(false);
+
+    
     const dispatch = useDispatch();
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -76,6 +80,11 @@ export default function ConfigView() {
         setCiudades(final_data)
 
     }
+
+    
+    const handleChangeContabilidad = (event) => {
+        setContabilidad(event.target.value);
+    };
 
     
     const actualizarDatos = async () => {
@@ -108,8 +117,14 @@ export default function ConfigView() {
             user_copy['signature'] = true
             user_copy['signature_url'] = url_profile
             user_copy['signature_name'] = signatureFile.name
-            
         } 
+        
+        user_copy['contabilidad'] = contabilidad
+        user_copy['ciudad'] = ciudad
+        user_copy['direccion_ruc'] = direccionRuc
+        user_copy['nombre_comercial'] = nombreComercial
+
+        
         dispatch(setUser(user_copy));
         console.log(user_copy)
         // Set the "capital" field of the city 'DC'
@@ -124,6 +139,7 @@ export default function ConfigView() {
         setSignatureFile(file)
 
     };
+
 
     const handleFileUpload = (file) => {
         // Aquí puedes manejar el archivo subido, por ejemplo, enviarlo a un servidor o realizar alguna operación con él.
@@ -217,22 +233,25 @@ export default function ConfigView() {
                                 disablePortal
                                 id="combo-box-demo"
                                 fullWidth
+                                onChange={(event, newValue) => {
+                                    setCiudad(newValue);
+                                }}
                                 options={ciudades}
-
                                 renderInput={(params) => <TextField {...params} label="Ciudad" />}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <FormControl>
-                                <FormLabel id="demo-row-radio-buttons-group-label">Obligado a llevar contabilidad?</FormLabel>
-                                <RadioGroup
-                                    row
-                                    aria-labelledby="demo-row-radio-buttons-group-label"
-                                    name="row-radio-buttons-group"
-                                >
-                                    <FormControlLabel value="si" control={<Radio />} label="si" />
-                                    <FormControlLabel value="no" control={<Radio />} label="no" />
-
+                                <FormLabel id="demo-controlled-radio-buttons-group">Obligado a llevar contabilidad ?</FormLabel>
+                                    <RadioGroup
+                                        aria-labelledby="demo-controlled-radio-buttons-group"
+                                        name="controlled-radio-buttons-group"
+                                        value={contabilidad}
+                                        row
+                                        onChange={handleChangeContabilidad}
+                                    >
+                                    <FormControlLabel value={false} control={<Radio />} label="si" />
+                                    <FormControlLabel value={true} control={<Radio />} label="no" />
                                 </RadioGroup>
                             </FormControl>
                         </Grid>
@@ -254,8 +273,11 @@ export default function ConfigView() {
                             label="Dirección registrada en el RUC"
                             multiline
                             rows={3}
-
                             fullWidth
+                            
+                            onChange={(event) => {
+                                setDireccionRuc(event.target.value);
+                            }}
                         />
                     </Grid>
                     <Grid item xs={12} md={6}>
@@ -264,7 +286,9 @@ export default function ConfigView() {
                             label="Nombre Comercial Registrado en el RUC"
                             multiline
                             rows={3}
-
+                            onChange={(event) => {
+                                setNombreComercial(event.target.value);
+                            }}
                             fullWidth
                         />
                     </Grid>
@@ -276,10 +300,10 @@ export default function ConfigView() {
                                 id="demo-simple-select"
                                 value={age}
                                 label="Has emitido facturas anteriormente"
-                                onChange={handleChange}
+                                onChange={handleChangeContabilidad}
                             >
-                                <MenuItem value={false}>No, mi ruc es nuevo</MenuItem>
-                                <MenuItem value={true}>Si, He emitido facturas anteriormente.</MenuItem>
+                                <MenuItem value={false}> No, mi ruc es nuevo</MenuItem>
+                                <MenuItem value={true}>  Si, He emitido facturas anteriormente.</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid>
@@ -316,8 +340,11 @@ export default function ConfigView() {
                     <Grid item xs={12}>
                         <Stack direction="column" spacing={3}>
 
-                            <p style={{ textAlign: "left" }}>Registre o actualice su firma Electronica para validar las facturas en el sistema del SRI.</p>
-                            <input type="file" onChange={handleFileChange} />
+                                <p style={{ textAlign: "left" }}>Registre o actualice su firma Electronica para validar las facturas en el sistema del SRI.</p>
+                                <stack direction="row" spacing={2}>
+                                    <input type="file" disabled={userState.signature} width={200} onChange={handleFileChange} />
+                                    <Chip label={userState.signature_name} variant="outlined" color="success" icon={<DoneIcon/>}/>  
+                                </stack> 
                             <FormControl fullWidth variant="filled">
                                 <InputLabel htmlFor="filled-adornment-password">Contraseña de la firma</InputLabel>
                                 <FilledInput
@@ -335,14 +362,13 @@ export default function ConfigView() {
                                                 onMouseDown={handleMouseDownPassword}
                                                 edge="end"
                                             >
-                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
                                             </IconButton>
                                         </InputAdornment>
                                     }
                                 />
                             </FormControl>
                         </Stack>
-
                     </Grid>
                     <Grid item xs={12}>
                         <Button sx={{ marginTop: 5 }} onClick={actualizarDatos} variant="contained">GUARDAR CAMBIOS</Button>
