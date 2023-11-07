@@ -84,6 +84,7 @@ export default function LoginView(){
         }else{
             banderas.phone = true
         }
+        
         let is_same = password === password2
         setFormFlags(banderas)
         if( banderas.email || banderas.ruc || banderas.phone || !is_same){

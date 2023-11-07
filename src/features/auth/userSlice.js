@@ -12,7 +12,12 @@ export const userSlice = createSlice({
         ruc: '',
         tipo:'',
         usuario:'',
-        id:''
+        id:'',
+        profile:false,
+        profile_url:'',
+        signature:false,
+        signature_url:'',
+        signature_name:''
     },
     reducers: {
         setUser: (state,action)=>{
@@ -24,6 +29,11 @@ export const userSlice = createSlice({
             state.tipo = action.payload.tipo;
             state.usuario = action.payload.usuario;
             state.id = action.payload.id;
+            state.profile = action.payload.profile;
+            state.profile_url = action.payload.profile_url
+            state.signature = action.payload.signature;
+            state.signature_url = action.payload.signature_url
+            state.signature_name = action.payload.signature_name
         },
     }
 })

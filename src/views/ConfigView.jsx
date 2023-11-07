@@ -9,8 +9,8 @@ import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
 import PersonIcon from '@mui/icons-material/Person';
-import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { db } from "../firebase/firebase-config";
+import { collection, query, where, onSnapshot, doc, updateDoc } from "firebase/firestore";
+import { db, storage } from "../firebase/firebase-config";
 import Button from '@mui/material/Button';
 import { useSelector } from 'react-redux';
 import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
@@ -28,58 +28,122 @@ import Select from '@mui/material/Select';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import FileUploadButton from "../components/fileUploadButton";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
+import ProfilePhoto from "../components/profile-phot";
+import { useDispatch } from 'react-redux';
+import { setUser } from "../features/auth/userSlice";
 export default function ConfigView() {
     const [showPassword, setShowPassword] = useState(false);
-    const [ciudades,setCiudades] = useState([]);
+    const [ciudades, setCiudades] = useState([]);
     const [age, setAge] = useState('');
-    const [factura,setFactura] = useState(false)
-    const [password,setPassword] = useState("");
+    const [factura, setFactura] = useState(false)
+    const [password, setPassword] = useState("");
+    const [signatureFile, setSignatureFile] = useState(null);
+    const [open, setOpen] = useState(false);
+    const [profileFile, setProfileFile] = useState(null);
+    const [imagenURL, setImagenURL] = useState(null);
     const handleChange = (event) => {
-      setAge(event.target.value);
+        setAge(event.target.value);
     };
+    const dispatch = useDispatch();
 
-    const handleClickShowPassword = () => setShowPassword((show) => !show);  
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
     };
     const userState = useSelector(state => state.auth);
-    const getData= ()=>{
-    
+    const getData = () => {
+
         let final_data = []
-        for(let i = 1;i<=23;i++){
-            let canton_code = i*100
+        for (let i = 1; i <= 23; i++) {
+            let canton_code = i * 100
             let cantones = dataEcu[i]['cantones']
             let provincia = dataEcu[i]['provincia']
-       
+
             let counter = Object.keys(cantones).length;
-       
-            for (let j = 1 ; j <= counter;j++){
-                let dec = canton_code+j
+
+            for (let j = 1; j <= counter; j++) {
+                let dec = canton_code + j
                 let canton = dataEcu[i]['cantones'][dec]['canton']
-                let nombre = provincia+' - '+ canton
+                let nombre = provincia + ' - ' + canton
                 final_data.push(nombre)
             }
-            
+
         }
         setCiudades(final_data)
 
     }
+
+    
+    const actualizarDatos = async () => {
+        setOpen(true);
+        const user_ref = doc(db, "usuarios", userState.id);
+        let user_copy = JSON.parse(JSON.stringify(userState))
+        let url_profile = ''
+        if (profileFile !== null) {
+            const spaceRef = ref(storage, `profiles/${profileFile.name}`);
+            await uploadBytes(spaceRef, profileFile).then(async (snapshot) => {
+                console.log('Uploaded an array!');
+                await getDownloadURL(snapshot.ref).then((downloadURL) => {
+                    console.log('File available at', downloadURL);
+                    url_profile = downloadURL
+                });
+            });
+            user_copy['profile'] = true
+            user_copy['profile_url'] = url_profile
+            
+        } 
+        if (signatureFile !== null) {
+            const spaceRef = ref(storage, `firmas/${signatureFile.name}`);
+            await uploadBytes(spaceRef, signatureFile).then(async (snapshot) => {
+                console.log('Uploaded an array!');
+                await getDownloadURL(snapshot.ref).then((downloadURL) => {
+                    console.log('File available at', downloadURL);
+                    url_profile = downloadURL
+                });
+            });
+            user_copy['signature'] = true
+            user_copy['signature_url'] = url_profile
+            user_copy['signature_name'] = signatureFile.name
+            
+        } 
+        dispatch(setUser(user_copy));
+        console.log(user_copy)
+        // Set the "capital" field of the city 'DC'
+        await updateDoc(user_ref, user_copy);
+        setOpen(false)
+    }
+
+
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        setSignatureFile(file)
+
+    };
+
     const handleFileUpload = (file) => {
         // Aquí puedes manejar el archivo subido, por ejemplo, enviarlo a un servidor o realizar alguna operación con él.
-        console.log('Archivo subido:', file);
-      };
+
+        const url = URL.createObjectURL(file);
+        setImagenURL(url);
+        setProfileFile(file);
+    };
     useEffect(() => {
         getData();
     }, []);
     return (
         <>
             <Container maxWidth="md">
-                <Stack  direction={{ xs: 'column', md: 'row' }} alignItems={"center"} spacing={2}>
+                <Stack direction={{ xs: 'column', md: 'row' }} alignItems={"center"} spacing={2}>
                     <Grid container spacing={1}>
-                    <Grid item xs={12}>
-                            <h5 style={{textAlign:'left',color:'#6C737F'}}>Configuracion de la cuenta</h5>
+                        <Grid item xs={12}>
+                            <h5 style={{ textAlign: 'left', color: '#6C737F' }}>Configuracion de la cuenta</h5>
                         </Grid>
-                        <Grid item  xs={12} md={6}>
+                        <Grid item xs={12} md={6}>
                             <FormControl fullWidth variant="filled">
                                 <InputLabel htmlFor="filled-adornment-password">Razon</InputLabel>
                                 <FilledInput
@@ -149,13 +213,13 @@ export default function ConfigView() {
                             </FormControl>
                         </Grid>
                         <Grid item xs={12} md={6}>
-                        <Autocomplete
-                            disablePortal
-                            id="combo-box-demo"
-                            fullWidth
-                            options={ciudades}
-                            
-                            renderInput={(params) => <TextField {...params} label="Ciudad" />}
+                            <Autocomplete
+                                disablePortal
+                                id="combo-box-demo"
+                                fullWidth
+                                options={ciudades}
+
+                                renderInput={(params) => <TextField {...params} label="Ciudad" />}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -168,41 +232,40 @@ export default function ConfigView() {
                                 >
                                     <FormControlLabel value="si" control={<Radio />} label="si" />
                                     <FormControlLabel value="no" control={<Radio />} label="no" />
-                                   
+
                                 </RadioGroup>
                             </FormControl>
                         </Grid>
-                        
+
                     </Grid>
-                        <Stack spacing={2}>    
-                            <div style={{height:"15rem",width:"20rem",borderRadius:5,borderStyle:"dashed",color:"#B2BABB",display:"flex",borderWidth:5,alignItems:"center",justifyContent:"center"}}>
-                                <img  src={profile}  style={{height:"60%",width:"60%"}}/>
-                            </div>
-                            <FileUploadButton onFileUpload={handleFileUpload} />
-                        </Stack>
+                    <Stack spacing={2}>
+
+                        <ProfilePhoto condition={userState.profile} url={imagenURL !== null ? imagenURL : userState.profile_url} />
+                        <FileUploadButton onFileUpload={handleFileUpload} />
+                    </Stack>
                 </Stack>
                 <Grid container marginTop={4} spacing={1}>
                     <Grid item xs={12}>
-                            <h5 style={{textAlign:'left',color:'#6C737F'}}>Configuracion del ruc</h5>
+                        <h5 style={{ textAlign: 'left', color: '#6C737F' }}>Configuracion del ruc</h5>
                     </Grid>
                     <Grid item xs={12} md={6}>
-                    <TextField
-                        id="outlined-multiline-flexible"
-                        label="Dirección registrada en el RUC"
-                        multiline
-                        rows={3}
-                        maxRows={3}
-                        fullWidth
+                        <TextField
+                            id="outlined-multiline-flexible"
+                            label="Dirección registrada en el RUC"
+                            multiline
+                            rows={3}
+
+                            fullWidth
                         />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                    <TextField
-                        id="outlined-multiline-flexible"
-                        label="Nombre Comercial Registrado en el RUC"
-                        multiline
-                        rows={3}
-                        maxRows={3}
-                        fullWidth
+                        <TextField
+                            id="outlined-multiline-flexible"
+                            label="Nombre Comercial Registrado en el RUC"
+                            multiline
+                            rows={3}
+
+                            fullWidth
                         />
                     </Grid>
                     <Grid item xs={12} md={6}>
@@ -221,71 +284,78 @@ export default function ConfigView() {
                         </FormControl>
                     </Grid>
                     <Grid item xs={12} md={6}>
-                        <Stack direction="row"  alignItems={"center"} spacing={1}>
+                        <Stack direction="row" alignItems={"center"} spacing={1}>
                             <TextField
                                 id="outlined-password-input"
                                 label=""
                                 type="text"
                                 autoComplete="current-password"
-                                sx={{width:100}}
-                                />
-                                <strong>-</strong>
-                                <TextField
+                                sx={{ width: 100 }}
+                            />
+                            <strong>-</strong>
+                            <TextField
                                 id="outlined-password-input"
                                 label=""
                                 type="text"
                                 autoComplete="current-password"
-                                sx={{width:100}}
-                                />
-                                <strong>-</strong>
-                                <TextField
+                                sx={{ width: 100 }}
+                            />
+                            <strong>-</strong>
+                            <TextField
                                 id="outlined-password-input"
                                 label=""
                                 type="text"
                                 fullWidth
                                 autoComplete="current-password"
-                                />
+                            />
                         </Stack>
                     </Grid>
                     <Grid item xs={12}>
-                        <h5 style={{textAlign:'left',color:'#6C737F',marginTop:7}}>Configuracion de la firma electronica</h5>
+                        <h5 style={{ textAlign: 'left', color: '#6C737F', marginTop: 7 }}>Configuracion de la firma electronica</h5>
                     </Grid>
                     <Grid item xs={12}>
-                    <Stack direction="column"  spacing={1}>
-                        <p style={{textAlign:"left"}}>Registre o actualice su firma Electronica para validar las facturas en el sistema del SRI.</p>
-                        <input type="file" />
-                        <FormControl fullWidth  variant="filled">
+                        <Stack direction="column" spacing={3}>
+
+                            <p style={{ textAlign: "left" }}>Registre o actualice su firma Electronica para validar las facturas en el sistema del SRI.</p>
+                            <input type="file" onChange={handleFileChange} />
+                            <FormControl fullWidth variant="filled">
                                 <InputLabel htmlFor="filled-adornment-password">Contraseña de la firma</InputLabel>
                                 <FilledInput
                                     onChange={(event) => {
                                         setPassword(event.target.value);
                                     }}
-                      
+
                                     type={showPassword ? 'text' : 'password'}
-                                    style={{width:240}}
+                                    style={{ width: 240 }}
                                     endAdornment={
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                        aria-label="toggle password visibility"
-                                        onClick={handleClickShowPassword}
-                                        onMouseDown={handleMouseDownPassword}
-                                        edge="end"
-                                        >
-                                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                onClick={handleClickShowPassword}
+                                                onMouseDown={handleMouseDownPassword}
+                                                edge="end"
+                                            >
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
                                     }
                                 />
-                                </FormControl>
-                    </Stack>
-                       
+                            </FormControl>
+                        </Stack>
+
                     </Grid>
                     <Grid item xs={12}>
-                        <Button  sx={{marginTop:5}} variant="contained">GUARDAR CAMBIOS</Button>
+                        <Button sx={{ marginTop: 5 }} onClick={actualizarDatos} variant="contained">GUARDAR CAMBIOS</Button>
                     </Grid>
                 </Grid>
-                
+
             </Container>
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={open}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
         </>
     );
 }
