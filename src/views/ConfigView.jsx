@@ -48,12 +48,9 @@ export default function ConfigView() {
     const [profileFile, setProfileFile] = useState(null);
     const [imagenURL, setImagenURL] = useState(null);
     const [contabilidad,setContabilidad] = useState(false);
-    const [direccionRuc,setDireccionRuc]  = useState(false);
-    const [nombreComercial,setNombreComercial]  = useState(false);
-
-    
+    const [direccionRuc,setDireccionRuc]  = useState("");
+    const [nombreComercial,setNombreComercial]  = useState("");
     const dispatch = useDispatch();
-
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
@@ -78,14 +75,21 @@ export default function ConfigView() {
 
         }
         setCiudades(final_data)
+        setCiudad(userState.ciudad)
+        setContabilidad(userState.contabilidad)
+        setFactura(userState.factura)
+        setDireccionRuc(userState.direccion_ruc)
+        setNombreComercial(userState.nombre_comercial)
+        setPassword(userState.firma_password)
 
     }
 
-    
+    const handleFactura =(event)=>{
+        setFactura(event.target.value);
+    }
     const handleChangeContabilidad = (event) => {
         setContabilidad(event.target.value);
     };
-
     
     const actualizarDatos = async () => {
         setOpen(true);
@@ -123,6 +127,8 @@ export default function ConfigView() {
         user_copy['ciudad'] = ciudad
         user_copy['direccion_ruc'] = direccionRuc
         user_copy['nombre_comercial'] = nombreComercial
+        user_copy['factura'] = factura
+        user_copy['firma_password'] = password
 
         
         dispatch(setUser(user_copy));
@@ -157,7 +163,7 @@ export default function ConfigView() {
                 <Stack direction={{ xs: 'column', md: 'row' }} alignItems={"center"} spacing={2}>
                     <Grid container spacing={1}>
                         <Grid item xs={12}>
-                            <h5 style={{ textAlign: 'left', color: '#6C737F' }}>Configuracion de la cuenta</h5>
+                            <h5 style={{ textAlign: 'left', color: '#6C737F' }}>Configuracion datos personales</h5>
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <FormControl fullWidth variant="filled">
@@ -236,6 +242,7 @@ export default function ConfigView() {
                                 onChange={(event, newValue) => {
                                     setCiudad(newValue);
                                 }}
+                                value={ciudad}
                                 options={ciudades}
                                 renderInput={(params) => <TextField {...params} label="Ciudad" />}
                             />
@@ -265,7 +272,7 @@ export default function ConfigView() {
                 </Stack>
                 <Grid container marginTop={4} spacing={1}>
                     <Grid item xs={12}>
-                        <h5 style={{ textAlign: 'left', color: '#6C737F' }}>Configuracion del ruc</h5>
+                        <h5 style={{ textAlign: 'left', color: '#6C737F' }}>Configuracion de facturacion</h5>
                     </Grid>
                     <Grid item xs={12} md={6}>
                         <TextField
@@ -274,7 +281,7 @@ export default function ConfigView() {
                             multiline
                             rows={3}
                             fullWidth
-                            
+                            value={direccionRuc}
                             onChange={(event) => {
                                 setDireccionRuc(event.target.value);
                             }}
@@ -285,6 +292,7 @@ export default function ConfigView() {
                             id="outlined-multiline-flexible"
                             label="Nombre Comercial Registrado en el RUC"
                             multiline
+                            value={nombreComercial}
                             rows={3}
                             onChange={(event) => {
                                 setNombreComercial(event.target.value);
@@ -298,9 +306,9 @@ export default function ConfigView() {
                             <Select
                                 labelId="demo-simple-select-label"
                                 id="demo-simple-select"
-                                value={age}
+                                value={factura}
                                 label="Has emitido facturas anteriormente"
-                                onChange={handleChangeContabilidad}
+                                onChange={handleFactura}
                             >
                                 <MenuItem value={false}> No, mi ruc es nuevo</MenuItem>
                                 <MenuItem value={true}>  Si, He emitido facturas anteriormente.</MenuItem>
@@ -351,6 +359,7 @@ export default function ConfigView() {
                                     onChange={(event) => {
                                         setPassword(event.target.value);
                                     }}
+                                    value={password}
 
                                     type={showPassword ? 'text' : 'password'}
                                     style={{ width: 240 }}

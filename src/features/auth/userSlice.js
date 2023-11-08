@@ -17,7 +17,15 @@ export const userSlice = createSlice({
         profile_url:'',
         signature:false,
         signature_url:'',
-        signature_name:''
+        signature_name:'',
+        ciudad:'',
+        contabilidad:true,
+        factura:true,
+        direccion_ruc:'',
+        nombre_comercial:'',
+        firma_password:''
+
+
     },
     reducers: {
         setUser: (state,action)=>{
@@ -30,10 +38,16 @@ export const userSlice = createSlice({
             state.usuario = action.payload.usuario;
             state.id = action.payload.id;
             state.profile = action.payload.profile;
-            state.profile_url = action.payload.profile_url
+            state.profile_url = action.payload.profile_url;
             state.signature = action.payload.signature;
-            state.signature_url = action.payload.signature_url
-            state.signature_name = action.payload.signature_name
+            state.signature_url = action.payload.signature_url;
+            state.signature_name = action.payload.signature_name;
+            state.ciudad = action.payload.ciudad;
+            state.contabilidad = action.payload.contabilidad;
+            state.factura = action.payload.factura;
+            state.direccion_ruc = action.payload.direccion_ruc;
+            state.nombre_comercial = action.payload.nombre_comercial;
+            state.firma_password = action.payload.firma_password;
         },
     }
 })

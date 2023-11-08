@@ -5,6 +5,7 @@ import StorefrontIcon from '@mui/icons-material/Storefront';
 import DescriptionIcon from '@mui/icons-material/Description';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import SettingsIcon from '@mui/icons-material/Settings';
+import EngineeringIcon from '@mui/icons-material/Engineering';
 //
 
 export const items = [
@@ -18,11 +19,20 @@ export const items = [
     )
   },
   {
-    title: 'Productos y Servicios',
+    title: 'Productos',
     path: 'productos',
     icon: (
       <SvgIcon fontSize="small">
         <StorefrontIcon />
+      </SvgIcon>
+    )
+  },
+  {
+    title: 'Servicios',
+    path: 'productos',
+    icon: (
+      <SvgIcon fontSize="small">
+        <EngineeringIcon />
       </SvgIcon>
     )
   },
