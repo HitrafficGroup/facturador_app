@@ -166,9 +166,7 @@ export default function LoginView(){
   
     const navigate = useNavigate(); 
     const toggle = () => setModalRegistro(!modalRegistro);
-    const cambiarVista = (path) => {
-      navigate(path);
-    } 
+ 
     
 
     return(

@@ -163,7 +163,7 @@ export default function ConfigView() {
                 <Stack direction={{ xs: 'column', md: 'row' }} alignItems={"center"} spacing={2}>
                     <Grid container spacing={1}>
                         <Grid item xs={12}>
-                            <h5 style={{ textAlign: 'left', color: '#6C737F' }}>Configuracion datos personales</h5>
+                            <h5 style={{ textAlign: 'left', color: '#6C737F' }}>Configuración de datos personales</h5>
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <FormControl fullWidth variant="filled">
@@ -394,3 +394,4 @@ export default function ConfigView() {
         </>
     );
 }
+//Bely2201828138
