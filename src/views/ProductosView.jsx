@@ -11,7 +11,7 @@ import TableRow from '@mui/material/TableRow';
 import Stack from '@mui/material/Stack';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
-import { collection, query, onSnapshot, doc, setDoc } from "firebase/firestore";
+import { collection, query, onSnapshot, doc, setDoc,updateDoc,deleteDoc  } from "firebase/firestore";
 import { db } from "../firebase/firebase-config";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import TextField from '@mui/material/TextField';
@@ -34,6 +34,8 @@ import PropTypes from 'prop-types';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import EditIcon from '@mui/icons-material/Edit';
 import { useSelector } from 'react-redux';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 export default function ProductosView() {
     const [productos, setProductos] = useState([])
     const [page, setPage] = useState(0);
@@ -60,8 +62,9 @@ export default function ProductosView() {
     const [value1,setValue1] = useState("");
     const [value2,setValue2] = useState("");
     const [value3,setValue3] = useState("");
+    const [open, setOpen] = useState(false);
     const userState = useSelector(state => state.auth);
-    const [currentProducto,setCurrentProduct] = useState({
+    const [currentProducto,setCurrentProducto] = useState({
         codigo_principal: "",
         codigo_auxiliar: "",
         descripcion: "",
@@ -75,6 +78,12 @@ export default function ProductosView() {
         inventario:"",
         stock: "",
         id:"",
+        param1:"",
+        value1:"",
+        param2:"",
+        value2:"",
+        param3:"",
+        value3:"",
     });
     
 
@@ -101,8 +110,7 @@ export default function ProductosView() {
 
         
     }
-    const toggle = () => setModalProducto(!modalProducto);
-    const toggle2 = () => setModalEditar(!modalEditar);
+
 
     const handleChange = (event) => {
         setTarifa(event.target.value);
@@ -117,10 +125,11 @@ export default function ProductosView() {
       };
     const abrirModalEditar =(item)=>{
         setModalEditar(true);
-        setCurrentProduct(item);
+        setCurrentProducto(item);
     }
 
     const agregarProductos = async () => {
+        setOpen(true);
         let id = uuidv4();
         console.log(id);
         let new_producto = {
@@ -134,85 +143,38 @@ export default function ProductosView() {
             activo:activo,
             establecimiento:establecimiento,
             categoria: categoria,
-            other_param: [
-                {
-                    nombre:param1,
-                    valor:value1
-                },
-                {
-                    nombre:param2,
-                    valor:value2
-                },
-                {
-                    nombre:param3,
-                    valor:value3
-                }
-            ],
+            param1:param1,
+            value1:value1,
+            param2:param2,
+            value2:value2,
+            param3:param3,
+            value3:value3,
             inventario:inventario,
             stock: stock,
             id:id,
         }
         await setDoc(doc(db, "productos", id), new_producto);
-
+        setOpen(false);
+        setModalProducto(false);
 
     }
+
     const actualizarProducto = async ()=>{
-        let id = uuidv4();
-        console.log(id);
-        setCodigoPrincipal(currentProducto.codigo_principal);
-        setCodigoAuxiliar(currentProducto.codigo_auxiliar);
-        setDescripcion(currentProducto.descripcion);
-        setValorUnitario(currentProducto.valor_unitario);
-        setUnidadMedida(currentProducto.unidad_medida);
-        setTarifa(currentProducto.tarifa_iva);
-        setIce(currentProducto.ice);
-        setActivo(activo);
-        setEstablecimiento(establecimiento);
-        setCategoria()
-;
-        let new_producto = {
-            codigo_principal: codigoPrincipal,
-            codigo_auxiliar: codigoAuxiliar,
-            descripcion: descripcion,
-            valor_unitario: valorUnitario,
-            unidad_medida: unidadMedida,
-            tarifa_iva: tarifa,
-            ice:ice,
-            activo:activo,
-            establecimiento:establecimiento,
-            categoria: categoria,
-            other_param: [
-                {
-                    nombre:param1,
-                    valor:value1
-                },
-                {
-                    nombre:param2,
-                    valor:value2
-                },
-                {
-                    nombre:param3,
-                    valor:value3
-                }
-            ],
-            inventario:inventario,
-            stock: stock,
-            id:id,
-        }
-        await setDoc(doc(db, "productos", id), new_producto);
+        setOpen(true);
+        const ref_data = doc(db, "productos", currentProducto.id);
+        await updateDoc(ref_data, currentProducto);
+        setModalEditar(false);
+        setOpen(false);
+    }
+    const eliminarProducto = async(item)=>{
+        await deleteDoc(doc(db, "productos", item.id));
     }
 
     const handleInputChange = (event) => {
         const { name, value } = event.target;
-    
-        // Crear una copia del objeto utilizando el operador spread
         const nuevoObjeto = { ...currentProducto };
-    
-        // Modificar el parámetro deseado en la copia según el nombre del campo
         nuevoObjeto[name] = value;
-    
-        // Actualizar el estado con el nuevo objeto
-        setCurrentProduct(nuevoObjeto);
+        setCurrentProducto(nuevoObjeto);
       };
     
 
@@ -279,7 +241,7 @@ export default function ProductosView() {
                                                             <IconButton aria-label="delete" color="amarillo" onClick={()=>{abrirModalEditar(row)}} >
                                                                 <EditIcon />
                                                             </IconButton>
-                                                            <IconButton aria-label="delete" color="rojo"  >
+                                                            <IconButton aria-label="delete" color="rojo" onClick={()=>{eliminarProducto(row)}}  >
                                                                 <DeleteIcon />
                                                             </IconButton>
                                                         </Stack>
@@ -308,8 +270,8 @@ export default function ProductosView() {
                     </Grid>
                 </Grid>
             </Container>
-            <Modal isOpen={modalProducto} toggle={toggle} >
-                <ModalHeader toggle={toggle} >Registrar Nuevo Producto <ShoppingBagIcon/> </ModalHeader>
+            <Modal isOpen={modalProducto} >
+                <ModalHeader  >Registrar Nuevo Producto <ShoppingBagIcon/> </ModalHeader>
                 <ModalBody>
 
                     <Box sx={{ width: '100%' }}>
@@ -400,7 +362,7 @@ export default function ProductosView() {
                                     <Autocomplete
                                         disablePortal
                                         id="combo-box-demo"
-
+                                        value={ice}
                                         options={data}
                                         getOptionLabel={(option) =>
                                             option.nombre
@@ -435,6 +397,7 @@ export default function ProductosView() {
                                     <Autocomplete
                                             disablePortal
                                             id="combo-box-demo"
+                                            value={establecimiento}
                                             options={establecimientos}
                                             getOptionLabel={(option) =>
                                                 option.direccion
@@ -446,21 +409,7 @@ export default function ProductosView() {
                                             renderInput={(params) => <TextField {...params} label="Establecimiento" />}
                                         />
                                 </Grid>
-                                {/* <Grid item md={4} xs={12}>
-                                <Autocomplete
-                                            disablePortal
-                                            id="combo-box-demo"
-                                            options={data}
-                                            getOptionLabel={(option) =>
-                                                option.name
-                                            }
-                                            onChange={(event, newValue) => {
-                                                setCategoria(newValue);
-                                            }}
-                                            fullWidth
-                                            renderInput={(params) => <TextField {...params} label="Categoria" />}
-                                        />
-                                </Grid> */}
+                              
                                 <Grid item xs={12}>
                                     <h6 style={{color:"#616A6B"}}>Datos Adicionales</h6>
                                 </Grid>
@@ -476,15 +425,15 @@ export default function ProductosView() {
                                     />
                                 </Grid>
                                 <Grid item xs={6}>
-                                <TextField
-                                        id="outlined-required"
-                                        label="Valor"
-                                        fullWidth
-                                        value={value1}
-                                        onChange={(event) => {
-                                            setValue1(event.target.value);
-                                        }} 
-                                    />
+                                    <TextField
+                                            id="outlined-required"
+                                            label="Valor"
+                                            fullWidth
+                                            value={value1}
+                                            onChange={(event) => {
+                                                setValue1(event.target.value);
+                                            }} 
+                                        />
                                 </Grid>
                                 <Grid item xs={6}>
                                 <TextField
@@ -580,8 +529,8 @@ export default function ProductosView() {
             </Modal>
 
 
-            <Modal isOpen={modalEditar}   toggle={toggle2} >
-                <ModalHeader toggle={toggle2} >Editar Producto <ShoppingBagIcon/> </ModalHeader>
+            <Modal isOpen={modalEditar}    >
+                <ModalHeader  >Editar Producto </ModalHeader>
                 <ModalBody>
 
                     <Box sx={{ width: '100%' }}>
@@ -619,7 +568,7 @@ export default function ProductosView() {
                                     <TextField
                                         id="outlined-required"
                                         label="Descripción"
-                                        name="descripicion"
+                                        name="descripcion"
                                         value={currentProducto.descripcion}
                                         fullWidth
                                         onChange={handleInputChange}
@@ -698,15 +647,16 @@ export default function ProductosView() {
                         </CustomTabPanel>
                         <CustomTabPanel value={value} index={1}>
                             <Grid container spacing={2}>
-                                <Grid item md={6} xs={12}>
+                                <Grid item  xs={12}>
                                     <Autocomplete
                                             disablePortal
                                             id="combo-box-demo"
                                             options={data}
                                             name="establecimiento"
                                             getOptionLabel={(option) =>
-                                                option.nombre
+                                                option.direccion
                                             }
+                                            value={currentProducto.establecimiento}
                                             onChange={(event, newValue) => {
                                                 setEstablecimiento(newValue);
                                             }}
@@ -714,22 +664,7 @@ export default function ProductosView() {
                                             renderInput={(params) => <TextField {...params} label="Establecimiento" />}
                                         />
                                 </Grid>
-                                <Grid item md={6} xs={12}>
-                                <Autocomplete
-                                            disablePortal
-                                            id="combo-box-demo"
-                                            options={data}
-                                            name="categoria"
-                                            getOptionLabel={(option) =>
-                                                option.name
-                                            }
-                                            onChange={(event, newValue) => {
-                                                setCategoria(newValue);
-                                            }}
-                                            fullWidth
-                                            renderInput={(params) => <TextField {...params} label="Categoria" />}
-                                        />
-                                </Grid>
+                             
                                 <Grid item xs={12}>
                                     <h6 style={{color:"#616A6B"}}>Datos Adicionales</h6>
                                 </Grid>
@@ -738,10 +673,9 @@ export default function ProductosView() {
                                         id="outlined-required"
                                         label="Nombre"
                                         fullWidth
-                                        value={param1}
-                                        onChange={(event) => {
-                                            setParam1(event.target.value);
-                                        }}                                    
+                                        value={currentProducto.param1}
+                                        name="param1"
+                                        onChange={handleInputChange}                                    
                                     />
                                 </Grid>
                                 <Grid item xs={6}>
@@ -749,10 +683,10 @@ export default function ProductosView() {
                                         id="outlined-required"
                                         label="Valor"
                                         fullWidth
-                                        value={value1}
-                                        onChange={(event) => {
-                                            setValue1(event.target.value);
-                                        }} 
+                                        value={currentProducto.value1}
+                                        name="value1"
+                                        onChange={handleInputChange} 
+                
                                     />
                                 </Grid>
                                 <Grid item xs={6}>
@@ -760,11 +694,9 @@ export default function ProductosView() {
                                         id="outlined-required"
                                         label="Nombre"
                                         fullWidth
-                                        value={param2}
-                                        onChange={(event) => {
-                                            setParam2(event.target.value);
-                                        }} 
-                                      
+                                        value={"param2"}
+                                        onChange={handleInputChange} 
+        
                                     />
                                 </Grid>
                                 <Grid item xs={6}>
@@ -772,11 +704,9 @@ export default function ProductosView() {
                                         id="outlined-required"
                                         label="Valor"
                                         fullWidth
-                                        value={value2}
-                                        onChange={(event) => {
-                                            setValue2(event.target.value);
-                                        }} 
-                                        
+                                        value={"value2"}
+                                        onChange={handleInputChange} 
+            
                                     />
                                 </Grid>
                                 <Grid item xs={6}>
@@ -784,21 +714,17 @@ export default function ProductosView() {
                                         id="outlined-required"
                                         label="Nombre"
                                         fullWidth
-                                        value={param3}
-                                        onChange={(event) => {
-                                            setParam3(event.target.value);
-                                        }} 
+                                        value={"param3"}
+                                        onChange={handleInputChange} 
                                     />
                                 </Grid>
                                 <Grid item xs={6}>
                                 <TextField
                                         id="outlined-required"
                                         label="Valor"
-                                        fullWidth
-                                        value={value3}
-                                        onChange={(event) => {
-                                            setValue3(event.target.value);
-                                        }} 
+                                        fullWidth 
+                                        value={"value3"}
+                                        onChange={handleInputChange} 
                                     />
                                 </Grid>
                                 
@@ -812,9 +738,9 @@ export default function ProductosView() {
                                         <RadioGroup
                                             row
                                             aria-labelledby="demo-row-radio-buttons-group-label"
-                                            name="row-radio-buttons-group"
-                                            value={inventario}
-                                            onChange={handleInventario}
+                                            name="inventario"
+                                            value={currentProducto.inventario}
+                                            onChange={handleInputChange} 
                                         >
                                             <FormControlLabel value={true} control={<Radio />} label="Si" />
                                             <FormControlLabel value={false} control={<Radio />} label="No" />
@@ -826,10 +752,9 @@ export default function ProductosView() {
                                                 id="outlined-required"
                                                 label="Stock de Equipos"
                                                 fullWidth
-                                                value={stock}
-                                                onChange={(event) => {
-                                                    setStock(event.target.value);
-                                                }}
+                                                name="stock"
+                                                value={currentProducto.stock}
+                                                onChange={handleInputChange}
                                             />
                                     </Grid>
                                    
@@ -838,15 +763,20 @@ export default function ProductosView() {
                     </Box>
                 </ModalBody>
                 <ModalFooter>
-                    
                     <Button color="primary"  onClick={() => { actualizarProducto()}} >
-                        Crear Producto
+                        Actualizar
                     </Button>
                     <Button color="secondary" onClick={() => { setModalEditar(false) }} >
                         Cancelar
                     </Button>
                 </ModalFooter>
             </Modal>
+            <Backdrop
+                sx={{ color: '#fff', zIndex: 1500}}
+                open={open}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
         </>
     );
 }

@@ -200,7 +200,7 @@ export const SideNav = (props) => {
           width: 280
         }
       }}
-      sx={{ zIndex: (theme) => theme.zIndex.appBar + 100 }}
+      sx={{ zIndex:  100 }}
       variant="temporary"
     >
       {content}

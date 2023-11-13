@@ -42,7 +42,9 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+
 export default function ConfigView() {
+    
     const [showPassword, setShowPassword] = useState(false);
     const [ciudades, setCiudades] = useState([]);
     const [age, setAge] = useState('');
@@ -50,7 +52,7 @@ export default function ConfigView() {
     const [factura, setFactura] = useState(false)
     const [password, setPassword] = useState("");
     const [signatureFile, setSignatureFile] = useState(null);
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(true);
     const [profileFile, setProfileFile] = useState(null);
     const [imagenURL, setImagenURL] = useState(null);
     const [contabilidad,setContabilidad] = useState(false);
@@ -475,7 +477,52 @@ export default function ConfigView() {
                 </Stack>
                 </ModalFooter>
             </Modal>
+         
         </>
     );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //Bely2201828138
