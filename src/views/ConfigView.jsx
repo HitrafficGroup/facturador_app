@@ -15,7 +15,6 @@ import Button from '@mui/material/Button';
 import { useSelector } from 'react-redux';
 import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
 import Stack from '@mui/material/Stack';
-import profile from '../assets/profile3.png';
 import NumbersIcon from '@mui/icons-material/Numbers';
 import Autocomplete from '@mui/material/Autocomplete';
 import dataEcu from "../scripts/provincias.json";
@@ -36,6 +35,13 @@ import CircularProgress from '@mui/material/CircularProgress';
 import ProfilePhoto from "../components/profile-phot";
 import { useDispatch } from 'react-redux';
 import { setUser } from "../features/auth/userSlice";
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 export default function ConfigView() {
     const [showPassword, setShowPassword] = useState(false);
     const [ciudades, setCiudades] = useState([]);
@@ -50,11 +56,14 @@ export default function ConfigView() {
     const [contabilidad,setContabilidad] = useState(false);
     const [direccionRuc,setDireccionRuc]  = useState("");
     const [nombreComercial,setNombreComercial]  = useState("");
+    const [modalDireccion,setModalDireccion] = useState(false);
+    const [codeDireccion,setCodeDireccion] = useState("");
     const dispatch = useDispatch();
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
     };
+    const [direcciones,setDirecciones] = useState([{}])
     const userState = useSelector(state => state.auth);
     const getData = () => {
 
@@ -78,9 +87,8 @@ export default function ConfigView() {
         setCiudad(userState.ciudad)
         setContabilidad(userState.contabilidad)
         setFactura(userState.factura)
-        setDireccionRuc(userState.direccion_ruc)
-        setNombreComercial(userState.nombre_comercial)
         setPassword(userState.firma_password)
+        setDirecciones(userState.direcciones)
 
     }
 
@@ -154,6 +162,31 @@ export default function ConfigView() {
         setImagenURL(url);
         setProfileFile(file);
     };
+    const abrirModalDirecciones = ()=>{
+        setModalDireccion(true);
+    }
+    const agregarDirecciones = async()=>{
+        setOpen(true);
+        const user_ref = doc(db, "usuarios", userState.id);
+        const aux_directions = JSON.parse(JSON.stringify(direcciones))
+        let user_copy = JSON.parse(JSON.stringify(userState))
+
+        let new_data = {
+            direccion:direccionRuc,
+            nombreComercial:nombreComercial,
+            codigo:codeDireccion
+        }
+        aux_directions.push(new_data)
+        await updateDoc(user_ref, {
+            direcciones: aux_directions
+        });
+        user_copy['direcciones'] = aux_directions;
+        dispatch(setUser(user_copy));
+        setDirecciones(aux_directions);
+        setModalDireccion(false);
+        setOpen(false);
+        
+    }
     useEffect(() => {
         getData();
     }, []);
@@ -274,32 +307,32 @@ export default function ConfigView() {
                     <Grid item xs={12}>
                         <h5 style={{ textAlign: 'left', color: '#6C737F' }}>Configuracion de facturacion</h5>
                     </Grid>
-                    <Grid item xs={12} md={6}>
-                        <TextField
-                            id="outlined-multiline-flexible"
-                            label="Dirección registrada en el RUC"
-                            multiline
-                            rows={3}
-                            fullWidth
-                            value={direccionRuc}
-                            onChange={(event) => {
-                                setDireccionRuc(event.target.value);
-                            }}
-                        />
+                    <Grid item xs={12} >
+                        <Button variant="contained" onClick={abrirModalDirecciones}>Agregar Direccion</Button>
                     </Grid>
-                    <Grid item xs={12} md={6}>
-                        <TextField
-                            id="outlined-multiline-flexible"
-                            label="Nombre Comercial Registrado en el RUC"
-                            multiline
-                            value={nombreComercial}
-                            rows={3}
-                            onChange={(event) => {
-                                setNombreComercial(event.target.value);
-                            }}
-                            fullWidth
-                        />
+                    <Grid item xs={12} >
+                    <TableContainer >
+                        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                            <TableHead>
+                            <TableRow>
+                                <TableCell align="left">Direccion</TableCell>
+                                <TableCell align="left">Nombre Comercial</TableCell>
+                                <TableCell align="left">Codigo</TableCell>
+                            </TableRow>
+                            </TableHead>
+                            <TableBody>
+                            {direcciones.map((row,index) => (
+                                <TableRow key={index}>
+                                    <TableCell align="left">{row.direccion}</TableCell>
+                                    <TableCell align="left">{row.nombreComercial}</TableCell>
+                                    <TableCell align="left">{row.codigo}</TableCell>
+                                </TableRow>
+                            ))}
+                            </TableBody>
+                        </Table>
+                        </TableContainer>
                     </Grid>
+                   
                     <Grid item xs={12} md={6}>
                         <FormControl fullWidth variant="filled">
                             <InputLabel htmlFor="filled-adornment-password">Ha emitido facturas?</InputLabel>
@@ -391,6 +424,57 @@ export default function ConfigView() {
             >
                 <CircularProgress color="inherit" />
             </Backdrop>
+
+            <Modal isOpen={modalDireccion}  >
+                <ModalHeader>Registrar Nueva Direccion  </ModalHeader>
+                <ModalBody>
+                <Grid container spacing={1}>
+                        <Grid item xs={12}>
+                            <TextField
+                                id="outlined-password-input"
+                                label="Direccion Registrada"
+                                type="text"
+                                autoComplete="current-password"
+                                onChange={(event) => {
+                                    setDireccionRuc(event.target.value);
+                                }}
+                                fullWidth
+                                />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                id="outlined-password-input"
+                                label="Nombre Comercial"
+                                type="text"
+                                autoComplete="current-password"
+                                onChange={(event) => {
+                                    setNombreComercial(event.target.value);
+                                }}
+                                fullWidth
+                                />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                id="outlined-password-input"
+                                label="Codigo de Establecimiento"
+                                type="text"
+                                autoComplete="current-password"
+                                onChange={(event) => {
+                                    setCodeDireccion(event.target.value);
+                                }}
+                                fullWidth
+                                />
+                        </Grid>
+                        
+                </Grid>
+                </ModalBody>
+                <ModalFooter>
+                <Stack direction="row" spacing={2}>
+                    <Button sx={{ marginTop: 5 }} onClick={agregarDirecciones}  variant="contained">Agregar</Button>
+                    <Button sx={{ marginTop: 5 }} onClick={()=>{setModalDireccion(false)}} color="rojo" variant="contained">Cancelar</Button>
+                </Stack>
+                </ModalFooter>
+            </Modal>
         </>
     );
 }

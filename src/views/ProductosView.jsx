@@ -58,7 +58,21 @@ export default function ProductosView() {
     const [value1,setValue1] = useState("");
     const [value2,setValue2] = useState("");
     const [value3,setValue3] = useState("");
-    const [currentProducto,setCurrentProduct] = useState("");
+    const [currentProducto,setCurrentProduct] = useState({
+        codigo_principal: "",
+        codigo_auxiliar: "",
+        descripcion: "",
+        valor_unitario: "",
+        unidad_medida: "",
+        tarifa_iva: "",
+        ice:"",
+        activo:"",
+        establecimiento:"",
+        categoria: "",
+        inventario:"",
+        stock: "",
+        id:"",
+    });
     
 
 
@@ -79,6 +93,7 @@ export default function ProductosView() {
             });
             setProductos(products_aux);
         });
+        
     }
     const toggle = () => setModalProducto(!modalProducto);
     const toggle2 = () => setModalEditar(!modalEditar);
@@ -181,6 +196,22 @@ export default function ProductosView() {
         await setDoc(doc(db, "productos", id), new_producto);
     }
 
+    const handleInputChange = (event) => {
+        const { name, value } = event.target;
+    
+        // Crear una copia del objeto utilizando el operador spread
+        const nuevoObjeto = { ...currentProducto };
+    
+        // Modificar el parámetro deseado en la copia según el nombre del campo
+        nuevoObjeto[name] = value;
+    
+        // Actualizar el estado con el nuevo objeto
+        setCurrentProduct(nuevoObjeto);
+      };
+    
+
+
+
     const handleChangeTab = (event, newValue) => {
         setValue(newValue);
     };
@@ -239,7 +270,7 @@ export default function ProductosView() {
                                                     </TableCell>
                                                     <TableCell align={"center"}>
                                                         <Stack direction="row" spacing={1}>
-                                                            <IconButton aria-label="delete" color="amarillo" onClick={abrirModalEditar} >
+                                                            <IconButton aria-label="delete" color="amarillo" onClick={()=>{abrirModalEditar(row)}} >
                                                                 <EditIcon />
                                                             </IconButton>
                                                             <IconButton aria-label="delete" color="rojo"  >
@@ -366,7 +397,7 @@ export default function ProductosView() {
 
                                         options={data}
                                         getOptionLabel={(option) =>
-                                            option.name
+                                            option.nombre
                                         }
                                         onChange={(event, newValue) => {
                                             setIce(newValue);
@@ -563,10 +594,9 @@ export default function ProductosView() {
                                         id="outlined-required"
                                         label="Código Principal"
                                         fullWidth
-                                        value={codigoPrincipal}
-                                        onChange={(event) => {
-                                            setCodigoPrincipal(event.target.value);
-                                        }}
+                                        value={currentProducto.codigo_principal}
+                                        name="codigo_principal"
+                                        onChange={handleInputChange}
                                     />
                                 </Grid>
                                 <Grid item md={6} xs={12}>
@@ -574,32 +604,29 @@ export default function ProductosView() {
                                         id="outlined-required"
                                         label="Código Auxiliar"
                                         fullWidth
-                                        value={codigoAuxiliar}
-                                        onChange={(event) => {
-                                            setCodigoAuxiliar(event.target.value);
-                                        }}
+                                        name="codigo_auxiliar"
+                                        value={currentProducto.codigo_auxiliar}
+                                        onChange={handleInputChange}
                                     />
                                 </Grid>
                                 <Grid item md={12} xs={12}>
                                     <TextField
                                         id="outlined-required"
                                         label="Descripción"
+                                        name="descripicion"
+                                        value={currentProducto.descripcion}
                                         fullWidth
-                                        value={descripcion}
-                                        onChange={(event) => {
-                                            setDescripcion(event.target.value);
-                                        }}
+                                        onChange={handleInputChange}
                                     />
                                 </Grid>
                                 <Grid item md={4} xs={6}>
                                     <TextField
                                         id="outlined-required"
                                         label="Valor Unitario"
+                                        name="valor_unitario"
                                         fullWidth
-                                        value={valorUnitario}
-                                        onChange={(event) => {
-                                            setValorUnitario(event.target.value);
-                                        }}
+                                        value={currentProducto.valor_unitario}
+                                        onChange={handleInputChange}
 
                                     />
                                 </Grid>
@@ -607,11 +634,10 @@ export default function ProductosView() {
                                     <TextField
                                         id="outlined-required"
                                         label="U.Medida"
+                                        name="unidad_medida"
                                         fullWidth
-                                        value={unidadMedida}
-                                        onChange={(event) => {
-                                            setUnidadMedida(event.target.value);
-                                        }}
+                                        value={currentProducto.unidad_medida}
+                                        onChange={handleInputChange}
                                     />
                                 </Grid>
                                 <Grid item md={4} xs={6}>
@@ -619,9 +645,10 @@ export default function ProductosView() {
                                         <InputLabel htmlFor="filled-adornment-password">Tarifador IVA</InputLabel>
                                         <Select
                                             labelId="demo-simple-select-label"
-                                            value={tarifa}
+                                            value={currentProducto.tarifa_iva}
                                             label="Tipo de Persona"
-                                            onChange={handleChange}
+                                            name="tarifa_iva"
+                                            onChange={handleInputChange}
                                         >
                                             <MenuItem value={1}>0%</MenuItem>
                                             <MenuItem value={2}>12%</MenuItem>
@@ -635,14 +662,13 @@ export default function ProductosView() {
                                     <Autocomplete
                                         disablePortal
                                         id="combo-box-demo"
-
+                                        name="ice"
                                         options={data}
+                                        value={currentProducto.ice}
                                         getOptionLabel={(option) =>
-                                            option.name
+                                            option.nombre
                                         }
-                                        onChange={(event, newValue) => {
-                                            setIce(newValue);
-                                        }}
+                                        onChange={handleInputChange}
                                         fullWidth
                                         renderInput={(params) => <TextField {...params} label="Tarifado ICE" />}
                                     />
@@ -653,9 +679,9 @@ export default function ProductosView() {
                                         <RadioGroup
                                             row
                                             aria-labelledby="demo-row-radio-buttons-group-label"
-                                            name="row-radio-buttons-group"
-                                            value={activo}
-                                            onChange={handleActivo}
+                                            name="activo"
+                                            value={currentProducto.activo}
+                                            onChange={handleInputChange}
                                         >
                                             <FormControlLabel value={true} control={<Radio />} label="Si" />
                                             <FormControlLabel value={false} control={<Radio />} label="No" />
@@ -671,8 +697,9 @@ export default function ProductosView() {
                                             disablePortal
                                             id="combo-box-demo"
                                             options={data}
+                                            name="establecimiento"
                                             getOptionLabel={(option) =>
-                                                option.name
+                                                option.nombre
                                             }
                                             onChange={(event, newValue) => {
                                                 setEstablecimiento(newValue);
@@ -686,6 +713,7 @@ export default function ProductosView() {
                                             disablePortal
                                             id="combo-box-demo"
                                             options={data}
+                                            name="categoria"
                                             getOptionLabel={(option) =>
                                                 option.name
                                             }
@@ -851,23 +879,75 @@ CustomTabPanel.propTypes = {
 
 let data = [
     {
-        name: 'ICE Alcohol',
-        valor: 13
+        codigo:3011,
+        nombre:"ICE CIGARRILLOS RUBIOS"
     },
     {
-        name: 'ICE Motorizados',
-        valor: 18
+        codigo:3021,
+        nombre:"ICE CIGARRILLOS NEGROS"
     },
     {
-        name: 'ICE Repuestos de vehiculo',
-        valor: 17
+        codigo:3031,
+        nombre:"ICE BEBIDAS ALCOHOLICAS"
     },
     {
-        name: 'ICE Comida extranjera',
-        valor: 15
+        codigo:3041,
+        nombre:"ICE - CERVEZA INDUSTRIAL"
     },
     {
-        name: 'ICE Bebidas gaseosas',
-        valor: 4
+        codigo:3043,
+        nombre:"ICE - CERVEZA ARTESANAL"
+    },
+    {
+        codigo:3053,
+        nombre:"ICE - BEBIDAS GASEOSAS ALTO CONTENIDO DE AZUCAR "
+    },
+    {
+        codigo:3054,
+        nombre:"ICE - BEBIDAS GASEOSAS BAJO CONTENIDO DE AZUCAR "
+    },
+    {
+        codigo:3081,
+        nombre:"ICE - AVIONES - TRICARES"
+    },
+    {
+        codigo:3092,
+        nombre:"ICE - SERVICIOS DE TELEVISION PAGADA"
+    },
+    {
+        codigo:3093,
+        nombre:"SERVICIOS DE TELEFONIA"
+    },
+    {
+        codigo:3101,
+        nombre:"ICE BEBIDAS ENERGIZANTES"
+    }, 
+    {
+        codigo:3111,
+        nombre:"ICE - BEBIBAS NO ALCÓHÓLICAS"
+    },
+    {
+        codigo:3610,
+        nombre:"ICE PERFUMES Y AGUAS DE TOCADOR"
+    },    
+    {
+        codigo:3620,
+        nombre:"ICE VIDEO-JUEGOS"
+    },
+    {
+        codigo:3630,
+        nombre:"ICE ARMAS DE FUEGO, ARMAS DEPORTIVAS"
+    }, 
+    {
+        codigo:3640,
+        nombre:"ICE - CUOTAS MEMBRESÍAS"
+    },
+    {
+        codigo:3670,
+        nombre:"ICE COCINAS, CALEFONES Y OTROS DE USO DOMÉSTICO A GAS SRI"
+    },    
+    {
+        codigo:3770,
+        nombre:"ICE COCINAS, CALEFONES Y OTROS DE USO DOMÉSTICO A GAS SENAE"
     }
 ]

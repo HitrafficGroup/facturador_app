@@ -23,6 +23,7 @@ export const userSlice = createSlice({
         factura:true,
         direccion_ruc:'',
         nombre_comercial:'',
+        direcciones:[],
         firma_password:''
 
 
@@ -48,6 +49,7 @@ export const userSlice = createSlice({
             state.direccion_ruc = action.payload.direccion_ruc;
             state.nombre_comercial = action.payload.nombre_comercial;
             state.firma_password = action.payload.firma_password;
+            state.direcciones = action.payload.direcciones;
         },
     }
 })
