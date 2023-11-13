@@ -1,4 +1,4 @@
-import {useState,useEffect} from "react";
+import { useState, useEffect } from "react";
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Table from '@mui/material/Table';
@@ -9,12 +9,11 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Stack from '@mui/material/Stack';
-import SettingsIcon from '@mui/icons-material/Settings';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
-import { collection, query, onSnapshot,doc, setDoc } from "firebase/firestore";
+import { collection, query, onSnapshot, doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase-config";
-import {Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import Button from '@mui/material/Button';
@@ -24,19 +23,44 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
-
-
-export default function ProductosView(){
-    const [productos,setProductos] = useState([])
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import PropTypes from 'prop-types';
+import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
+import EditIcon from '@mui/icons-material/Edit';
+export default function ProductosView() {
+    const [productos, setProductos] = useState([])
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [modalProducto,setModalProducto] = useState(false);
-    const [codigoPrincipal,setCodigoPrincipal] = useState('');
-    const [codigoAuxiliar,setCodigoAuxiliar] = useState('');
-    const [descripcion,setDescripcion] = useState('');
-    const [valorUnitario,setValorUnitario] = useState('');
-    const [unidadMedida,setUnidadMedida] = useState('');
-    const [tarifaIva,setTarifaIva] = useState('');
+    const [modalProducto, setModalProducto] = useState(false);
+    const [modalEditar,setModalEditar] = useState(false);
+    const [codigoPrincipal, setCodigoPrincipal] = useState('');
+    const [codigoAuxiliar, setCodigoAuxiliar] = useState('');
+    const [descripcion, setDescripcion] = useState('');
+    const [valorUnitario, setValorUnitario] = useState('');
+    const [unidadMedida, setUnidadMedida] = useState('');
+    const [activo, setActivo] = useState(false);
+    const [stock, setStock] = useState('');
+    const [establecimiento, setEstablecimiento] = useState('');
+    const [inventario,setInventario] = useState(false);
+    const [categoria,setCategoria] = useState('');
+    const [tarifa, setTarifa] = useState(1);
+    const [ice, setIce] = useState({});
+    const [value, setValue] = useState(0);
+    const [param1,setParam1] = useState("")
+    const [param2,setParam2] = useState("");
+    const [param3,setParam3] = useState("");
+    const [value1,setValue1] = useState("");
+    const [value2,setValue2] = useState("");
+    const [value3,setValue3] = useState("");
+    const [currentProducto,setCurrentProduct] = useState("");
+    
+
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -46,41 +70,125 @@ export default function ProductosView(){
         setRowsPerPage(+event.target.value);
         setPage(0);
     };
-    const getData=()=>{
+    const getData = () => {
         const q = query(collection(db, "productos"));
         onSnapshot(q, (querySnapshot) => {
-        const products_aux = [];
-        querySnapshot.forEach((doc) => {
-            products_aux.push(doc.data());
-        });
-        setProductos(products_aux);
+            const products_aux = [];
+            querySnapshot.forEach((doc) => {
+                products_aux.push(doc.data());
+            });
+            setProductos(products_aux);
         });
     }
     const toggle = () => setModalProducto(!modalProducto);
+    const toggle2 = () => setModalEditar(!modalEditar);
+
+    const handleChange = (event) => {
+        setTarifa(event.target.value);
+    };
 
 
-    const agregarProductos = async()=>{
+    const handleInventario = (event) => {
+        setInventario(event.target.value);
+    };
+    const handleActivo = (event) => {
+        setActivo(event.target.value);
+      };
+    const abrirModalEditar =(item)=>{
+        setModalEditar(true);
+        setCurrentProduct(item);
+    }
+
+    const agregarProductos = async () => {
         let id = uuidv4();
         console.log(id);
         let new_producto = {
-            descripcion:descripcion,
-            codigo_principal:codigoPrincipal,
-            codigo_auxiliar:codigoAuxiliar,
-            descripcion:descripcion,
-            valor_unitario:valorUnitario,
-            unidad_medida:unidadMedida,
-            tarifa_iva:tarifaIva,
+            codigo_principal: codigoPrincipal,
+            codigo_auxiliar: codigoAuxiliar,
+            descripcion: descripcion,
+            valor_unitario: valorUnitario,
+            unidad_medida: unidadMedida,
+            tarifa_iva: tarifa,
+            ice:ice,
+            activo:activo,
+            establecimiento:establecimiento,
+            categoria: categoria,
+            other_param: [
+                {
+                    nombre:param1,
+                    valor:value1
+                },
+                {
+                    nombre:param2,
+                    valor:value2
+                },
+                {
+                    nombre:param3,
+                    valor:value3
+                }
+            ],
+            inventario:inventario,
+            stock: stock,
+            id:id,
         }
-        await setDoc(doc(db, "productos", id),new_producto);
-        
+        await setDoc(doc(db, "productos", id), new_producto);
+
 
     }
+    const actualizarProducto = async ()=>{
+        let id = uuidv4();
+        console.log(id);
+        setCodigoPrincipal(currentProducto.codigo_principal);
+        setCodigoAuxiliar(currentProducto.codigo_auxiliar);
+        setDescripcion(currentProducto.descripcion);
+        setValorUnitario(currentProducto.valor_unitario);
+        setUnidadMedida(currentProducto.unidad_medida);
+        setTarifa(currentProducto.tarifa_iva);
+        setIce(currentProducto.ice);
+        setActivo(activo);
+        setEstablecimiento(establecimiento);
+        setCategoria()
+;
+        let new_producto = {
+            codigo_principal: codigoPrincipal,
+            codigo_auxiliar: codigoAuxiliar,
+            descripcion: descripcion,
+            valor_unitario: valorUnitario,
+            unidad_medida: unidadMedida,
+            tarifa_iva: tarifa,
+            ice:ice,
+            activo:activo,
+            establecimiento:establecimiento,
+            categoria: categoria,
+            other_param: [
+                {
+                    nombre:param1,
+                    valor:value1
+                },
+                {
+                    nombre:param2,
+                    valor:value2
+                },
+                {
+                    nombre:param3,
+                    valor:value3
+                }
+            ],
+            inventario:inventario,
+            stock: stock,
+            id:id,
+        }
+        await setDoc(doc(db, "productos", id), new_producto);
+    }
 
+    const handleChangeTab = (event, newValue) => {
+        setValue(newValue);
+    };
     useEffect(() => {
         getData();
     }, []);
 
-    return(
+    return (
         <>
             <Container maxWidth="md">
                 <Grid container spacing={2}>
@@ -88,27 +196,27 @@ export default function ProductosView(){
                         <h1>Productos View</h1>
                     </Grid>
                     <Grid item xs={12}>
-                        <Button variant="contained" onClick={()=>{setModalProducto(true)}}>Agregar Producto</Button>
+                        <Button variant="contained" onClick={() => { setModalProducto(true) }}>Agregar Producto</Button>
                     </Grid>
                     <Grid item xs={12}>
-                    <TableContainer sx={{ maxHeight: 440 }}>
+                        <TableContainer sx={{ maxHeight: 440 }}>
                             <Table stickyHeader aria-label="sticky table">
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell  align={'center'}>
-                                        Descripcion
+                                        <TableCell align={'center'}>
+                                            Descripcion
                                         </TableCell>
-                                        <TableCell  align={'center'}>
-                                        Categoria
+                                        <TableCell align={'center'}>
+                                            Categoria
                                         </TableCell>
-                                        <TableCell  align={'center'}>
-                                        Valor
+                                        <TableCell align={'center'}>
+                                            Valor
                                         </TableCell>
-                                        <TableCell  align={'center'}>
-                                        Stock
+                                        <TableCell align={'center'}>
+                                            Stock
                                         </TableCell>
-                                        <TableCell  align={'left'}>
-                                        Estado
+                                        <TableCell align={'left'}>
+                                            Estado
                                         </TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -118,23 +226,23 @@ export default function ProductosView(){
                                             return (
                                                 <TableRow hover role="checkbox" tabIndex={-1} key={index}>
                                                     <TableCell align={"center"}>
-                                                        {row.number}
+                                                        {row.descripcion}
                                                     </TableCell>
                                                     <TableCell align={"center"}>
-                                                        {row.walk}
+                                                        {row.valor_unitario}
                                                     </TableCell>
                                                     <TableCell align={"center"}>
-                                                        {row.pedestrianClear}
+                                                        {row.valor_unitario}
                                                     </TableCell>
                                                     <TableCell align={"center"}>
-                                                        {row.minimumGreen}
+                                                        {row.stock}
                                                     </TableCell>
-                                                    <TableCell  align={"center"}>
+                                                    <TableCell align={"center"}>
                                                         <Stack direction="row" spacing={1}>
-                                                            <IconButton aria-label="delete" color="gris" >
-                                                                <SettingsIcon />
+                                                            <IconButton aria-label="delete" color="amarillo" onClick={abrirModalEditar} >
+                                                                <EditIcon />
                                                             </IconButton>
-                                                            <IconButton aria-label="delete" color="rojo" >
+                                                            <IconButton aria-label="delete" color="rojo"  >
                                                                 <DeleteIcon />
                                                             </IconButton>
                                                         </Stack>
@@ -156,103 +264,126 @@ export default function ProductosView(){
                         />
                     </Grid>
                     <Grid item xs={12}>
-                    
+
                     </Grid>
                     <Grid item xs={12}>
-                    
+
                     </Grid>
                 </Grid>
             </Container>
             <Modal isOpen={modalProducto} toggle={toggle} >
-                    <ModalHeader toggle={toggle} >Registrar Nueva Cuenta</ModalHeader>
-                        <ModalBody>
+                <ModalHeader toggle={toggle} >Registrar Nuevo Producto <ShoppingBagIcon/> </ModalHeader>
+                <ModalBody>
+
+                    <Box sx={{ width: '100%' }}>
+                        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                            <Tabs value={value} onChange={handleChangeTab} aria-label="basic tabs example">
+                                <Tab label="Datos Generales" {...a11yProps(0)} />
+                                <Tab label="Datos Adicionales" {...a11yProps(1)} />
+                                <Tab label="Inventario" {...a11yProps(2)} />
+                            </Tabs>
+                        </Box>
+                        <CustomTabPanel value={value} index={0}>
                             <Grid container spacing={2}>
-                                <Grid item md={6} xs={12}> 
+                                <Grid item md={6} xs={12}>
                                     <TextField
                                         required
                                         id="outlined-required"
                                         label="Código Principal"
                                         fullWidth
                                         value={codigoPrincipal}
-                                        onChange={(event, newValue) => {
-                                            setCodigoPrincipal(newValue);
+                                        onChange={(event) => {
+                                            setCodigoPrincipal(event.target.value);
                                         }}
-                                        />
+                                    />
                                 </Grid>
-                                <Grid item md={6} xs={12}> 
+                                <Grid item md={6} xs={12}>
                                     <TextField
                                         id="outlined-required"
                                         label="Código Auxiliar"
                                         fullWidth
                                         value={codigoAuxiliar}
-                                        onChange={(event, newValue) => {
-                                            setCodigoAuxiliar(newValue);
+                                        onChange={(event) => {
+                                            setCodigoAuxiliar(event.target.value);
                                         }}
-                                        />
+                                    />
                                 </Grid>
-                                <Grid item md={12} xs={12}> 
+                                <Grid item md={12} xs={12}>
                                     <TextField
                                         id="outlined-required"
                                         label="Descripción"
                                         fullWidth
                                         value={descripcion}
-                                        onChange={(event, newValue) => {
-                                            setDescripcion(newValue);
+                                        onChange={(event) => {
+                                            setDescripcion(event.target.value);
                                         }}
-                                        />
+                                    />
                                 </Grid>
-                                <Grid item md={4} xs={6}> 
+                                <Grid item md={4} xs={6}>
                                     <TextField
                                         id="outlined-required"
                                         label="Valor Unitario"
                                         fullWidth
                                         value={valorUnitario}
-                                        onChange={(event, newValue) => {
-                                            setValorUnitario(newValue);
+                                        onChange={(event) => {
+                                            setValorUnitario(event.target.value);
                                         }}
-                                        />
+
+                                    />
                                 </Grid>
-                                <Grid item md={4} xs={6}> 
+                                <Grid item md={4} xs={6}>
                                     <TextField
                                         id="outlined-required"
                                         label="U.Medida"
                                         fullWidth
                                         value={unidadMedida}
-                                        onChange={(event, newValue) => {
-                                            setUnidadMedida(newValue);
+                                        onChange={(event) => {
+                                            setUnidadMedida(event.target.value);
                                         }}
-                                        />
+                                    />
                                 </Grid>
-                                <Grid item md={4} xs={6}> 
-                                    <TextField
-                                        id="outlined-required"
-                                        label="Tarifa IVA"
-                                        fullWidth
-                                        value={unidadMedida}
-                                        onChange={(event, newValue) => {
-                                            setTarifaIva(newValue);
-                                        }}
-                                        />
+                                <Grid item md={4} xs={6}>
+                                    <FormControl fullWidth variant="filled">
+                                        <InputLabel htmlFor="filled-adornment-password">Tarifador IVA</InputLabel>
+                                        <Select
+                                            labelId="demo-simple-select-label"
+                                            value={tarifa}
+                                            label="Tipo de Persona"
+                                            onChange={handleChange}
+                                        >
+                                            <MenuItem value={1}>0%</MenuItem>
+                                            <MenuItem value={2}>12%</MenuItem>
+                                            <MenuItem value={3}>No Objeto de impuesto</MenuItem>
+                                            <MenuItem value={4}>Extento de IVA</MenuItem>
+                                            <MenuItem value={5}>8%</MenuItem>
+                                        </Select>
+                                    </FormControl>
                                 </Grid>
-                                <Grid item md={8} xs={6}> 
+                                <Grid item md={8} xs={6}>
                                     <Autocomplete
                                         disablePortal
                                         id="combo-box-demo"
-                                        value={tarifaIva}
+
                                         options={data}
+                                        getOptionLabel={(option) =>
+                                            option.name
+                                        }
+                                        onChange={(event, newValue) => {
+                                            setIce(newValue);
+                                        }}
                                         fullWidth
                                         renderInput={(params) => <TextField {...params} label="Tarifado ICE" />}
-                                        
-
                                     />
                                 </Grid>
-                                <Grid item md={4} xs={6}> 
+                                <Grid item md={4} xs={6}>
                                     <FormControl>
                                         <FormLabel id="demo-row-radio-buttons-group-label">Activo</FormLabel>
                                         <RadioGroup
                                             row
                                             aria-labelledby="demo-row-radio-buttons-group-label"
                                             name="row-radio-buttons-group"
+                                            value={activo}
+                                            onChange={handleActivo}
                                         >
                                             <FormControlLabel value={true} control={<Radio />} label="Si" />
                                             <FormControlLabel value={false} control={<Radio />} label="No" />
@@ -260,26 +391,483 @@ export default function ProductosView(){
                                     </FormControl>
                                 </Grid>
                             </Grid>
-                        </ModalBody>
-                        <ModalFooter>
-                        <Button color="primary" onClick={()=>{agregarProductos()}}>
-                            Crear Producto
-                        </Button>
-                        <Button color="secondary" onClick={()=>{setModalProducto(false)}} >
-                            Cancelar
-                        </Button>
-                    </ModalFooter>
-                </Modal>
+                        </CustomTabPanel>
+                        <CustomTabPanel value={value} index={1}>
+                            <Grid container spacing={2}>
+                                <Grid item md={6} xs={12}>
+                                    <Autocomplete
+                                            disablePortal
+                                            id="combo-box-demo"
+                                            options={data}
+                                            getOptionLabel={(option) =>
+                                                option.name
+                                            }
+                                            onChange={(event, newValue) => {
+                                                setEstablecimiento(newValue);
+                                            }}
+                                            fullWidth
+                                            renderInput={(params) => <TextField {...params} label="Establecimiento" />}
+                                        />
+                                </Grid>
+                                <Grid item md={6} xs={12}>
+                                <Autocomplete
+                                            disablePortal
+                                            id="combo-box-demo"
+                                            options={data}
+                                            getOptionLabel={(option) =>
+                                                option.name
+                                            }
+                                            onChange={(event, newValue) => {
+                                                setCategoria(newValue);
+                                            }}
+                                            fullWidth
+                                            renderInput={(params) => <TextField {...params} label="Categoria" />}
+                                        />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <h6 style={{color:"#616A6B"}}>Datos Adicionales</h6>
+                                </Grid>
+                                <Grid item xs={6}>
+                                <TextField
+                                        id="outlined-required"
+                                        label="Nombre"
+                                        fullWidth
+                                        value={param1}
+                                        onChange={(event) => {
+                                            setParam1(event.target.value);
+                                        }}                                    
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                <TextField
+                                        id="outlined-required"
+                                        label="Valor"
+                                        fullWidth
+                                        value={value1}
+                                        onChange={(event) => {
+                                            setValue1(event.target.value);
+                                        }} 
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                <TextField
+                                        id="outlined-required"
+                                        label="Nombre"
+                                        fullWidth
+                                        value={param2}
+                                        onChange={(event) => {
+                                            setParam2(event.target.value);
+                                        }} 
+                                      
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                <TextField
+                                        id="outlined-required"
+                                        label="Valor"
+                                        fullWidth
+                                        value={value2}
+                                        onChange={(event) => {
+                                            setValue2(event.target.value);
+                                        }} 
+                                        
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                <TextField
+                                        id="outlined-required"
+                                        label="Nombre"
+                                        fullWidth
+                                        value={param3}
+                                        onChange={(event) => {
+                                            setParam3(event.target.value);
+                                        }} 
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                <TextField
+                                        id="outlined-required"
+                                        label="Valor"
+                                        fullWidth
+                                        value={value3}
+                                        onChange={(event) => {
+                                            setValue3(event.target.value);
+                                        }} 
+                                    />
+                                </Grid>
+                                
+                            </Grid>
+                        </CustomTabPanel>
+                        <CustomTabPanel value={value} index={2}>
+                            <Grid container spacing={2}>
+                                    <Grid item md={4} xs={12}>
+                                    <FormControl>
+                                        <FormLabel id="demo-row-radio-buttons-group-label">Llevar Inventario?</FormLabel>
+                                        <RadioGroup
+                                            row
+                                            aria-labelledby="demo-row-radio-buttons-group-label"
+                                            name="row-radio-buttons-group"
+                                            value={inventario}
+                                            onChange={handleInventario}
+                                        >
+                                            <FormControlLabel value={true} control={<Radio />} label="Si" />
+                                            <FormControlLabel value={false} control={<Radio />} label="No" />
+                                        </RadioGroup>
+                                    </FormControl>
+                                    </Grid>
+                                    <Grid item md={8} xs={12}>
+                                        <TextField
+                                                id="outlined-required"
+                                                label="Stock de Equipos"
+                                                fullWidth
+                                                value={stock}
+                                                onChange={(event) => {
+                                                    setStock(event.target.value);
+                                                }}
+                                            />
+                                    </Grid>
+                                   
+                            </Grid>
+                        </CustomTabPanel>
+                    </Box>
+                </ModalBody>
+                <ModalFooter>
+                    
+                    <Button color="primary" onClick={() => { agregarProductos() }}>
+                        Crear Producto
+                    </Button>
+                    <Button color="secondary" onClick={() => { setModalProducto(false) }} >
+                        Cancelar
+                    </Button>
+                </ModalFooter>
+            </Modal>
+
+
+            <Modal isOpen={modalEditar}   toggle={toggle2} >
+                <ModalHeader toggle={toggle2} >Editar Producto <ShoppingBagIcon/> </ModalHeader>
+                <ModalBody>
+
+                    <Box sx={{ width: '100%' }}>
+                        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                            <Tabs value={value} onChange={handleChangeTab} aria-label="basic tabs example">
+                                <Tab label="Datos Generales" {...a11yProps(0)} />
+                                <Tab label="Datos Adicionales" {...a11yProps(1)} />
+                                <Tab label="Inventario" {...a11yProps(2)} />
+                            </Tabs>
+                        </Box>
+                        <CustomTabPanel value={value} index={0}>
+                            <Grid container spacing={2}>
+                                <Grid item md={6} xs={12}>
+                                    <TextField
+                                        required
+                                        id="outlined-required"
+                                        label="Código Principal"
+                                        fullWidth
+                                        value={codigoPrincipal}
+                                        onChange={(event) => {
+                                            setCodigoPrincipal(event.target.value);
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item md={6} xs={12}>
+                                    <TextField
+                                        id="outlined-required"
+                                        label="Código Auxiliar"
+                                        fullWidth
+                                        value={codigoAuxiliar}
+                                        onChange={(event) => {
+                                            setCodigoAuxiliar(event.target.value);
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item md={12} xs={12}>
+                                    <TextField
+                                        id="outlined-required"
+                                        label="Descripción"
+                                        fullWidth
+                                        value={descripcion}
+                                        onChange={(event) => {
+                                            setDescripcion(event.target.value);
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item md={4} xs={6}>
+                                    <TextField
+                                        id="outlined-required"
+                                        label="Valor Unitario"
+                                        fullWidth
+                                        value={valorUnitario}
+                                        onChange={(event) => {
+                                            setValorUnitario(event.target.value);
+                                        }}
+
+                                    />
+                                </Grid>
+                                <Grid item md={4} xs={6}>
+                                    <TextField
+                                        id="outlined-required"
+                                        label="U.Medida"
+                                        fullWidth
+                                        value={unidadMedida}
+                                        onChange={(event) => {
+                                            setUnidadMedida(event.target.value);
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item md={4} xs={6}>
+                                    <FormControl fullWidth variant="filled">
+                                        <InputLabel htmlFor="filled-adornment-password">Tarifador IVA</InputLabel>
+                                        <Select
+                                            labelId="demo-simple-select-label"
+                                            value={tarifa}
+                                            label="Tipo de Persona"
+                                            onChange={handleChange}
+                                        >
+                                            <MenuItem value={1}>0%</MenuItem>
+                                            <MenuItem value={2}>12%</MenuItem>
+                                            <MenuItem value={3}>No Objeto de impuesto</MenuItem>
+                                            <MenuItem value={4}>Extento de IVA</MenuItem>
+                                            <MenuItem value={5}>8%</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item md={8} xs={6}>
+                                    <Autocomplete
+                                        disablePortal
+                                        id="combo-box-demo"
+
+                                        options={data}
+                                        getOptionLabel={(option) =>
+                                            option.name
+                                        }
+                                        onChange={(event, newValue) => {
+                                            setIce(newValue);
+                                        }}
+                                        fullWidth
+                                        renderInput={(params) => <TextField {...params} label="Tarifado ICE" />}
+                                    />
+                                </Grid>
+                                <Grid item md={4} xs={6}>
+                                    <FormControl>
+                                        <FormLabel id="demo-row-radio-buttons-group-label">Activo</FormLabel>
+                                        <RadioGroup
+                                            row
+                                            aria-labelledby="demo-row-radio-buttons-group-label"
+                                            name="row-radio-buttons-group"
+                                            value={activo}
+                                            onChange={handleActivo}
+                                        >
+                                            <FormControlLabel value={true} control={<Radio />} label="Si" />
+                                            <FormControlLabel value={false} control={<Radio />} label="No" />
+                                        </RadioGroup>
+                                    </FormControl>
+                                </Grid>
+                            </Grid>
+                        </CustomTabPanel>
+                        <CustomTabPanel value={value} index={1}>
+                            <Grid container spacing={2}>
+                                <Grid item md={6} xs={12}>
+                                    <Autocomplete
+                                            disablePortal
+                                            id="combo-box-demo"
+                                            options={data}
+                                            getOptionLabel={(option) =>
+                                                option.name
+                                            }
+                                            onChange={(event, newValue) => {
+                                                setEstablecimiento(newValue);
+                                            }}
+                                            fullWidth
+                                            renderInput={(params) => <TextField {...params} label="Establecimiento" />}
+                                        />
+                                </Grid>
+                                <Grid item md={6} xs={12}>
+                                <Autocomplete
+                                            disablePortal
+                                            id="combo-box-demo"
+                                            options={data}
+                                            getOptionLabel={(option) =>
+                                                option.name
+                                            }
+                                            onChange={(event, newValue) => {
+                                                setCategoria(newValue);
+                                            }}
+                                            fullWidth
+                                            renderInput={(params) => <TextField {...params} label="Categoria" />}
+                                        />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <h6 style={{color:"#616A6B"}}>Datos Adicionales</h6>
+                                </Grid>
+                                <Grid item xs={6}>
+                                <TextField
+                                        id="outlined-required"
+                                        label="Nombre"
+                                        fullWidth
+                                        value={param1}
+                                        onChange={(event) => {
+                                            setParam1(event.target.value);
+                                        }}                                    
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                <TextField
+                                        id="outlined-required"
+                                        label="Valor"
+                                        fullWidth
+                                        value={value1}
+                                        onChange={(event) => {
+                                            setValue1(event.target.value);
+                                        }} 
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                <TextField
+                                        id="outlined-required"
+                                        label="Nombre"
+                                        fullWidth
+                                        value={param2}
+                                        onChange={(event) => {
+                                            setParam2(event.target.value);
+                                        }} 
+                                      
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                <TextField
+                                        id="outlined-required"
+                                        label="Valor"
+                                        fullWidth
+                                        value={value2}
+                                        onChange={(event) => {
+                                            setValue2(event.target.value);
+                                        }} 
+                                        
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                <TextField
+                                        id="outlined-required"
+                                        label="Nombre"
+                                        fullWidth
+                                        value={param3}
+                                        onChange={(event) => {
+                                            setParam3(event.target.value);
+                                        }} 
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                <TextField
+                                        id="outlined-required"
+                                        label="Valor"
+                                        fullWidth
+                                        value={value3}
+                                        onChange={(event) => {
+                                            setValue3(event.target.value);
+                                        }} 
+                                    />
+                                </Grid>
+                                
+                            </Grid>
+                        </CustomTabPanel>
+                        <CustomTabPanel value={value} index={2}>
+                            <Grid container spacing={2}>
+                                    <Grid item md={4} xs={12}>
+                                    <FormControl>
+                                        <FormLabel id="demo-row-radio-buttons-group-label">Llevar Inventario?</FormLabel>
+                                        <RadioGroup
+                                            row
+                                            aria-labelledby="demo-row-radio-buttons-group-label"
+                                            name="row-radio-buttons-group"
+                                            value={inventario}
+                                            onChange={handleInventario}
+                                        >
+                                            <FormControlLabel value={true} control={<Radio />} label="Si" />
+                                            <FormControlLabel value={false} control={<Radio />} label="No" />
+                                        </RadioGroup>
+                                    </FormControl>
+                                    </Grid>
+                                    <Grid item md={8} xs={12}>
+                                        <TextField
+                                                id="outlined-required"
+                                                label="Stock de Equipos"
+                                                fullWidth
+                                                value={stock}
+                                                onChange={(event) => {
+                                                    setStock(event.target.value);
+                                                }}
+                                            />
+                                    </Grid>
+                                   
+                            </Grid>
+                        </CustomTabPanel>
+                    </Box>
+                </ModalBody>
+                <ModalFooter>
+                    
+                    <Button color="primary"  onClick={() => { actualizarProducto()}} >
+                        Crear Producto
+                    </Button>
+                    <Button color="secondary" onClick={() => { setModalEditar(false) }} >
+                        Cancelar
+                    </Button>
+                </ModalFooter>
+            </Modal>
         </>
     );
 }
+function a11yProps(index) {
+    return {
+        id: `simple-tab-${index}`,
+        'aria-controls': `simple-tabpanel-${index}`,
+    };
+}
+
+function CustomTabPanel(props) {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+                <Box sx={{ p: 3 }}>
+                    <Typography>{children}</Typography>
+                </Box>
+            )}
+        </div>
+    );
+}
+
+CustomTabPanel.propTypes = {
+    children: PropTypes.node,
+    index: PropTypes.number.isRequired,
+    value: PropTypes.number.isRequired,
+};
+
 let data = [
     {
-        name:'ICE Alcohol',
-        valor: 321.2
+        name: 'ICE Alcohol',
+        valor: 13
     },
     {
-        name:'ICE Motorizados',
-        valor: 321.2
+        name: 'ICE Motorizados',
+        valor: 18
+    },
+    {
+        name: 'ICE Repuestos de vehiculo',
+        valor: 17
+    },
+    {
+        name: 'ICE Comida extranjera',
+        valor: 15
+    },
+    {
+        name: 'ICE Bebidas gaseosas',
+        valor: 4
     }
 ]
