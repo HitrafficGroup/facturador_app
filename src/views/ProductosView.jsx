@@ -33,6 +33,7 @@ import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import EditIcon from '@mui/icons-material/Edit';
+import { useSelector } from 'react-redux';
 export default function ProductosView() {
     const [productos, setProductos] = useState([])
     const [page, setPage] = useState(0);
@@ -50,6 +51,7 @@ export default function ProductosView() {
     const [inventario,setInventario] = useState(false);
     const [categoria,setCategoria] = useState('');
     const [tarifa, setTarifa] = useState(1);
+    const [establecimientos,setEstablecimientos] = useState({});
     const [ice, setIce] = useState({});
     const [value, setValue] = useState(0);
     const [param1,setParam1] = useState("")
@@ -58,6 +60,7 @@ export default function ProductosView() {
     const [value1,setValue1] = useState("");
     const [value2,setValue2] = useState("");
     const [value3,setValue3] = useState("");
+    const userState = useSelector(state => state.auth);
     const [currentProducto,setCurrentProduct] = useState({
         codigo_principal: "",
         codigo_auxiliar: "",
@@ -93,6 +96,9 @@ export default function ProductosView() {
             });
             setProductos(products_aux);
         });
+        setEstablecimientos(userState.direcciones)
+        
+
         
     }
     const toggle = () => setModalProducto(!modalProducto);
@@ -425,13 +431,13 @@ export default function ProductosView() {
                         </CustomTabPanel>
                         <CustomTabPanel value={value} index={1}>
                             <Grid container spacing={2}>
-                                <Grid item md={6} xs={12}>
+                                <Grid item md={12} xs={12}>
                                     <Autocomplete
                                             disablePortal
                                             id="combo-box-demo"
-                                            options={data}
+                                            options={establecimientos}
                                             getOptionLabel={(option) =>
-                                                option.name
+                                                option.direccion
                                             }
                                             onChange={(event, newValue) => {
                                                 setEstablecimiento(newValue);
@@ -440,7 +446,7 @@ export default function ProductosView() {
                                             renderInput={(params) => <TextField {...params} label="Establecimiento" />}
                                         />
                                 </Grid>
-                                <Grid item md={6} xs={12}>
+                                {/* <Grid item md={4} xs={12}>
                                 <Autocomplete
                                             disablePortal
                                             id="combo-box-demo"
@@ -454,7 +460,7 @@ export default function ProductosView() {
                                             fullWidth
                                             renderInput={(params) => <TextField {...params} label="Categoria" />}
                                         />
-                                </Grid>
+                                </Grid> */}
                                 <Grid item xs={12}>
                                     <h6 style={{color:"#616A6B"}}>Datos Adicionales</h6>
                                 </Grid>
