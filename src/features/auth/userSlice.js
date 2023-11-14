@@ -51,6 +51,7 @@ export const userSlice = createSlice({
             state.firma_password = action.payload.firma_password;
             state.direcciones = action.payload.direcciones;
         },
+        
     }
 })
 export const {setUser} = userSlice.actions

@@ -30,8 +30,6 @@ import DoneIcon from '@mui/icons-material/Done';
 import FileUploadButton from "../components/fileUploadButton";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Chip from '@mui/material/Chip';
-import Backdrop from '@mui/material/Backdrop';
-import CircularProgress from '@mui/material/CircularProgress';
 import ProfilePhoto from "../components/profile-phot";
 import { useDispatch } from 'react-redux';
 import { setUser } from "../features/auth/userSlice";
@@ -42,7 +40,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-
+import { setLoading } from "../features/menu/menuSlice";
 export default function ConfigView() {
     
     const [showPassword, setShowPassword] = useState(false);
@@ -52,7 +50,6 @@ export default function ConfigView() {
     const [factura, setFactura] = useState(false)
     const [password, setPassword] = useState("");
     const [signatureFile, setSignatureFile] = useState(null);
-    const [open, setOpen] = useState(true);
     const [profileFile, setProfileFile] = useState(null);
     const [imagenURL, setImagenURL] = useState(null);
     const [contabilidad,setContabilidad] = useState(false);
@@ -60,6 +57,7 @@ export default function ConfigView() {
     const [nombreComercial,setNombreComercial]  = useState("");
     const [modalDireccion,setModalDireccion] = useState(false);
     const [codeDireccion,setCodeDireccion] = useState("");
+
     const dispatch = useDispatch();
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event) => {
@@ -102,7 +100,7 @@ export default function ConfigView() {
     };
     
     const actualizarDatos = async () => {
-        setOpen(true);
+        dispatch(setLoading(true));
         const user_ref = doc(db, "usuarios", userState.id);
         let user_copy = JSON.parse(JSON.stringify(userState))
         let url_profile = ''
@@ -145,7 +143,7 @@ export default function ConfigView() {
         console.log(user_copy)
         // Set the "capital" field of the city 'DC'
         await updateDoc(user_ref, user_copy);
-        setOpen(false)
+        dispatch(setLoading(false));
     }
 
 
@@ -159,7 +157,6 @@ export default function ConfigView() {
 
     const handleFileUpload = (file) => {
         // Aquí puedes manejar el archivo subido, por ejemplo, enviarlo a un servidor o realizar alguna operación con él.
-
         const url = URL.createObjectURL(file);
         setImagenURL(url);
         setProfileFile(file);
@@ -168,7 +165,7 @@ export default function ConfigView() {
         setModalDireccion(true);
     }
     const agregarDirecciones = async()=>{
-        setOpen(true);
+        dispatch(setLoading(true));
         const user_ref = doc(db, "usuarios", userState.id);
         const aux_directions = JSON.parse(JSON.stringify(direcciones))
         let user_copy = JSON.parse(JSON.stringify(userState))
@@ -186,7 +183,7 @@ export default function ConfigView() {
         dispatch(setUser(user_copy));
         setDirecciones(aux_directions);
         setModalDireccion(false);
-        setOpen(false);
+        dispatch(setLoading(false));
         
     }
     useEffect(() => {
@@ -420,12 +417,7 @@ export default function ConfigView() {
                 </Grid>
 
             </Container>
-            <Backdrop
-                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                open={open}
-            >
-                <CircularProgress color="inherit" />
-            </Backdrop>
+      
 
             <Modal isOpen={modalDireccion}  >
                 <ModalHeader>Registrar Nueva Direccion  </ModalHeader>

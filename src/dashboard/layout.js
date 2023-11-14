@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-
+import { useSelector } from 'react-redux';
 import { styled } from '@mui/material/styles';
 import { useLocation } from 'react-router-dom';
 import { SideNav } from './side-nav';
@@ -26,10 +26,11 @@ const LayoutContainer = styled('div')({
 });
 
 export const Layout = (props) => {
-
+    const loading = useSelector(state => state.menu);
     const { children } = props;
     const [openNav, setOpenNav] = useState(true);
     const pathname = useLocation();
+    
     const handlePathnameChange = useCallback(
         () => {
             if (openNav) {
@@ -61,7 +62,7 @@ export const Layout = (props) => {
             </LayoutRoot>
                 <Backdrop
                     sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 900 }}
-                    open={false}
+                    open={loading.loading}
                 >
                 <CircularProgress color="inherit" />
             </Backdrop>

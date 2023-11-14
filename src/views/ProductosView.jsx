@@ -33,12 +33,14 @@ import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import EditIcon from '@mui/icons-material/Edit';
-import { useSelector } from 'react-redux';
+import { useSelector,useDispatch } from 'react-redux';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
+import { setLoading } from "../features/menu/menuSlice";
 export default function ProductosView() {
     const [productos, setProductos] = useState([])
     const [page, setPage] = useState(0);
+    const dispatch = useDispatch();
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [modalProducto, setModalProducto] = useState(false);
     const [modalEditar,setModalEditar] = useState(false);
@@ -62,7 +64,6 @@ export default function ProductosView() {
     const [value1,setValue1] = useState("");
     const [value2,setValue2] = useState("");
     const [value3,setValue3] = useState("");
-    const [open, setOpen] = useState(false);
     const userState = useSelector(state => state.auth);
     const [currentProducto,setCurrentProducto] = useState({
         codigo_principal: "",
@@ -129,7 +130,7 @@ export default function ProductosView() {
     }
 
     const agregarProductos = async () => {
-        setOpen(true);
+        dispatch(setLoading(true));
         let id = uuidv4();
         console.log(id);
         let new_producto = {
@@ -154,17 +155,17 @@ export default function ProductosView() {
             id:id,
         }
         await setDoc(doc(db, "productos", id), new_producto);
-        setOpen(false);
+        dispatch(setLoading(false));
         setModalProducto(false);
 
     }
 
     const actualizarProducto = async ()=>{
-        setOpen(true);
+        dispatch(setLoading(true));
         const ref_data = doc(db, "productos", currentProducto.id);
         await updateDoc(ref_data, currentProducto);
         setModalEditar(false);
-        setOpen(false);
+        dispatch(setLoading(false));
     }
     const eliminarProducto = async(item)=>{
         await deleteDoc(doc(db, "productos", item.id));
@@ -771,12 +772,7 @@ export default function ProductosView() {
                     </Button>
                 </ModalFooter>
             </Modal>
-            <Backdrop
-                sx={{ color: '#fff', zIndex: 1500}}
-                open={open}
-            >
-                <CircularProgress color="inherit" />
-            </Backdrop>
+        
         </>
     );
 }

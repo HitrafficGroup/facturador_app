@@ -1,13 +1,14 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 
 import userSlice from '../features/auth/userSlice.js';
-
+import menuSlice from '../features/menu/menuSlice.js';
 
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 import thunk from 'redux-thunk';
 const reducers = combineReducers({
-  auth:userSlice
+  auth:userSlice,
+  menu: menuSlice,
 })
 
 const persistConfig = {
