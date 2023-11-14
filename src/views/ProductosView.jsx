@@ -244,7 +244,6 @@ export default function ProductosView() {
 
                     <Grid item xs={12} md={3}>
                         <FormControl fullWidth variant="filled">
-
                             <FilledInput
                                 hiddenLabel
                                 id="filled-adornment-password"
@@ -887,9 +886,7 @@ export default function ProductosView() {
                             <Grid item xs={12}>
                                 <Button fullWidth variant="contained" startIcon={<ArticleIcon/>} color="gris" >Descargar Plantilla </Button>
                             </Grid>
-                            <Grid item xs={12}>
-                                <Button fullWidth variant="contained" startIcon={<CategoryIcon/>} color="anaranjado1" >Generar Categoria</Button>
-                            </Grid>
+                         
                             <Grid item xs={12}>
                                 <Button fullWidth variant="contained" startIcon={<CloudUploadIcon />}  color="verde">Subir Productos </Button>
                             </Grid>
@@ -904,6 +901,7 @@ export default function ProductosView() {
                     </Button>
                 </ModalFooter>
             </Modal>
+            
         </>
     );
 }

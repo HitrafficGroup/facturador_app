@@ -8,6 +8,7 @@ import ProductosView from "./ProductosView";
 import ProformasView from "./ProformasView";
 import OrdenesView from "./OrdenesView";
 import ConfigView from "./ConfigView";
+import ServiciosView from "./ServiciosView";
 export default function DashboardView(){
 
 
@@ -19,6 +20,7 @@ export default function DashboardView(){
                         <Routes>
                             <Route path="/personas"  element={<PersonasView />} />
                             <Route path="/productos"  element={<ProductosView />} />
+                            <Route path="/servicios"  element={<ServiciosView />} />
                             <Route path="/proformas"  element={<ProformasView />} />
                             <Route path="/ordenes"  element={<OrdenesView />} />
                             <Route path="/configuraciones"  element={<ConfigView />} />
