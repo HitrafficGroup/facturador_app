@@ -31,6 +31,14 @@
   display: inline-block;
   position: relative;
 }
+.header-dash{
+  display: flex;
+  background-color: #f3f3f3;
+  align-items: center;
+  padding: 1.2rem;
+  border-radius: 5px;
+  width: 100%;
+}
 
 .file-upload-button input[type="file"] {
   position: absolute;
