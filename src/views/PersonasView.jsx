@@ -22,7 +22,6 @@ import AddIcon from '@mui/icons-material/Add';
 import TextField from '@mui/material/TextField';
 import FormControl from '@mui/material/FormControl';
 import FilledInput from '@mui/material/FilledInput';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ShareLocationIcon from '@mui/icons-material/ShareLocation';
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
 import PersonIcon from '@mui/icons-material/Person';
@@ -38,7 +37,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setLoading } from "../features/menu/menuSlice";
 import SettingsIcon from '@mui/icons-material/Settings';
 import SearchIcon from '@mui/icons-material/Search';
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import ArticleIcon from '@mui/icons-material/Article';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
@@ -50,7 +48,7 @@ export default function PersonasView(){
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [modalEditar, setModalEditar] = useState(false);
-    const [currentCliente,setCurrentCliente] = useState(client_defect);
+    const [totalClientes,setTotalClientes] = useState(0);
     const [modalCliente,setModalCliente] = useState();
     const [tipoIde,setTipoIde] = useState(1);
     const [correos,setCorreos] = useState([]);
@@ -146,7 +144,7 @@ export default function PersonasView(){
             });
             setPersonas(clientes_aux);
             allClientes.current = clientes_aux;
-            
+            setTotalClientes(clientes_aux.length);
         });
         
     }
@@ -180,7 +178,7 @@ export default function PersonasView(){
                         </div>
                     </Grid>
                     <Grid item xs={6} md={3} >
-                        <CardClient value={4} />
+                        <CardClient value={totalClientes} />
                     </Grid>
                     <Grid item xs={6} md={9}>
 

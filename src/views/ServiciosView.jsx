@@ -45,7 +45,7 @@ export default function ServiciosView(){
     const [servicios,setServicios] = useState([{establecimiento:{direccion:""}}]);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    
+    const [totalServices,setTotalServices] = useState();
     const [modalEditar,setModalEditar] = useState(false);
     const [modalServicio,setModalServicio] = useState(false);
     const [modalOpciones,setModalOpciones] = useState(false);
@@ -126,8 +126,9 @@ export default function ServiciosView(){
             });
             setServicios(servicios_aux);
             allServicios.current = servicios_aux;
+            setTotalServices(servicios_aux.length)
         });
-        setEstablecimientos(userState.direcciones)
+        setEstablecimientos(userState.direcciones);
         
 
 
@@ -146,7 +147,7 @@ export default function ServiciosView(){
                         </div>
                     </Grid>
                     <Grid item xs={6} md={3} >
-                        <CardService value={4} />
+                        <CardService value={totalServices} />
                     </Grid>
                     <Grid item xs={6} md={9}>
 
