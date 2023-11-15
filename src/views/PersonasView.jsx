@@ -42,6 +42,8 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import ArticleIcon from '@mui/icons-material/Article';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import CardClient from "../components/card-client";
+
 export default function PersonasView(){
     const dispatch = useDispatch();
     const [personas,setPersonas] = useState([]);
@@ -176,6 +178,12 @@ export default function PersonasView(){
                         <div className="header-dash">
                             Listado de clientes habilitados
                         </div>
+                    </Grid>
+                    <Grid item xs={6} md={3} >
+                        <CardClient value={4} />
+                    </Grid>
+                    <Grid item xs={6} md={9}>
+
                     </Grid>
                     <Grid item md={3}>
                         <FormControl fullWidth variant="filled">

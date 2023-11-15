@@ -37,6 +37,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import Autocomplete from '@mui/material/Autocomplete';
 import { v4 as uuidv4 } from 'uuid';
 import { setLoading } from "../features/menu/menuSlice";
+import FilledInput from '@mui/material/FilledInput';
+import InputAdornment from '@mui/material/InputAdornment';
+import SearchIcon from '@mui/icons-material/Search';
+import CardService from "../components/card-service";
 export default function ServiciosView(){
     const [servicios,setServicios] = useState([{establecimiento:{direccion:""}}]);
     const [page, setPage] = useState(0);
@@ -65,6 +69,7 @@ export default function ServiciosView(){
     const abrirModalEditar=(item)=>{
         setModalEditar(true);
         setFormService(item)
+        setEstablecimiento(item.establecimiento)
     }
     const handleChangeTab = (event, newValue) => {
         setValue(newValue);
@@ -86,11 +91,9 @@ export default function ServiciosView(){
         let aux_data =  JSON.parse(JSON.stringify(formService));
         aux_data['establecimiento'] = establecimiento;
         const ref = doc(db, "servicios", aux_data['id']);
-        
         await updateDoc(ref, aux_data);
-        setModalEditar(false)
+        setModalEditar(false);
         dispatch(setLoading(false));
-
     }
 
     const handleFormService =(event)=>{
@@ -99,6 +102,21 @@ export default function ServiciosView(){
         nuevoObjeto[name] = value;
         setFormService(nuevoObjeto);
     };
+    const handleSearch=(event)=>{
+
+    
+        let textoMinusculas = event.target.value.toLowerCase();
+        const filtrados = allServicios.current.filter((elemento) => {
+            // Convertir el nombre del elemento a minúsculas para la comparación
+            const nombreMinusculas = elemento.descripcion.toLowerCase();
+        
+            // Verificar si el nombre del elemento incluye el texto de búsqueda
+            return nombreMinusculas.includes(textoMinusculas);
+          });
+
+          setServicios(filtrados);
+    }
+
     const getData = () => {
         const q = query(collection(db, "servicios"));
         onSnapshot(q, (querySnapshot) => {
@@ -127,7 +145,35 @@ export default function ServiciosView(){
                             Listado de servicios habilitados
                         </div>
                     </Grid>
-                    <Grid item xs={12} md={8}>
+                    <Grid item xs={6} md={3} >
+                        <CardService value={4} />
+                    </Grid>
+                    <Grid item xs={6} md={9}>
+
+                    </Grid>
+                    <Grid item md={3}>
+                        <FormControl fullWidth variant="filled">
+                                <FilledInput
+                                    hiddenLabel
+                                    id="filled-adornment-password"
+                                    type="text"
+                                    size="small"
+                                    onChange={handleSearch}
+                                    endAdornment={
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                edge="end"
+                                            >
+                                                <SearchIcon />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    }
+                                    label="Password"
+                                />
+                        </FormControl>
+                    </Grid>   
+                    <Grid item md={5}>
                     </Grid>
                     <Grid item xs={6} md={2}>
                         <Button fullWidth variant="contained" onClick={() => { setModalServicio(true) }} startIcon={<AddIcon />} >Agregar Servicio</Button>
