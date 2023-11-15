@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
+import TextField from '@mui/material/TextField';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -15,6 +16,27 @@ import { collection, query, onSnapshot, doc, setDoc, updateDoc, deleteDoc } from
 import { db } from "../firebase/firebase-config";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
+import SettingsIcon from '@mui/icons-material/Settings';
+import Button from '@mui/material/Button';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import PropTypes from 'prop-types';
+import BadgeIcon from '@mui/icons-material/Badge';
+import InputAdornment from '@mui/material/InputAdornment';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import FormControl from '@mui/material/FormControl';
+import FormLabel from '@mui/material/FormLabel';
+import InputLabel from '@mui/material/InputLabel';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import { useSelector, useDispatch } from 'react-redux';
+import Autocomplete from '@mui/material/Autocomplete';
 export default function ServiciosView(){
     const [servicios,setServicios] = useState([{}]);
     const [page, setPage] = useState(0);
@@ -22,6 +44,12 @@ export default function ServiciosView(){
     const [modalEditar,setModalEditar] = useState(false);
     const [modalServicio,setModalServicio] = useState(false);
     const [modalOpciones,setModalOpciones] = useState(false);
+    const [formService,setFormService] = useState(service_defect);
+    const [establecimiento, setEstablecimiento] = useState('');
+    const [establecimientos, setEstablecimientos] = useState({});
+    const [value, setValue] = useState(0);
+    const allServicios = useRef([]);
+    const userState = useSelector(state => state.auth);
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
     };
@@ -30,21 +58,59 @@ export default function ServiciosView(){
         setPage(0);
     };
     const eliminarProducto = ()=>{
-        
+
     }
     const abrirModalEditar=()=>{
         setModalEditar(true);
     }
+    const handleChangeTab = (event, newValue) => {
+        setValue(newValue);
+    };
 
+    const handleFormService =(event)=>{
+        const { name, value } = event.target;
+        const nuevoObjeto = { ...formService };
+        nuevoObjeto[name] = value;
+        setFormService(nuevoObjeto);
+    };
+    const getData = () => {
+        const q = query(collection(db, "servicios"));
+        onSnapshot(q, (querySnapshot) => {
+            const servicios_aux = [];
+            querySnapshot.forEach((doc) => {
+                servicios_aux.push(doc.data());
+            });
+            setServicios(servicios_aux);
+            allServicios.current = servicios_aux;
+        });
+        setEstablecimientos(userState.direcciones)
+        
+
+
+    }
+    useEffect(() => {
+        getData();
+    }, []);
 
     return(
         <>
             <Container maxWidth="xl">
                 <Grid container spacing={2}>
-                <Grid item md={12} xs={12}>
+                    <Grid item md={12} xs={12}>
                         <div className="header-dash">
                             Listado de servicios habilitados
                         </div>
+                    </Grid>
+                    <Grid item xs={12} md={8}>
+                    </Grid>
+                    <Grid item xs={6} md={2}>
+                        <Button fullWidth variant="contained" onClick={() => { setModalServicio(true) }} startIcon={<AddIcon />} >Agregar Servicio</Button>
+                    </Grid>
+                    <Grid item xs={6} md={2}>
+                        <Button fullWidth variant="contained" startIcon={<SettingsIcon />} color="gris" onClick={()=>{setModalOpciones(true)}} >Opciones</Button>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <div style={{ height: 10 }}></div>
                     </Grid>
                     <Grid item  xs={12}>
                         <TableContainer sx={{ maxHeight: 440 }}>
@@ -114,7 +180,243 @@ export default function ServiciosView(){
                     </Grid>  
                 </Grid>         
             </Container>
+                <Modal isOpen={modalServicio} >
+                    <ModalHeader  >Registrar Servicio <ShoppingBagIcon /> </ModalHeader>
+                        <ModalBody>
+                        <Box sx={{ width: '100%' }}>
+                        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                            <Tabs value={value} onChange={handleChangeTab} aria-label="basic tabs example">
+                                <Tab label="Datos Generales" {...a11yProps(0)} />
+                                <Tab label="Datos Adicionales" {...a11yProps(1)} />
+                            </Tabs>
+                        </Box>
+                        <CustomTabPanel value={value} index={0}>
+                            <Grid container spacing={2}>
+                                <Grid item md={6} xs={12}>
+                                    <TextField
+                                        id="outlined-required"
+                                        label="Código principal"
+                                        value={formService.codigo}
+                                        name="codigo"
+                                        onChange={handleFormService}
+                                        fullWidth  
+                                    />
+                                </Grid>
+                                <Grid item md={6} xs={12}>
+                                    <TextField
+                                        id="outlined-required"
+                                        label="Código auxiliar (Opcional)"
+                                        value={formService.codigo_aux}
+                                        name="codigo_aux"
+                                        onChange={handleFormService}
+                                        fullWidth  
+                                    />
+                                </Grid>
+                                <Grid item md={12} xs={12}>
+                                    <TextField
+                                            id="outlined-required"
+                                            label="Descripción"
+                                            value={formService.descripcion}
+                                            name="descripcion"
+                                            onChange={handleFormService}
+                                            fullWidth  
+                                        />
+                                </Grid>
+                                <Grid item md={4} xs={12}>
+                                        <TextField
+                                            id="outlined-required"
+                                            label="Valor unitario"
+                                            value={formService.valor_unitario}
+                                            name="valor_unitario"
+                                            onChange={handleFormService}
+                                            fullWidth  
+                                        />
+                                </Grid>
+                                <Grid item md={4} xs={12}>
+                                <FormControl fullWidth variant="filled">
+                                        <InputLabel htmlFor="filled-adornment-password">Tarifador IVA</InputLabel>
+                                        <Select
+                                            labelId="demo-simple-select-label"
+                                            label="Tipo de Persona"
+                                            value={formService.tarifa}
+                                            name="tarifa"
+                                            onChange={handleFormService}
+                                        >
+                                            <MenuItem value={1}>0%</MenuItem>
+                                            <MenuItem value={2}>12%</MenuItem>
+                                            <MenuItem value={3}>No Objeto de impuesto</MenuItem>
+                                            <MenuItem value={4}>Extento de IVA</MenuItem>
+                                            <MenuItem value={5}>8%</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item md={4} xs={12}>
+                                    <FormControl>
+                                        <FormLabel id="demo-controlled-radio-buttons-group">Gender</FormLabel>
+                                            <RadioGroup
+                                                aria-labelledby="demo-controlled-radio-buttons-group"
+                                                name="controlled-radio-buttons-group"
+                                                value={value}
+                                                onChange={handleFormService}
+                                                row
+                                            >
+                                            <FormControlLabel value={true} control={<Radio />} label="Si" />
+                                            <FormControlLabel value={false} control={<Radio />} label="No" />
+                                        </RadioGroup>
+                                    </FormControl>
+                                </Grid>
+                            </Grid>
+                        </CustomTabPanel>
+                        <CustomTabPanel value={value} index={1}>
+                        <Grid container spacing={2}>
+                                <Grid item xs={12}>
+                                <Autocomplete
+                                        disablePortal
+                                        id="combo-box-demo"
+                                        options={establecimientos}
+                                        getOptionLabel={(option) =>
+                                            option.direccion
+                                        }
+                                        onChange={(event, newValue) => {
+                                            setEstablecimiento(newValue);
+                                        }}
+                                        fullWidth
+                                        renderInput={(params) => <TextField {...params} label="Establecimiento" />}
+                                    />
+                                </Grid>
+
+                                <Grid item xs={12}>
+                                    <h6 style={{ color: "#616A6B" }}>Datos Adicionales</h6>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <TextField
+                                        id="outlined-required"
+                                        label="Nombre"
+                                        fullWidth
+                                        value={formService.tarifa}
+                                        name="param1"
+                                        onChange={handleFormService}
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <TextField
+                                        id="outlined-required"
+                                        label="Valor"
+                                        fullWidth
+                                        value={formService.tarifa}
+                                        name="value1"
+                                        onChange={handleFormService}
+
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <TextField
+                                        id="outlined-required"
+                                        label="Nombre"
+                                        fullWidth
+                                        value={formService.param2}
+                                        name="param2"
+                                        onChange={handleFormService}
+
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <TextField
+                                        id="outlined-required"
+                                        label="Valor"
+                                        fullWidth
+                                        value={formService.value2}
+                                        name="value2"
+                                        onChange={handleFormService}
+
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <TextField
+                                        id="outlined-required"
+                                        label="Nombre"
+                                        fullWidth
+                                        value={formService.param3}
+                                        name="param3"
+                                        onChange={handleFormService}
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <TextField
+                                        id="outlined-required"
+                                        label="Valor"
+                                        fullWidth
+                                        value={formService.value3}
+                                        name="value3"
+                                        onChange={handleFormService}
+                                    />
+                                </Grid>
+
+                            </Grid>
+                        </CustomTabPanel>
+
+                    </Box>
+                        </ModalBody>
+                    <ModalFooter>
+                    <Button color="primary" >
+                        Agregar
+                    </Button>
+                    <Button color="secondary" onClick={() => { setModalServicio(false) }} >
+                        Cancelar
+                    </Button>
+                    </ModalFooter>
+                </Modal>
         </>
     );
 
+}
+function a11yProps(index) {
+    return {
+        id: `simple-tab-${index}`,
+        'aria-controls': `simple-tabpanel-${index}`,
+    };
+}
+
+function CustomTabPanel(props) {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+                <Box sx={{ p: 3 }}>
+                    <Typography>{children}</Typography>
+                </Box>
+            )}
+        </div>
+    );
+}
+
+CustomTabPanel.propTypes = {
+    children: PropTypes.node,
+    index: PropTypes.number.isRequired,
+    value: PropTypes.number.isRequired,
+};
+const service_defect =   {
+    codigo:"",
+    codigo_aux:"",
+    descripcion:"",
+    valor_unitario:0,
+    tarifa:"",
+    activo:false,
+    venta:false,
+    compra:false,
+    establecimiento:"",
+    categoria:"",
+    param1:"",
+    value1:"",
+    param2:"",
+    value2:"",
+    param3:"",
+    value3:""
 }

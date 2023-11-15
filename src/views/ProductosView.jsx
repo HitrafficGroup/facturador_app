@@ -65,11 +65,11 @@ export default function ProductosView() {
     const [activo, setActivo] = useState(false);
     const [stock, setStock] = useState('');
     const [establecimiento, setEstablecimiento] = useState('');
+    const [establecimientos, setEstablecimientos] = useState({});
     const [inventario, setInventario] = useState(false);
     const [categoria, setCategoria] = useState('');
     const [tarifa, setTarifa] = useState(1);
     const [totalProducts,setTotalProducts] = useState(0)
-    const [establecimientos, setEstablecimientos] = useState({});
     const [ice, setIce] = useState({});
     const [value, setValue] = useState(0);
     const [param1, setParam1] = useState("")
