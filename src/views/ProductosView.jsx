@@ -62,15 +62,19 @@ export default function ProductosView() {
     const [descripcion, setDescripcion] = useState('');
     const [valorUnitario, setValorUnitario] = useState('');
     const [unidadMedida, setUnidadMedida] = useState('');
-    const [activo, setActivo] = useState(false);
+    const [activo, setActivo] = useState(true);
     const [stock, setStock] = useState('');
     const [establecimiento, setEstablecimiento] = useState('');
     const [establecimientos, setEstablecimientos] = useState({});
     const [inventario, setInventario] = useState(false);
     const [categoria, setCategoria] = useState('');
     const [tarifa, setTarifa] = useState(1);
+    const [modalCategorias,setModalCategorias] = useState(false);
     const [totalProducts,setTotalProducts] = useState(0)
-    const [ice, setIce] = useState({});
+    const [ice, setIce] = useState({
+        codigo: 0,
+        nombre: "NINGUNO"
+    });
     const [value, setValue] = useState(0);
     const [param1, setParam1] = useState("")
     const [param2, setParam2] = useState("");
@@ -160,7 +164,7 @@ export default function ProductosView() {
         let new_producto = {
             codigo_principal: codigoPrincipal,
             codigo_auxiliar: codigoAuxiliar,
-            descripcion: descripcion,
+            descripcion: descripcion.toUpperCase(),
             valor_unitario: valorUnitario,
             unidad_medida: unidadMedida,
             tarifa_iva: tarifa,
@@ -282,7 +286,10 @@ export default function ProductosView() {
                                 <MenuItem onClick={closeMenu}>Logout</MenuItem>
                             </Menu> */}
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} md={2}>
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                        <Button fullWidth color="anaranjado1" variant="contained" onClick={() => { setModalCategorias(true) }} startIcon={<AddIcon />} >Categorias</Button>
                     </Grid>
                     <Grid item xs={6} md={2}>
                         <Button fullWidth variant="contained" onClick={() => { setModalProducto(true) }} startIcon={<AddIcon />} >Agregar Producto</Button>
@@ -404,22 +411,13 @@ export default function ProductosView() {
                                         }}
                                     />
                                 </Grid>
-                                <Grid item md={6} xs={12}>
-                                    <TextField
-                                        id="outlined-required"
-                                        label="Código Auxiliar"
-                                        fullWidth
-                                        value={codigoAuxiliar}
-                                        onChange={(event) => {
-                                            setCodigoAuxiliar(event.target.value);
-                                        }}
-                                    />
-                                </Grid>
+                               
                                 <Grid item md={12} xs={12}>
                                     <TextField
                                         id="outlined-required"
                                         label="Descripción"
                                         fullWidth
+                                        inputProps={{ style: { textTransform: "uppercase" } }}
                                         value={descripcion}
                                         onChange={(event) => {
                                             setDescripcion(event.target.value);
@@ -662,16 +660,7 @@ export default function ProductosView() {
                                         onChange={handleInputChange}
                                     />
                                 </Grid>
-                                <Grid item md={6} xs={12}>
-                                    <TextField
-                                        id="outlined-required"
-                                        label="Código Auxiliar"
-                                        fullWidth
-                                        name="codigo_auxiliar"
-                                        value={currentProducto.codigo_auxiliar}
-                                        onChange={handleInputChange}
-                                    />
-                                </Grid>
+                               
                                 <Grid item md={12} xs={12}>
                                     <TextField
                                         id="outlined-required"
@@ -901,7 +890,29 @@ export default function ProductosView() {
                     </Button>
                 </ModalFooter>
             </Modal>
-            
+            <Modal isOpen={modalCategorias} >
+                <ModalHeader>Registrar Nueva Categoría<ShoppingBagIcon /> </ModalHeader>
+                    <ModalBody>
+                        <Grid container spacing={2}>
+                           <Grid item xs={12}>
+                            <TextField
+                                    id="outlined-required"
+                                    label="Nombre"
+                                    fullWidth
+                                 
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Button fullWidth variant="contained"  color="verde">Agregar Categoria </Button>
+                            </Grid>
+                        </Grid>
+                    </ModalBody>
+                <ModalFooter>
+                <Button color="secondary" onClick={() => { setModalCategorias(false) }} >
+                        Salir
+                    </Button>              
+                </ModalFooter>
+            </Modal>
         </>
     );
 }
@@ -939,6 +950,10 @@ CustomTabPanel.propTypes = {
 };
 
 let data = [
+    {
+        codigo: 0,
+        nombre: "NINGUNO"
+    },
     {
         codigo: 3011,
         nombre: "ICE CIGARRILLOS RUBIOS"

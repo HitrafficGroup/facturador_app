@@ -31,6 +31,7 @@ import RadioGroup from '@mui/material/RadioGroup';
 import PanToolAltIcon from '@mui/icons-material/PanToolAlt';
 import AddIcon from '@mui/icons-material/Add';
 import Checkbox from '@mui/material/Checkbox';
+import ButtonGroup from '@mui/material/ButtonGroup';
 export default function ProformasView() {
     const [value, setValue] = useState(dayjs('2022-04-17'));
     const [productos, setProductos] = useState([{}])
@@ -107,6 +108,10 @@ export default function ProformasView() {
         setBusqueda(event.target.value);
     };
 
+    const agregarProductos =()=>{
+        const seleccionados = allItems.current.filter(item => item['select'] === true);
+        setProductos(seleccionados)
+    }
     const eliminarProducto = async (item) => {
 
     }
@@ -210,13 +215,13 @@ export default function ProformasView() {
                             <Table stickyHeader aria-label="sticky table">
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell align={'left'}>
+                                        <TableCell sx={{width:60}} align={'center'}>
                                             Item
                                         </TableCell>
-                                        <TableCell align={'center'}>
+                                        <TableCell  sx={{width:60}} align={'center'}>
                                             Cantidad
                                         </TableCell>
-                                        <TableCell align={'center'}>
+                                        <TableCell align={'left'}>
                                             Detalle
                                         </TableCell>
                                         <TableCell align={'center'}>
@@ -238,14 +243,20 @@ export default function ProformasView() {
                                         .map((row, index) => {
                                             return (
                                                 <TableRow hover role="checkbox" tabIndex={-1} key={index}>
-                                                    <TableCell align={"left"}>
+                                                    <TableCell align={"center"}>
                                                         {index + 1}
                                                     </TableCell>
                                                     <TableCell align={"center"}>
-                                                        {row.descripcion}
+                                                    <FilledInput
+                                                        hiddenLabel
+                                                        id="filled-adornment-password"
+                                                        type="number"
+                                                        size="small"
+                                                        sx={{width:60}}
+                                                    />
                                                     </TableCell>
-                                                    <TableCell align={"center"}>
-                                                        {row.categoria}
+                                                    <TableCell align={"left"}>
+                                                        {row.descripcion}
                                                     </TableCell>
                                                     <TableCell align={"center"}>
                                                         {row.valor_unitario}
@@ -374,7 +385,7 @@ export default function ProformasView() {
                 </ModalBody>
                 <ModalFooter>
                     <Stack direction="row" spacing={2}>
-                        <Button color="primary" variant="contained"  >
+                        <Button color="primary" variant="contained" onClick={agregarProductos}  >
                             terminar seleccion
                         </Button>
                         <Button color="rojo" variant="contained" onClick={() => { setModalProducto(false) }} >
