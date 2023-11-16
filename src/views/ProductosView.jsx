@@ -52,9 +52,9 @@ import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 export default function ProductosView() {
     const [productos, setProductos] = useState([])
     const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const dispatch = useDispatch();
     const [modalOpciones,setModalOpciones] =useState(false);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
     const [modalProducto, setModalProducto] = useState(false);
     const [modalEditar, setModalEditar] = useState(false);
     const [codigoPrincipal, setCodigoPrincipal] = useState('');

@@ -149,8 +149,6 @@ export default function PersonasView(){
         
     }
     const handleSearch=(event)=>{
-
-    
         let textoMinusculas = event.target.value.toLowerCase();
         const filtrados = allClientes.current.filter((elemento) => {
             // Convertir el nombre del elemento a minúsculas para la comparación
