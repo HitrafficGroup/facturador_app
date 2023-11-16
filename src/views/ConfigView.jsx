@@ -184,7 +184,7 @@ export default function ConfigView() {
         setDirecciones(aux_directions);
         setModalDireccion(false);
         dispatch(setLoading(false));
-        
+  
     }
     useEffect(() => {
         getData();
@@ -479,7 +479,8 @@ export default function ConfigView() {
 
 
 
-
+      //5582840000554661 0326
+      //312
 
 
 
