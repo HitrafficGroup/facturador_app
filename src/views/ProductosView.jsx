@@ -54,6 +54,7 @@ import { updateCategorias } from "../features/auth/userSlice";
 export default function ProductosView() {
     const [productos, setProductos] = useState([])
     const [page, setPage] = useState(0);
+    const userState = useSelector(state => state.auth);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const dispatch = useDispatch();
     const [modalOpciones,setModalOpciones] =useState(false);
@@ -70,7 +71,7 @@ export default function ProductosView() {
     const [establecimientos, setEstablecimientos] = useState({});
     const [inventario, setInventario] = useState(false);
     const [categoria, setCategoria] = useState('');
-    const [categorias,setCategorias] = useState([]);
+    const [categorias,setCategorias] = useState(userState.categorias);
     const [tarifa, setTarifa] = useState(1);
     const [modalCategorias,setModalCategorias] = useState(false);
     const [totalProducts,setTotalProducts] = useState(0)
@@ -89,7 +90,6 @@ export default function ProductosView() {
     
 
     const allproducts = useRef([{}]);
-    const userState = useSelector(state => state.auth);
     const [currentProducto, setCurrentProducto] = useState({
         codigo_principal: "",
         codigo_auxiliar: "",
@@ -342,9 +342,7 @@ export default function ProductosView() {
                                         <TableCell align={'center'}>
                                             Descripcion
                                         </TableCell>
-                                        <TableCell align={'center'}>
-                                            Categoria
-                                        </TableCell>
+                                      
                                         <TableCell align={'center'}>
                                             Valor
                                         </TableCell>
@@ -370,9 +368,7 @@ export default function ProductosView() {
                                                     <TableCell align={"center"}>
                                                         {row.descripcion}
                                                     </TableCell>
-                                                    <TableCell align={"center"}>
-                                                        {row.categoria}
-                                                    </TableCell>
+                                                  
                                                     <TableCell align={"center"}>
                                                         {row.valor_unitario}
                                                     </TableCell>
