@@ -49,6 +49,8 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import ArticleIcon from '@mui/icons-material/Article';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import Paper from '@mui/material/Paper';
+import { updateCategorias } from "../features/auth/userSlice";
 export default function ProductosView() {
     const [productos, setProductos] = useState([])
     const [page, setPage] = useState(0);
@@ -68,6 +70,7 @@ export default function ProductosView() {
     const [establecimientos, setEstablecimientos] = useState({});
     const [inventario, setInventario] = useState(false);
     const [categoria, setCategoria] = useState('');
+    const [categorias,setCategorias] = useState([]);
     const [tarifa, setTarifa] = useState(1);
     const [modalCategorias,setModalCategorias] = useState(false);
     const [totalProducts,setTotalProducts] = useState(0)
@@ -75,6 +78,7 @@ export default function ProductosView() {
         codigo: 0,
         nombre: "NINGUNO"
     });
+
     const [value, setValue] = useState(0);
     const [param1, setParam1] = useState("")
     const [param2, setParam2] = useState("");
@@ -82,6 +86,8 @@ export default function ProductosView() {
     const [value1, setValue1] = useState("");
     const [value2, setValue2] = useState("");
     const [value3, setValue3] = useState("");
+    
+
     const allproducts = useRef([{}]);
     const userState = useSelector(state => state.auth);
     const [currentProducto, setCurrentProducto] = useState({
@@ -135,15 +141,40 @@ export default function ProductosView() {
             setTotalProducts(products_aux.length)
         });
         setEstablecimientos(userState.direcciones)
-        
-
-
-    }
+   }
 
 
     const handleChange = (event) => {
         setTarifa(event.target.value);
     };
+
+
+    const agregarCategorias = async() =>{
+        dispatch(setLoading(true));
+        let aux_categorias = JSON.parse(JSON.stringify(categorias))
+        aux_categorias.push(categoria.toUpperCase())
+        const ref_data = doc(db, "usuarios", userState.id);
+        await updateDoc(ref_data, {
+            categorias:aux_categorias,
+        });
+        dispatch(updateCategorias(aux_categorias))
+        setCategorias(aux_categorias)
+        setCategoria("")
+        dispatch(setLoading(false));
+    }
+
+    const eliminarCategoria = async(_data) =>{
+        dispatch(setLoading(true));
+        let aux_categorias = JSON.parse(JSON.stringify(categorias));
+        let data_filtrada = aux_categorias.filter(item=> item !== _data);
+        const ref_data = doc(db, "usuarios", userState.id);
+        await updateDoc(ref_data, {
+            categorias:data_filtrada,
+        });
+        dispatch(updateCategorias(data_filtrada))
+        setCategorias(data_filtrada);
+        dispatch(setLoading(false));
+    }
 
 
     const handleInventario = (event) => {
@@ -891,21 +922,57 @@ export default function ProductosView() {
                 </ModalFooter>
             </Modal>
             <Modal isOpen={modalCategorias} >
-                <ModalHeader>Registrar Nueva Categoría<ShoppingBagIcon /> </ModalHeader>
+                <ModalHeader>Registrar Nueva Categoría</ModalHeader>
                     <ModalBody>
-                        <Grid container spacing={2}>
-                           <Grid item xs={12}>
-                            <TextField
-                                    id="outlined-required"
-                                    label="Nombre"
-                                    fullWidth
-                                 
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Button fullWidth variant="contained"  color="verde">Agregar Categoria </Button>
-                            </Grid>
-                        </Grid>
+                       
+                            <Grid container spacing={2}>
+                                <Grid item xs={12}>
+                                    <TextField
+                                            id="outlined-required"
+                                            label="Nombre"
+                                            fullWidth
+                                            value={categoria}
+                                            inputProps={{ style: { textTransform: "uppercase" } }}
+                                            onChange={(event) => {
+                                            setCategoria(event.target.value);
+                                            }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <Button fullWidth variant="contained" onClick={agregarCategorias} color="verde">Agregar Categoria </Button>
+                                    </Grid>
+                      
+                                
+                                    <Grid item xs={12}>
+                                        <TableContainer component={Paper}>
+                                            <Table aria-label="simple table">
+                                                <TableHead>
+                                                    <TableRow>
+                                                        <TableCell>Categorias</TableCell>
+                                                        <TableCell align="center"></TableCell>
+                                                    </TableRow>
+                                                </TableHead>
+                                                <TableBody>
+                                                    {categorias.map((row,index) => (
+                                                        <TableRow
+                                                        key={index}
+                                                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                                        >
+                                                
+                                                        <TableCell align="left">{row}</TableCell>
+                                                        <TableCell align="center">
+                                                            <IconButton aria-label="delete" color="rojo" onClick={()=>{eliminarCategoria(row)}}>
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </TableContainer>
+                                    </Grid>
+                                </Grid>
+                       
                     </ModalBody>
                 <ModalFooter>
                 <Button color="secondary" onClick={() => { setModalCategorias(false) }} >

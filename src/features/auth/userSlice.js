@@ -24,7 +24,8 @@ export const userSlice = createSlice({
         direccion_ruc:'',
         nombre_comercial:'',
         direcciones:[],
-        firma_password:''
+        firma_password:'',
+        categorias:[]
 
 
     },
@@ -50,9 +51,13 @@ export const userSlice = createSlice({
             state.nombre_comercial = action.payload.nombre_comercial;
             state.firma_password = action.payload.firma_password;
             state.direcciones = action.payload.direcciones;
+            state.categorias = action.payload.categorias;
         },
+        updateCategorias:(state,action)=>{
+            state.categorias = action.payload;
+        }
         
     }
 })
-export const {setUser} = userSlice.actions
+export const {setUser,updateCategorias} = userSlice.actions
 export default userSlice.reducer
