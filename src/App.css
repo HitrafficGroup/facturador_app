@@ -13,6 +13,29 @@
   }
 }
 
+.proforma-item{
+  background-color: #ECF0F1;
+  border-radius: 7px;
+  padding: 0.8rem;
+}
+.proforma-item-p{
+  margin: 0;
+  color: #839192;
+  text-align: right;
+  font-size: medium;
+}
+.proforma-total{
+  border-radius: 7px;
+  padding: 0.8rem;
+  background-color: #6366F1;
+}
+.proforma-total-p{
+  color: white;
+  margin: 0;
+  font-weight: bold;
+  text-align: right;
+  font-size: large;
+}
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -76,6 +99,7 @@
   border-radius: 5px;
   width: 100%;
 }
+
 
 .file-upload-button input[type="file"] {
   position: absolute;

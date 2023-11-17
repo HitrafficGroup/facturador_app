@@ -12,7 +12,7 @@ import { collection, query, onSnapshot, doc, setDoc, updateDoc, deleteDoc } from
 import { db } from "../firebase/firebase-config";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
@@ -32,6 +32,37 @@ import PanToolAltIcon from '@mui/icons-material/PanToolAlt';
 import AddIcon from '@mui/icons-material/Add';
 import Checkbox from '@mui/material/Checkbox';
 import ButtonGroup from '@mui/material/ButtonGroup';
+import { styled } from '@mui/material/styles';
+import Paper from '@mui/material/Paper';
+
+
+
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+    [`&.${tableCellClasses.head}`]: {
+      backgroundColor: "#6366F1",
+      color: theme.palette.common.white,
+    },
+    [`&.${tableCellClasses.body}`]: {
+      fontSize: 14,
+    },
+  }));
+  
+  const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    '&:nth-of-type(odd)': {
+      backgroundColor: theme.palette.action.hover,
+    },
+    // hide last border
+    '&:last-child td, &:last-child th': {
+      border: 0,
+    },
+  }));
+  
+
+
+
+
+
 export default function ProformasView() {
     const [value, setValue] = useState(dayjs('2022-04-17'));
     const [productos, setProductos] = useState([{}])
@@ -81,9 +112,20 @@ export default function ProformasView() {
         console.log(items_selected)
         
     }
+    const handleCantidad = (event,_data)=>{
+        let aux_data =  JSON.parse(JSON.stringify(productos));
+        aux_data.map((item)=>{
+            if(item.id === _data.id){
+                aux_data['cantidad'] = event.target.value;
+            }
+        })
+        setProductos(aux_data)
+
+    }
     const abrirModalProductos = ()=>{
         const items_formated = allItems.current.map((item)=>{
-            item['select']= false
+            item['select']= false;
+            item['cantidad'] = 1;
             return item;
         });
         allItems.current = items_formated
@@ -111,9 +153,13 @@ export default function ProformasView() {
     const agregarProductos =()=>{
         const seleccionados = allItems.current.filter(item => item['select'] === true);
         setProductos(seleccionados)
-    }
-    const eliminarProducto = async (item) => {
-
+        setModalProducto(false)
+        }
+    const eliminarProducto = async (_data) => {
+        console.log(_data)
+        let aux_data =  JSON.parse(JSON.stringify(productos));
+        let datos_filtrados = aux_data.filter(item=> item.id !== _data.id);
+        setProductos(datos_filtrados);
     }
     const getData = () => {
         const q = query(collection(db, "productos"));
@@ -252,6 +298,8 @@ export default function ProformasView() {
                                                         id="filled-adornment-password"
                                                         type="number"
                                                         size="small"
+                                                        onChange={(event)=>{handleCantidad(event,row)}}
+                                                        value={row.cantidad}
                                                         sx={{width:60}}
                                                     />
                                                     </TableCell>
@@ -289,6 +337,69 @@ export default function ProformasView() {
                             onPageChange={handleChangePage}
                             onRowsPerPageChange={handleChangeRowsPerPage}
                         />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <TableContainer component={Paper}>
+                            <Table  aria-label="customized table">
+                                <TableHead>
+                                    <TableRow>
+                                        <StyledTableCell>Nombre</StyledTableCell>
+                                        <StyledTableCell align="left">Valor</StyledTableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    <StyledTableRow >
+                                        <StyledTableCell align="left">Direccion</StyledTableCell>
+                                        <StyledTableCell align="left">Av Turuhuayco y Juan Estrobel</StyledTableCell>
+                                    </StyledTableRow>
+                                    <StyledTableRow >
+                                        <StyledTableCell align="left">Teléfonos</StyledTableCell>
+                                        <StyledTableCell align="left">0939117412</StyledTableCell>
+                                    </StyledTableRow>
+                                    <StyledTableRow >
+                                        <StyledTableCell align="left">Email</StyledTableCell>
+                                        <StyledTableCell align="left">david.diaz190799@gmail.com</StyledTableCell>
+                                    </StyledTableRow>
+                                    <StyledTableRow >
+                                        <StyledTableCell align="left">Observaciones</StyledTableCell>
+                                        <StyledTableCell align="left">Es uno de los empresarios mas influyentes de la epoca.</StyledTableCell>
+                                    </StyledTableRow>
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Grid>
+                    <Grid item xs={12} md={1}>
+                    </Grid>
+                    <Grid item xs={12} md={4.5}>
+                        <Stack spacing={1}>
+                            <div className="proforma-item">
+                                 <p className="proforma-item-p" >Subtotal sin impuestos: $1200</p>
+                            </div>
+                            <div className="proforma-item">
+                                 <p className="proforma-item-p" >Subtotal IVA: $84.00</p>
+                            </div>
+                            <div className="proforma-item">
+                                 <p className="proforma-item-p" >Subtotal 0%: $0.00</p>
+                            </div>
+                            <div className="proforma-item">
+                                 <p className="proforma-item-p" >Subtotal no objeto de IVA: $0.00</p>
+                            </div>
+                            <div className="proforma-item">
+                                 <p className="proforma-item-p" >Total descuento: $0.00</p>
+                            </div>
+                            <div className="proforma-item">
+                                 <p className="proforma-item-p" >ICE: $0.00</p>
+                            </div>
+                            <div className="proforma-item">
+                                 <p className="proforma-item-p" >IVA: $10.08</p>
+                            </div>
+                            <div className="proforma-total">
+                                 <p className="proforma-total-p" >10.08</p>
+                            </div>
+                        </Stack>
+
+                    </Grid>
+                    <Grid item xs={12} md={0.5}>
                     </Grid>
                 </Grid>
             </Container>
