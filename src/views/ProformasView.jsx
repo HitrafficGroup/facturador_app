@@ -79,6 +79,7 @@ export default function ProformasView() {
     const [total,setTotal] = useState(0.00);
     const [subZero,setSubZero] = useState(0.00);
     const [subNoIva,setSubNoIva] = useState(0.00);
+    const [subIva,setSubIva] = useState(0.00);
     const [ice,setIce] = useState(0.00)
     const allproducts = useRef([{}]);
     const allClientes = useRef([{}])
@@ -122,18 +123,74 @@ export default function ProformasView() {
         let aux_data =  JSON.parse(JSON.stringify(productos));
         aux_data.map((item)=>{
             if(item.id === _data.id){
-                aux_data['cantidad'] = event.target.value;
+                if(event.target.value > 1){
+                    item['cantidad'] = event.target.value;
+                }else{
+                    item['cantidad'] = 1;
+                }
+
             }
         })
+   
+        let aux_subtotal = 0.0
+        let aux_iva = 0.0
+        let const_iva = 0.12
+        let aux_zero = 0.0
+        let aux_noiva = 0.0
+        let aux_totaliva = 0.0
+        aux_data.forEach((item)=>{
+            aux_subtotal = (parseFloat(item.valor_unitario)*parseFloat(item['cantidad'])) + aux_subtotal
+            if(item.tarifa_iva === 1){
+                const_iva = 0.00
+                aux_zero = (parseFloat(item.valor_unitario)*parseFloat(item['cantidad'])) + aux_zero
+            }else if(item.tarifa_iva === 2){
+                const_iva = 0.12
+                aux_totaliva =  (parseFloat(item.valor_unitario)*parseFloat(item['cantidad'])) + aux_totaliva
+            }else if(item.tarifa_iva === 3){
+                const_iva = 0.00
+            }else if(item.tarifa_iva === 4){
+                const_iva = 0.00
+                aux_noiva = (parseFloat(item.valor_unitario)*parseFloat(item['cantidad'])) + aux_noiva
+            }else{
+                const_iva = 0.08
+                aux_totaliva =  (parseFloat(item.valor_unitario)*parseFloat(item['cantidad'])) + aux_totaliva
+            }
+            aux_iva = ((parseFloat(item.valor_unitario)*parseFloat(item['cantidad']))*const_iva) + aux_iva;
+            console.log(aux_iva)
+        })
+        setIva(aux_iva);
+        setSubTotal(aux_subtotal)
+        setSubZero(aux_zero)
+        setSubNoIva(aux_noiva)
+        setSubIva(aux_totaliva)
+        setTotal(aux_iva+aux_subtotal)
+
         setProductos(aux_data)
 
     }
     const abrirModalProductos = ()=>{
-        const items_formated = allItems.current.map((item)=>{
-            item['select']= false;
-            item['cantidad'] = 1;
-            return item;
-        });
+        let items_formated = []
+        if(productos.length === 0){
+
+             items_formated = allItems.current.map((item)=>{
+                item['select']= false;
+                item['cantidad'] = 1;
+                return item;
+            });
+        }else{
+            items_formated = allItems.current.map((item)=>{
+                let aux_target = productos.filter(param => param.id === item.id)
+                if(aux_target.length === 1){
+                    item['select']= true;
+                    item['cantidad'] = 1;
+                }else{
+                    item['select']= false;
+                    item['cantidad'] = 1;
+                }
+              
+                return item;
+            });
+        }
         allItems.current = items_formated
 
         setItems(items_formated)
@@ -160,9 +217,10 @@ export default function ProformasView() {
         const seleccionados = allItems.current.filter(item => item['select'] === true);
         let aux_subtotal = 0.0
         let aux_iva = 0.0
-        let const_iva = 12.00
+        let const_iva = 0.12
         let aux_zero = 0.0
         let aux_noiva = 0.0
+        let aux_totaliva = 0.0
         seleccionados.forEach((item)=>{
             aux_subtotal = parseFloat(item.valor_unitario) + aux_subtotal
             if(item.tarifa_iva === 1){
@@ -170,27 +228,66 @@ export default function ProformasView() {
                 aux_zero = parseFloat(item.valor_unitario) + aux_zero
             }else if(item.tarifa_iva === 2){
                 const_iva = 0.12
+                aux_totaliva =  parseFloat(item.valor_unitario) + aux_totaliva
             }else if(item.tarifa_iva === 3){
                 const_iva = 0.00
-            }
-            else if(item.tarifa_iva === 4){
+            }else if(item.tarifa_iva === 4){
                 const_iva = 0.00
                 aux_noiva = parseFloat(item.valor_unitario) + aux_noiva
             }else{
                 const_iva = 0.08
+                aux_totaliva =  parseFloat(item.valor_unitario) + aux_totaliva
             }
-            aux_iva += (parseFloat(item.valor_unitario)*const_iva) + aux_iva;
+            aux_iva = (parseFloat(item.valor_unitario)*const_iva) + aux_iva;
+            console.log(aux_iva)
         })
         setIva(aux_iva);
         setSubTotal(aux_subtotal)
+        setSubZero(aux_zero)
+        setSubNoIva(aux_noiva)
+        setSubIva(aux_totaliva)
         setTotal(aux_iva+aux_subtotal)
         setProductos(seleccionados)
         setModalProducto(false)
+        
         }
     const eliminarProducto = async (_data) => {
         console.log(_data)
         let aux_data =  JSON.parse(JSON.stringify(productos));
         let datos_filtrados = aux_data.filter(item=> item.id !== _data.id);
+        let aux_subtotal = 0.0
+        let aux_iva = 0.0
+        let const_iva = 0.12
+        let aux_zero = 0.0
+        let aux_noiva = 0.0
+        let aux_totaliva = 0.0
+        datos_filtrados.forEach((item)=>{
+            aux_subtotal = (parseFloat(item.valor_unitario)*parseFloat(item['cantidad'])) + aux_subtotal
+            if(item.tarifa_iva === 1){
+                const_iva = 0.00
+                aux_zero = (parseFloat(item.valor_unitario)*parseFloat(item['cantidad'])) + aux_zero
+            }else if(item.tarifa_iva === 2){
+                const_iva = 0.12
+                aux_totaliva =  (parseFloat(item.valor_unitario)*parseFloat(item['cantidad'])) + aux_totaliva
+            }else if(item.tarifa_iva === 3){
+                const_iva = 0.00
+            }else if(item.tarifa_iva === 4){
+                const_iva = 0.00
+                aux_noiva = (parseFloat(item.valor_unitario)*parseFloat(item['cantidad'])) + aux_noiva
+            }else{
+                const_iva = 0.08
+                aux_totaliva =  (parseFloat(item.valor_unitario)*parseFloat(item['cantidad'])) + aux_totaliva
+            }
+            aux_iva = ((parseFloat(item.valor_unitario)*parseFloat(item['cantidad']))*const_iva) + aux_iva;
+            console.log(aux_iva)
+        })
+        setIva(aux_iva);
+        setSubTotal(aux_subtotal)
+        setSubZero(aux_zero)
+        setSubNoIva(aux_noiva)
+        setSubIva(aux_totaliva)
+        setTotal(aux_iva+aux_subtotal)
+
         setProductos(datos_filtrados);
     }
     const getData = () => {
@@ -337,13 +434,13 @@ export default function ProformasView() {
                                                         {row.descripcion}
                                                     </TableCell>
                                                     <TableCell align={"center"}>
-                                                        {row.valor_unitario}
+                                                        {parseFloat(row.valor_unitario)}
                                                     </TableCell>
                                                     <TableCell align={"center"}>
                                                         {row.codigo_principal}
                                                     </TableCell>
                                                     <TableCell align={"center"}>
-                                                        {row.stock}
+                                                        {parseFloat(row.valor_unitario)*parseFloat(row.cantidad)}
                                                     </TableCell>
                                                     <TableCell align={"center"}>
                                                         <Stack direction="row" spacing={1}>
@@ -406,13 +503,13 @@ export default function ProformasView() {
                                  <p className="proforma-item-p" >Subtotal sin impuestos: ${subtotal}</p>
                             </div>
                             <div className="proforma-item">
-                                 <p className="proforma-item-p" >Subtotal IVA: ${subtotal}</p>
+                                 <p className="proforma-item-p" >Subtotal IVA: ${subIva}</p>
                             </div>
                             <div className="proforma-item">
-                                 <p className="proforma-item-p" >Subtotal 0%: $0.00</p>
+                                 <p className="proforma-item-p" >Subtotal 0%: ${subZero}</p>
                             </div>
                             <div className="proforma-item">
-                                 <p className="proforma-item-p" >Subtotal no objeto de IVA: $0.00</p>
+                                 <p className="proforma-item-p" >Subtotal no objeto de IVA: ${subNoIva}</p>
                             </div>
                             <div className="proforma-item">
                                  <p className="proforma-item-p" >Total descuento: $0.00</p>
