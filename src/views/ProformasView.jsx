@@ -74,10 +74,16 @@ export default function ProformasView() {
     const [busqueda, setBusqueda] = useState(false);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [clientes, setClientes] = useState([]);
-
+    const [subtotal,setSubTotal] = useState(0.00);
+    const [iva,setIva] = useState(0.00);
+    const [total,setTotal] = useState(0.00);
+    const [subZero,setSubZero] = useState(0.00);
+    const [subNoIva,setSubNoIva] = useState(0.00);
+    const [ice,setIce] = useState(0.00)
     const allproducts = useRef([{}]);
     const allClientes = useRef([{}])
     const allItems = useRef([{}])
+
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
     };
@@ -152,6 +158,32 @@ export default function ProformasView() {
 
     const agregarProductos =()=>{
         const seleccionados = allItems.current.filter(item => item['select'] === true);
+        let aux_subtotal = 0.0
+        let aux_iva = 0.0
+        let const_iva = 12.00
+        let aux_zero = 0.0
+        let aux_noiva = 0.0
+        seleccionados.forEach((item)=>{
+            aux_subtotal = parseFloat(item.valor_unitario) + aux_subtotal
+            if(item.tarifa_iva === 1){
+                const_iva = 0.00
+                aux_zero = parseFloat(item.valor_unitario) + aux_zero
+            }else if(item.tarifa_iva === 2){
+                const_iva = 0.12
+            }else if(item.tarifa_iva === 3){
+                const_iva = 0.00
+            }
+            else if(item.tarifa_iva === 4){
+                const_iva = 0.00
+                aux_noiva = parseFloat(item.valor_unitario) + aux_noiva
+            }else{
+                const_iva = 0.08
+            }
+            aux_iva += (parseFloat(item.valor_unitario)*const_iva) + aux_iva;
+        })
+        setIva(aux_iva);
+        setSubTotal(aux_subtotal)
+        setTotal(aux_iva+aux_subtotal)
         setProductos(seleccionados)
         setModalProducto(false)
         }
@@ -170,7 +202,6 @@ export default function ProformasView() {
             });
             setItems(products_aux);
             allItems.current = products_aux;
-
         });
 
         const q2 = query(collection(db, "clientes"));
@@ -181,7 +212,6 @@ export default function ProformasView() {
             });
             setClientes(clientes_aux);
             allClientes.current = clientes_aux;
-
         });
 
 
@@ -373,10 +403,10 @@ export default function ProformasView() {
                     <Grid item xs={12} md={4.5}>
                         <Stack spacing={1}>
                             <div className="proforma-item">
-                                 <p className="proforma-item-p" >Subtotal sin impuestos: $1200</p>
+                                 <p className="proforma-item-p" >Subtotal sin impuestos: ${subtotal}</p>
                             </div>
                             <div className="proforma-item">
-                                 <p className="proforma-item-p" >Subtotal IVA: $84.00</p>
+                                 <p className="proforma-item-p" >Subtotal IVA: ${subtotal}</p>
                             </div>
                             <div className="proforma-item">
                                  <p className="proforma-item-p" >Subtotal 0%: $0.00</p>
@@ -391,10 +421,10 @@ export default function ProformasView() {
                                  <p className="proforma-item-p" >ICE: $0.00</p>
                             </div>
                             <div className="proforma-item">
-                                 <p className="proforma-item-p" >IVA: $10.08</p>
+                                 <p className="proforma-item-p" >IVA: ${iva}</p>
                             </div>
                             <div className="proforma-total">
-                                 <p className="proforma-total-p" >10.08</p>
+                                 <p className="proforma-total-p" >${total}</p>
                             </div>
                         </Stack>
 
