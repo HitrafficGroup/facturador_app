@@ -25,55 +25,55 @@ const generarPdf = async(proforma) => {
         [
             { content: ``, styles: { halign: 'left',lineWidth:0 } },
             { content: 'SUBTOTAL IVA',styles: { halign: 'left',cellWidth:40 ,fontSize:8 ,fontStyle:"bold"} },
-            { content: `12.40`, styles: { halign: 'left',cellWidth:20 ,fontSize:8 } },
+            { content: `${proforma.sub_iva}`, styles: { halign: 'left',cellWidth:20 ,fontSize:8 } },
         ],
         [
             { content: ``, styles: { halign: 'left',lineWidth:0  } },
             { content: 'SUBTOTAL 0%',styles: { halign: 'left',cellWidth:40 ,fontSize:8 ,fontStyle:"bold"} },
-            { content: `12.40`, styles: { halign: 'left',cellWidth:20,fontSize:8 } },
+            { content: `${proforma.sub_zero}`, styles: { halign: 'left',cellWidth:20,fontSize:8 } },
         ],
         [
             { content: ``, styles: { halign: 'left',lineWidth:0  } },
             { content: 'SUBTOTAL No sujeto IVA',styles: { halign: 'left',cellWidth:40 ,fontSize:8 ,fontStyle:"bold"} },
-            { content: `12.40`, styles: { halign: 'left',cellWidth:20 ,fontSize:8 } },
+            { content: `${proforma.sub_total}`, styles: { halign: 'left',cellWidth:20 ,fontSize:8 } },
         ],
         [
             { content: ``, styles: { halign: 'left',lineWidth:0  } },
             { content: 'SUBTOTAL SIN IMPUESTOS',styles: { halign: 'left',cellWidth:40 ,fontSize:8 ,fontStyle:"bold"} },
-            { content: `12.40`, styles: { halign: 'left',cellWidth:20 ,fontSize:8  } },
+            { content: `${proforma.sub_siniva}`, styles: { halign: 'left',cellWidth:20 ,fontSize:8  } },
         ],
         [
             { content: ``, styles: { halign: 'left',lineWidth:0  } },
             { content: 'DESCUENTO',styles: { halign: 'left',cellWidth:40 ,fontSize:8 ,fontStyle:"bold"} },
-            { content: `12.40`, styles: { halign: 'left',cellWidth:20,fontSize:8 } },
+            { content: `${proforma.descuento}`, styles: { halign: 'left',cellWidth:20,fontSize:8 } },
         ],
         [
             { content: ``, styles: { halign: 'left',lineWidth:0  } },
             { content: 'ICE',styles: { halign: 'left',cellWidth:40,fontSize:8 ,fontStyle:"bold"} },
-            { content: `12.40`, styles: { halign: 'left',cellWidth:20,fontSize:8  } },
+            { content: `${proforma.ice}`, styles: { halign: 'left',cellWidth:20,fontSize:8  } },
         ],
         [
             { content: ``, styles: { halign: 'left',lineWidth:0  } },
             { content: 'IVA',styles: { halign: 'left',cellWidth:40,fontSize:8 ,fontStyle:"bold"} },
-            { content: `12.40`, styles: { halign: 'left' ,cellWidth:20,fontSize:8 } },
+            { content: `${proforma.iva}`, styles: { halign: 'left' ,cellWidth:20,fontSize:8 } },
         ],
         [
             { content: ``, styles: { halign: 'left',lineWidth:0  } },
             { content: 'VALOR TOTAL',styles: { halign: 'left',cellWidth:40,fontSize:8 ,fontStyle:"bold"} },
-            { content: `12.40`, styles: { halign: 'left',cellWidth:20,fontSize:8  } },
+            { content: `${proforma.total}`, styles: { halign: 'left',cellWidth:20,fontSize:8  } },
         ],
     ]
 
     let datos_cliente  = [
         [
-            { content: 'Razon Social / Nombres y Apellidos:',styles: { halign: 'left',cellWidth:60} },
-            { content: `Joan David Encarnacion Diaz`,colSpan: 3, styles: { halign: 'left' } },
+            { content: 'Razon Social / Nombres y Apellidos:',styles: { halign: 'left',cellWidth:70,fontStyle:"bold"} },
+            { content: `${proforma.nombre}`,colSpan: 3, styles: { halign: 'left' } },
         ],
         [
-            { content: 'RUC / C.I.:', styles: { halign: 'left' } },
-            { content: `9999999999999`, styles: { halign: 'center' } },
-            { content: 'Fecha Emisión:', styles: { halign: 'left' } },
-            { content: '21/11/2023', styles: { halign: 'center' } },
+            { content: 'RUC / C.I.:', styles: { halign: 'left',fontStyle:"bold" } },
+            { content: `${proforma.ci}`, styles: { halign: 'center' } },
+            { content: 'Fecha Emisión:', styles: { halign: 'left',fontStyle:"bold" } },
+            { content: `${proforma.fecha}`, styles: { halign: 'center' } },
         ]
     ]
     

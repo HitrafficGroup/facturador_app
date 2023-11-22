@@ -46,8 +46,8 @@ export const items = [
     )
   },
   {
-    title: 'Ordenes de Pedido',
-    path: 'ordenes',
+    title: 'Facturar',
+    path: 'facturador',
     icon: (
       <SvgIcon fontSize="small">
         <PostAddIcon />

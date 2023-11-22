@@ -191,12 +191,29 @@ export default function ProformasView() {
                         precio_total:parseFloat(item.valor_unitario)*parseFloat(item.cantidad)
                     }
             })
+           
+            let fecha_formated = new Date(value)
+            var dia = fecha_formated.getDate();
+            var mes = fecha_formated.getMonth() + 1; // Los meses en JavaScript van de 0 a 11, por lo que sumamos 1
+            var año = fecha_formated.getFullYear();
+            var fechaFormateada = dia + '/' + mes + '/' + año;
             let proforma_data = {
                 products: products_formated,
                 profile: userState.profile,
-                profile_url: userState.profile_url,            
+                profile_url: userState.profile_url,  
+                nombre: currentCliente.nombre,
+                fecha: fechaFormateada,
+                sub_siniva:subNoIva,
+                sub_iva:subIva,
+                sub_total:subtotal,
+                sub_zero:subZero,
+                total:total,
+                iva:iva,
+                ci:currentCliente.ci,
+                descuento:0,
+                ice:0,
             }
-      
+            //console.log(fechaFormateada)
             generarPdf(proforma_data);
         }
 
@@ -290,14 +307,14 @@ export default function ProformasView() {
             aux_iva = (parseFloat(item.valor_unitario)*const_iva) + aux_iva;
             console.log(aux_iva)
         })
-        setIva(aux_iva);
-        setSubTotal(aux_subtotal)
-        setSubZero(aux_zero)
-        setSubNoIva(aux_noiva)
-        setSubIva(aux_totaliva)
-        setTotal(aux_iva+aux_subtotal)
-        setProductos(seleccionados)
-        setModalProducto(false)
+            setIva(aux_iva);
+            setSubTotal(aux_subtotal)
+            setSubZero(aux_zero)
+            setSubNoIva(aux_noiva)
+            setSubIva(aux_totaliva)
+            setTotal(aux_iva+aux_subtotal)
+            setProductos(seleccionados)
+            setModalProducto(false)
         
         }
     const eliminarProducto = async (_data) => {
@@ -360,7 +377,6 @@ export default function ProformasView() {
             allClientes.current = clientes_aux;
         });
       
-
     }
     const seleccionarEmpleado =(_data)=>{
         
