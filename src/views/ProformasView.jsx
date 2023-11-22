@@ -35,7 +35,7 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import { generarPdf } from "../scripts/generar-pdf";
-
+import { useSelector, useDispatch } from 'react-redux';
 
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -64,6 +64,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 
 export default function ProformasView() {
+    const userState = useSelector(state => state.auth);
     const [value, setValue] = useState(dayjs(new Date()));
     const [productos, setProductos] = useState([])
     const [modalCliente, setModalCliente] = useState(false);
@@ -177,22 +178,27 @@ export default function ProformasView() {
     }
 
     const generarProforma =()=>{
+
         let aux_productos =  JSON.parse(JSON.stringify(productos));
-        let products_formated = aux_productos.map((item)=>{
-            return {
-                    codigo:item.codigo_principal,
-                    descripcion:item.descripcion,
-                    cantidad:item.cantidad,
-                    precio_unitario:item.valor_unitario,
-                    descuento:0,
-                    precio_total:parseFloat(item.valor_unitario)*parseFloat(item.cantidad)
-                }
-        })
-        let proforma_data = {
-            products: products_formated,
+        if(aux_productos.length >0){
+            let products_formated = aux_productos.map((item)=>{
+                return {
+                        codigo:item.codigo_principal,
+                        descripcion:item.descripcion,
+                        cantidad:item.cantidad,
+                        precio_unitario:item.valor_unitario,
+                        descuento:0,
+                        precio_total:parseFloat(item.valor_unitario)*parseFloat(item.cantidad)
+                    }
+            })
+            let proforma_data = {
+                products: products_formated,
+                profile: userState.profile,
+                profile_url: userState.profile_url,            
+            }
+      
+            generarPdf(proforma_data);
         }
-     
-        generarPdf(proforma_data);
 
     }
 
@@ -225,7 +231,7 @@ export default function ProformasView() {
 
         setItems(items_formated)
         setModalProducto(true);
-        console.log(items_formated)
+   
     }
     const handleSearchClient = (event) => {
         let textoMinusculas = event.target.value.toLowerCase();

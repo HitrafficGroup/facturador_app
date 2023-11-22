@@ -1,9 +1,14 @@
 
-import { jsPDF } from "jspdf";
+import { jsPDF} from "jspdf";
 import autoTable from 'jspdf-autotable';
+import { getStorage, ref, getDownloadURL, getBlob } from "firebase/storage";
+import { db,storage } from "../firebase/firebase-config";
+import no_logo from "../assets/no_logo.webp";
 //import icono from "../assets/logo_arandano.png"
 
-const generarPdf = (proforma) => {
+
+
+const generarPdf = async(proforma) => {
 
     var doc = new jsPDF({
         orientation: "portrait",
@@ -15,54 +20,7 @@ const generarPdf = (proforma) => {
 
     doc.setLineWidth(0.5);
  
-    // autoTable(doc, {
-    //     theme: 'plain',
-    //     body: [
-    //         [{ content: 'ARANDANO COMPAÑÍA LIMITADA', styles: { halign: 'center', fontStyle: "bold", cellPadding: 0 } }],
-    //         [{ content: 'ROL DE PAGOS MENSUAL', styles: { halign: 'center', fontStyle: "bold", cellPadding: 0 } }],
-    //         [{ content: 'SEPTIEMBRE - 2023', styles: { halign: 'center', fontStyle: "bold", cellPadding: 0 } }],
-    //     ],
-    //     startY:5,a
-    // }
-    //)
 
-
-    // autoTable(doc, {
-    //     theme: 'plain',
-    //     body: encabezado,
-    //     startY:19
-    // })
-
-
-    // autoTable(doc, {
-    //     theme: 'plain',
-    //     body: dias_trabajados,
-    //     startY:39
-    // })
-
-
-    // autoTable(doc, {
-    //     styles: { lineColor: [0, 0, 0], lineWidth: 0.4,fontSize:9 },
-    //     theme: 'grid',
-    //     body: resumen_rol,
-    //     startY:53
-    // })
-
-    // autoTable(doc, {
-    //     styles: { lineColor: [0, 0, 0], lineWidth: 0.4 },
-    //     theme: 'grid',
-    //     body: [
-    //         [{ content: 'Los dias y horas suplementarias y extraordinarias corresponden a las efectivamente laboradas.', styles: { halign: 'center',  cellPadding: 0 } }]
-    //     ],
-    //     startY:120
-    // })
-
-    // autoTable(doc, {
-    //     styles: { lineColor: [0, 0, 0], lineWidth: 0.4 },
-    //     theme: 'grid',
-    //     body: firmas,
-    //     startY:126
-    // })
     let datos_factura = [
         [
             { content: ``, styles: { halign: 'left',lineWidth:0 } },
@@ -162,10 +120,54 @@ const generarPdf = (proforma) => {
        
     })
     doc.rect(25, 80, 160, 15); 
-    //doc.addImage(icono, 'JPEG', 160, 5, 30,12);
+    if(proforma.profile){
+      
+  
+       
+    const httpsReference = ref(storage, proforma.profile_url); 
+    await getDownloadURL(httpsReference)
+        .then((url) => {
+      
+            const img = new Image()
+            img.src = url
+            console.log("todo chato hasta aca")
+      
+          
+            doc.addImage(img, 'PNG', 24, 14, 60, 60);
+         
+        })
+        .catch((error) => {
+            // A full list of error codes is available at
+            // https://firebase.google.com/docs/storage/web/handle-errors
+            switch (error.code) {
+            case 'storage/object-not-found':
+                // File doesn't exist
+                break;
+            case 'storage/unauthorized':
+                // User doesn't have permission to access the object
+                break;
+            case 'storage/canceled':
+                // User canceled the upload
+                break;
 
+            // ...
+
+            case 'storage/unknown':
+                // Unknown error occurred, inspect the server response
+                break;
+            }
+            
+
+        });
+        
+    }else{
+        doc.addImage(no_logo, 'webp', 24, 14, 60,60);
+    }
+    
     doc.save(`proforma.pdf`);
 }
+
+
 
 
 export { generarPdf }

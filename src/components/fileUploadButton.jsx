@@ -10,7 +10,7 @@ const FileUploadButton = ({ onFileUpload }) => {
   return (
     <div className="file-upload-button">
       <input type="file" id="file-input" onChange={handleFileChange} />
-      <label htmlFor="file-input">Subir Imagen</label>
+      <label htmlFor="file-input">Subir Logo</label>
     </div>
   );
 };
