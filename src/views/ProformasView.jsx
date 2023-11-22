@@ -34,7 +34,7 @@ import Checkbox from '@mui/material/Checkbox';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
-
+import { generarPdf } from "../scripts/generar-pdf";
 
 
 
@@ -64,10 +64,16 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 
 export default function ProformasView() {
-    const [value, setValue] = useState(dayjs('2022-04-17'));
-    const [productos, setProductos] = useState([{}])
+    const [value, setValue] = useState(dayjs(new Date()));
+    const [productos, setProductos] = useState([])
     const [modalCliente, setModalCliente] = useState(false);
-    const [currentCliente, setCurrentCliente] = useState([{}]);
+    const [currentCliente, setCurrentCliente] = useState({
+        ci:"0000000000000",
+        correos:["----------"],
+        nombre:"----- ----- ----- ----",
+        phone:"00000000000",
+        direccion:"--------- ---- ----------"
+    });
     const [modalProducto, setModalProducto] = useState(false);
     const [items, setItems] = useState([{}]);
     const [page, setPage] = useState(0);
@@ -82,8 +88,9 @@ export default function ProformasView() {
     const [subIva,setSubIva] = useState(0.00);
     const [ice,setIce] = useState(0.00)
     const allproducts = useRef([{}]);
-    const allClientes = useRef([{}])
-    const allItems = useRef([{}])
+    const allClientes = useRef([{}]);
+    const allItems = useRef([{}]);
+
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -168,6 +175,29 @@ export default function ProformasView() {
         setProductos(aux_data)
 
     }
+
+    const generarProforma =()=>{
+        let aux_productos =  JSON.parse(JSON.stringify(productos));
+        let products_formated = aux_productos.map((item)=>{
+            return {
+                    codigo:item.codigo_principal,
+                    descripcion:item.descripcion,
+                    cantidad:item.cantidad,
+                    precio_unitario:item.valor_unitario,
+                    descuento:0,
+                    precio_total:parseFloat(item.valor_unitario)*parseFloat(item.cantidad)
+                }
+        })
+        let proforma_data = {
+            products: products_formated,
+        }
+     
+        generarPdf(proforma_data);
+
+    }
+
+
+
     const abrirModalProductos = ()=>{
         let items_formated = []
         if(productos.length === 0){
@@ -199,13 +229,26 @@ export default function ProformasView() {
     }
     const handleSearchClient = (event) => {
         let textoMinusculas = event.target.value.toLowerCase();
-        const filtrados = allClientes.current.filter((elemento) => {
-            // Convertir el nombre del elemento a minúsculas para la comparación
-            const nombreMinusculas = elemento.nombre.toLowerCase();
-
-            // Verificar si el nombre del elemento incluye el texto de búsqueda
-            return nombreMinusculas.includes(textoMinusculas);
-        });
+        let filtrados = []
+        if(busqueda){
+            
+            filtrados = allClientes.current.filter((elemento) => {
+                // Convertir el nombre del elemento a minúsculas para la comparación
+                const nombreMinusculas = elemento.nombre.toLowerCase();
+    
+                // Verificar si el nombre del elemento incluye el texto de búsqueda
+                return nombreMinusculas.includes(textoMinusculas);
+            });
+        }else{
+            filtrados = allClientes.current.filter((elemento) => {
+                // Convertir el nombre del elemento a minúsculas para la comparación
+                const cedula = elemento.ci;
+    
+                // Verificar si el nombre del elemento incluye el texto de búsqueda
+                return cedula.includes(textoMinusculas);
+            });
+        }
+       
 
         setClientes(filtrados);
     }
@@ -310,9 +353,13 @@ export default function ProformasView() {
             setClientes(clientes_aux);
             allClientes.current = clientes_aux;
         });
+      
 
-
-
+    }
+    const seleccionarEmpleado =(_data)=>{
+        
+        setCurrentCliente(_data)
+        setModalCliente(false)
     }
 
     useEffect(() => {
@@ -345,11 +392,11 @@ export default function ProformasView() {
                             <Stack direction="column" justifyContent={"space-between"} spacing={2}>
                                 <Button sx={{ width: 190 }} variant="contained" onClick={() => { setModalCliente(true) }}  >Buscar Cliente</Button>
                                 <Stack direction="row" spacing={2}>
-                                    <p ><strong>Cédula de Identidad</strong></p>  <p>1104595671</p>
+                                    <p ><strong>Cédula de Identidad:</strong></p>  <p>{currentCliente.ci}</p>
                                 </Stack>
                                 <Stack direction="row" spacing={2}>
                                     <p><strong>Nombres:</strong></p>
-                                    <p>Joan David Encarnacion Diaz</p>
+                                    <p>{currentCliente.nombre}</p>
                                 </Stack>
                             </Stack>
                         </div>
@@ -362,12 +409,11 @@ export default function ProformasView() {
                                 <Stack direction="row" spacing={2}>
                                     <strong>Doc.# :</strong> <p>001-001-000000001</p>
                                 </Stack>
-                                <Stack direction="row" alignItems={"center"} spacing={2}>
-                                    <strong style={{ margin: 0 }}>F. Emisión:</strong>
+                                <Stack direction="row" alignItems={"start"} spacing={2}>
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                                         <DemoContainer components={['DatePicker', 'DatePicker']}>
                                             <DatePicker
-                                                label="Controlled picker"
+                                                label="Fecha de Emision"
                                                 value={value}
                                                 onChange={(newValue) => setValue(newValue)}
                                             />
@@ -437,7 +483,7 @@ export default function ProformasView() {
                                                         {parseFloat(row.valor_unitario)}
                                                     </TableCell>
                                                     <TableCell align={"center"}>
-                                                        {row.codigo_principal}
+                                                        {0}%
                                                     </TableCell>
                                                     <TableCell align={"center"}>
                                                         {parseFloat(row.valor_unitario)*parseFloat(row.cantidad)}
@@ -477,19 +523,19 @@ export default function ProformasView() {
                                 <TableBody>
                                     <StyledTableRow >
                                         <StyledTableCell align="left">Direccion</StyledTableCell>
-                                        <StyledTableCell align="left">Av Turuhuayco y Juan Estrobel</StyledTableCell>
+                                        <StyledTableCell align="left">{currentCliente.direccion}</StyledTableCell>
                                     </StyledTableRow>
                                     <StyledTableRow >
                                         <StyledTableCell align="left">Teléfonos</StyledTableCell>
-                                        <StyledTableCell align="left">0939117412</StyledTableCell>
+                                        <StyledTableCell align="left">{currentCliente.phone}</StyledTableCell>
                                     </StyledTableRow>
                                     <StyledTableRow >
                                         <StyledTableCell align="left">Email</StyledTableCell>
-                                        <StyledTableCell align="left">david.diaz190799@gmail.com</StyledTableCell>
+                                        <StyledTableCell align="left">{currentCliente.correos[0]}</StyledTableCell>
                                     </StyledTableRow>
                                     <StyledTableRow >
                                         <StyledTableCell align="left">Observaciones</StyledTableCell>
-                                        <StyledTableCell align="left">Es uno de los empresarios mas influyentes de la epoca.</StyledTableCell>
+                                        <StyledTableCell align="left">Ninguna</StyledTableCell>
                                     </StyledTableRow>
                                 </TableBody>
                             </Table>
@@ -526,8 +572,23 @@ export default function ProformasView() {
                         </Stack>
 
                     </Grid>
+                   
                     <Grid item xs={12} md={0.5}>
+                    
                     </Grid>
+                    <Grid item xs={12} md={8}>
+                        
+                        </Grid>
+                        <Grid item xs={6} md={2}>
+                        <Button color="rojo" variant="contained" onClick={generarProforma} >
+                                Generar PDF
+                            </Button>
+                        </Grid>
+                        <Grid item xs={6} md={2}>
+                        <Button color="success" variant="contained" >
+                                Guardar Proforma
+                            </Button>
+                        </Grid>
                 </Grid>
             </Container>
             <Modal isOpen={modalProducto} size="lg" >
@@ -707,7 +768,7 @@ export default function ProformasView() {
                                                         </TableCell>
                                                         <TableCell align={"center"}>
                                                             <Stack direction="row" spacing={1}>
-                                                                <Button sx={{ width: 190 }} variant="contained" startIcon={<PanToolAltIcon />} >Seleccionar</Button>
+                                                                <Button sx={{ width: 190 }} variant="contained" startIcon={<PanToolAltIcon />} onClick={()=>{seleccionarEmpleado(row)}} >Seleccionar</Button>
                                                             </Stack>
                                                         </TableCell>
                                                     </TableRow>
