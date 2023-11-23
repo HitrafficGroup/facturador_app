@@ -22,20 +22,17 @@ import IconButton from '@mui/material/IconButton';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
 import FilledInput from '@mui/material/FilledInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import PanToolAltIcon from '@mui/icons-material/PanToolAlt';
-import AddIcon from '@mui/icons-material/Add';
 import Checkbox from '@mui/material/Checkbox';
-import ButtonGroup from '@mui/material/ButtonGroup';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import { generarPdf } from "../scripts/generar-pdf";
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector} from 'react-redux';
 
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -91,6 +88,11 @@ export default function ProformasView() {
     const allproducts = useRef([{}]);
     const allClientes = useRef([{}]);
     const allItems = useRef([{}]);
+    const [modalServicio,setModalServicio] = useState(false);
+    const [servicios,setServicios] = useState([]);
+    
+    const allservices = useRef([{}])
+    
 
 
     const handleChangePage = (event, newPage) => {
@@ -101,14 +103,22 @@ export default function ProformasView() {
         setRowsPerPage(+event.target.value);
         setPage(0);
     };
+    const servicioSeleccionado = (_data)=>{
+        let aux_servicios = allservices.current.map((item)=>{
+            if(item.id === _data.id){
+                item['select'] = !item['select']
+            }
+            return item;
+        })
+        allservices.current = aux_servicios;
+        setServicios(aux_servicios);
+        
+    };
 
     const handleSearchProduct = (event)=>{
         let textoMinusculas = event.target.value.toLowerCase();
         const filtrados = allItems.current.filter((elemento) => {
-            // Convertir el nombre del elemento a minúsculas para la comparación
             const nombreMinusculas = elemento.descripcion.toLowerCase();
-
-            // Verificar si el nombre del elemento incluye el texto de búsqueda
             return nombreMinusculas.includes(textoMinusculas);
         });
         setItems(filtrados);
@@ -124,7 +134,7 @@ export default function ProformasView() {
         })
         allItems.current = items_selected
         setItems(items_selected)
-        console.log(items_selected)
+       
         
     }
     const handleCantidad = (event,_data)=>{
@@ -136,7 +146,6 @@ export default function ProformasView() {
                 }else{
                     item['cantidad'] = 1;
                 }
-
             }
         })
    
@@ -175,6 +184,7 @@ export default function ProformasView() {
 
         setProductos(aux_data)
 
+
     }
 
     const generarProforma =()=>{
@@ -197,6 +207,7 @@ export default function ProformasView() {
             var mes = fecha_formated.getMonth() + 1; // Los meses en JavaScript van de 0 a 11, por lo que sumamos 1
             var año = fecha_formated.getFullYear();
             var fechaFormateada = dia + '/' + mes + '/' + año;
+            let contabilidad_txt = userState.contabilidad ?  "si":"no"
             let proforma_data = {
                 products: products_formated,
                 profile: userState.profile,
@@ -212,13 +223,44 @@ export default function ProformasView() {
                 ci:currentCliente.ci,
                 descuento:0,
                 ice:0,
+                matriz:userState.direcciones[0].direccion,
+                sucursal:userState.direcciones[0].direccion,
+                contabilidad: contabilidad_txt,
+                contribuyente_especial: "120231",
+                
             }
             //console.log(fechaFormateada)
             generarPdf(proforma_data);
         }
 
     }
+    const abrirModalServicios = ()=>{
+        let items_formated = []
+        if(productos.length === 0){
 
+            items_formated = allservices.current.map((item)=>{
+               item['select']= false;
+               item['cantidad'] = 1;
+               return item;
+           });
+       }else{
+           items_formated = allservices.current.map((item)=>{
+               let aux_target = productos.filter(param => param.id === item.id)
+               if(aux_target.length === 1){
+                   item['select']= true;
+                   item['cantidad'] = 1;
+               }else{
+                   item['select'] = false;
+                   item['cantidad'] = 1;
+               }
+             
+               return item;
+           });
+       }
+        setModalServicio(true);
+        setServicios(items_formated)
+
+    }
 
 
     const abrirModalProductos = ()=>{
@@ -254,20 +296,13 @@ export default function ProformasView() {
         let textoMinusculas = event.target.value.toLowerCase();
         let filtrados = []
         if(busqueda){
-            
             filtrados = allClientes.current.filter((elemento) => {
-                // Convertir el nombre del elemento a minúsculas para la comparación
                 const nombreMinusculas = elemento.nombre.toLowerCase();
-    
-                // Verificar si el nombre del elemento incluye el texto de búsqueda
                 return nombreMinusculas.includes(textoMinusculas);
             });
         }else{
             filtrados = allClientes.current.filter((elemento) => {
-                // Convertir el nombre del elemento a minúsculas para la comparación
                 const cedula = elemento.ci;
-    
-                // Verificar si el nombre del elemento incluye el texto de búsqueda
                 return cedula.includes(textoMinusculas);
             });
         }
@@ -281,13 +316,15 @@ export default function ProformasView() {
 
     const agregarProductos =()=>{
         const seleccionados = allItems.current.filter(item => item['select'] === true);
+        const servicios = allservices.current.filter(item => item['select'] === true);
+        const datos_unidos = seleccionados.concat(servicios)
         let aux_subtotal = 0.0
         let aux_iva = 0.0
         let const_iva = 0.12
         let aux_zero = 0.0
         let aux_noiva = 0.0
         let aux_totaliva = 0.0
-        seleccionados.forEach((item)=>{
+        datos_unidos.forEach((item)=>{
             aux_subtotal = parseFloat(item.valor_unitario) + aux_subtotal
             if(item.tarifa_iva === 1){
                 const_iva = 0.00
@@ -298,8 +335,8 @@ export default function ProformasView() {
             }else if(item.tarifa_iva === 3){
                 const_iva = 0.00
             }else if(item.tarifa_iva === 4){
-                const_iva = 0.00
-                aux_noiva = parseFloat(item.valor_unitario) + aux_noiva
+                const_iva = 0.00;
+                aux_noiva = parseFloat(item.valor_unitario) + aux_noiva;
             }else{
                 const_iva = 0.08
                 aux_totaliva =  parseFloat(item.valor_unitario) + aux_totaliva
@@ -308,17 +345,15 @@ export default function ProformasView() {
             console.log(aux_iva)
         })
             setIva(aux_iva);
-            setSubTotal(aux_subtotal)
-            setSubZero(aux_zero)
-            setSubNoIva(aux_noiva)
-            setSubIva(aux_totaliva)
-            setTotal(aux_iva+aux_subtotal)
-            setProductos(seleccionados)
-            setModalProducto(false)
-        
+            setSubTotal(aux_subtotal);
+            setSubZero(aux_zero);
+            setSubNoIva(aux_noiva);
+            setSubIva(aux_totaliva);
+            setTotal(aux_iva+aux_subtotal);
+            setProductos(datos_unidos);
+            setModalProducto(false);
         }
     const eliminarProducto = async (_data) => {
-        console.log(_data)
         let aux_data =  JSON.parse(JSON.stringify(productos));
         let datos_filtrados = aux_data.filter(item=> item.id !== _data.id);
         let aux_subtotal = 0.0
@@ -353,7 +388,6 @@ export default function ProformasView() {
         setSubNoIva(aux_noiva)
         setSubIva(aux_totaliva)
         setTotal(aux_iva+aux_subtotal)
-
         setProductos(datos_filtrados);
     }
     const getData = () => {
@@ -376,13 +410,62 @@ export default function ProformasView() {
             setClientes(clientes_aux);
             allClientes.current = clientes_aux;
         });
+        const q3 = query(collection(db,"servicios"))
+        onSnapshot(q3,(querySnapshot)=>{
+            const servicios_aux = [];
+            querySnapshot.forEach((doc)=> {
+                servicios_aux.push(doc.data());
+            })
+            setServicios(servicios_aux);
+            allservices.current = servicios_aux;
+        })
       
     }
     const seleccionarEmpleado =(_data)=>{
-        
         setCurrentCliente(_data)
         setModalCliente(false)
     }
+    const agregarServicios = ()=>{
+        let seleccionados = allItems.current.filter(item => item['select'] === true);
+        let servicios_seleccionado = allservices.current.filter(item => item['select'] === true);
+        let datos_unidos = seleccionados.concat(servicios_seleccionado);
+        let aux_subtotal = 0.0;
+        let aux_iva = 0.0;
+        let const_iva = 0.12;
+        let aux_zero = 0.0;
+        let aux_noiva = 0.0;
+        let aux_totaliva = 0.0;
+        datos_unidos.forEach((item)=>{
+            aux_subtotal = parseFloat(item.valor_unitario) + aux_subtotal;
+            if(item.tarifa_iva === 1){
+                const_iva = 0.00;
+                aux_zero = parseFloat(item.valor_unitario) + aux_zero;
+            }else if(item.tarifa_iva === 2){
+                const_iva = 0.12;
+                aux_totaliva =  parseFloat(item.valor_unitario) + aux_totaliva;
+            }else if(item.tarifa_iva === 3){
+                const_iva = 0.00; 
+                
+            }else if(item.tarifa_iva === 4){
+                const_iva = 0.00;
+                aux_noiva = parseFloat(item.valor_unitario) + aux_noiva;
+            }else{
+                const_iva = 0.08;
+                aux_totaliva =  parseFloat(item.valor_unitario) + aux_totaliva;
+            }
+            aux_iva = (parseFloat(item.valor_unitario)*const_iva) + aux_iva;
+        })
+        setIva(aux_iva);
+        setSubTotal(aux_subtotal);
+        setSubZero(aux_zero);
+        setSubNoIva(aux_noiva);
+        setSubIva(aux_totaliva);
+        setTotal(aux_iva+aux_subtotal);
+        setProductos(datos_unidos);
+        setModalServicio(false);
+    }
+
+    //const seleccionar
 
     useEffect(() => {
         getData();
@@ -448,8 +531,11 @@ export default function ProformasView() {
                     <Grid item xs={12} md={8}>
 
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} md={2}>
                         <Button sx={{ width: 190 }} variant="contained" onClick={() => { abrirModalProductos() }} >Agregar Producto</Button>
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                        <Button sx={{ width: 190 }} variant="contained" onClick={() => { abrirModalServicios() }} >Agregar Servicio</Button>
                     </Grid>
                     <Grid item xs={12} md={12}>
                         <TableContainer sx={{ maxHeight: 440 }}>
@@ -488,15 +574,15 @@ export default function ProformasView() {
                                                         {index + 1}
                                                     </TableCell>
                                                     <TableCell align={"center"}>
-                                                    <FilledInput
-                                                        hiddenLabel
-                                                        id="filled-adornment-password"
-                                                        type="number"
-                                                        size="small"
-                                                        onChange={(event)=>{handleCantidad(event,row)}}
-                                                        value={row.cantidad}
-                                                        sx={{width:60}}
-                                                    />
+                                                        <FilledInput
+                                                            hiddenLabel
+                                                            id="filled-adornment-password"
+                                                            type="number"
+                                                            size="small"
+                                                            onChange={(event)=>{handleCantidad(event,row)}}
+                                                            value={row.cantidad}
+                                                            sx={{width:60}}
+                                                        />
                                                     </TableCell>
                                                     <TableCell align={"left"}>
                                                         {row.descripcion}
@@ -815,6 +901,80 @@ export default function ProformasView() {
                     <Button color="secondary" onClick={() => { setModalCliente(false) }} >
                         Salir
                     </Button>
+                </ModalFooter>
+            </Modal>
+            <Modal isOpen={modalServicio} size="lg" >
+                <ModalHeader>Agregar Servicio</ModalHeader>
+                <ModalBody>
+                <Grid item xs={12}>
+                    <TableContainer sx={{ maxHeight: 440 }}>
+                        <Table stickyHeader aria-label="sticky table">
+                            <TableHead>
+                                <TableRow>
+                                        <TableCell align={'left'}>
+                                            Item
+                                        </TableCell>
+                                        <TableCell align={'center'}>
+                                            Descripcion
+                                        </TableCell>
+                                        <TableCell align={'center'}>
+                                            Precio
+                                        </TableCell>
+                                        <TableCell align={'left'}>
+
+                                        </TableCell>
+                                    </TableRow>
+                                    </TableHead>
+                            <TableBody>
+                                {servicios.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                            .map((row, index) => {
+                                                return (
+                                                    <TableRow hover role="checkbox" tabIndex={-1} key={index}>
+                                                        <TableCell align={"left"}>
+                                                            {index + 1}
+                                                        </TableCell>
+                                                        <TableCell align={"center"}>
+                                                            {row.descripcion}
+                                                        </TableCell>
+                                                        <TableCell align={"center"}>
+                                                            {row.valor_unitario}
+                                                        </TableCell>
+
+                                                        <TableCell align={"center"}>
+                                                            <Stack direction="row" spacing={1}>
+                                                                <Checkbox
+                                                                    checked={row['select']}
+                                                                    onClick={()=>{servicioSeleccionado(row)}}
+                                                                    inputProps={{ 'aria-label': 'controlled' }}
+                                                                />
+                                                            </Stack>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                );
+                                            })}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                            <TablePagination
+                                rowsPerPageOptions={[10, 25, 100]}
+                                component="div"
+                                count={items.length}
+                                rowsPerPage={rowsPerPage}
+                                page={page}
+                                onPageChange={handleChangePage}
+                                onRowsPerPageChange={handleChangeRowsPerPage}
+                            />
+                        </Grid>
+                </ModalBody>
+                <ModalFooter>
+                <Stack direction="row" spacing={2}>
+                        <Button color="primary" variant="contained" onClick={agregarServicios}>
+                            terminar seleccion
+                        </Button>
+                        <Button color="rojo" variant="contained" onClick={() => { setModalServicio(false) }} >
+                            Cancelar
+                        </Button>
+                    </Stack>
                 </ModalFooter>
             </Modal>
         </>

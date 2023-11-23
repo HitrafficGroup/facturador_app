@@ -87,8 +87,6 @@ export default function ProductosView() {
     const [value1, setValue1] = useState("");
     const [value2, setValue2] = useState("");
     const [value3, setValue3] = useState("");
-    
-
     const allproducts = useRef([{}]);
     const [currentProducto, setCurrentProducto] = useState({
         codigo_principal: "",
@@ -183,6 +181,7 @@ export default function ProductosView() {
     const handleActivo = (event) => {
         setActivo(event.target.value);
     };
+
     const abrirModalEditar = (item) => {
         setModalEditar(true);
         setCurrentProducto(item);
@@ -212,6 +211,7 @@ export default function ProductosView() {
             inventario: inventario,
             stock: stock,
             id: id,
+            producto:true,
         }
         await setDoc(doc(db, "productos", id), new_producto);
         dispatch(setLoading(false));
@@ -241,10 +241,8 @@ export default function ProductosView() {
     
         let textoMinusculas = event.target.value.toLowerCase();
         const filtrados = allproducts.current.filter((elemento) => {
-            // Convertir el nombre del elemento a minúsculas para la comparación
             const nombreMinusculas = elemento.descripcion.toLowerCase();
-        
-            // Verificar si el nombre del elemento incluye el texto de búsqueda
+
             return nombreMinusculas.includes(textoMinusculas);
           });
 
@@ -342,7 +340,6 @@ export default function ProductosView() {
                                         <TableCell align={'center'}>
                                             Descripcion
                                         </TableCell>
-                                      
                                         <TableCell align={'center'}>
                                             Valor
                                         </TableCell>
@@ -368,7 +365,6 @@ export default function ProductosView() {
                                                     <TableCell align={"center"}>
                                                         {row.descripcion}
                                                     </TableCell>
-                                                  
                                                     <TableCell align={"center"}>
                                                         {row.valor_unitario}
                                                     </TableCell>
@@ -566,6 +562,7 @@ export default function ProductosView() {
                                         onChange={(event) => {
                                             setValue1(event.target.value);
                                         }}
+                                        
                                     />
                                 </Grid>
                                 <Grid item xs={6}>
@@ -577,7 +574,6 @@ export default function ProductosView() {
                                         onChange={(event) => {
                                             setParam2(event.target.value);
                                         }}
-
                                     />
                                 </Grid>
                                 <Grid item xs={6}>
@@ -622,13 +618,13 @@ export default function ProductosView() {
                                 <Grid item md={4} xs={12}>
                                     <FormControl>
                                         <FormLabel id="demo-row-radio-buttons-group-label">Llevar Inventario?</FormLabel>
-                                        <RadioGroup
-                                            row
-                                            aria-labelledby="demo-row-radio-buttons-group-label"
-                                            name="row-radio-buttons-group"
-                                            value={inventario}
-                                            onChange={handleInventario}
-                                        >
+                                            <RadioGroup
+                                                row
+                                                aria-labelledby="demo-row-radio-buttons-group-label"
+                                                name="row-radio-buttons-group"
+                                                value={inventario}
+                                                onChange={handleInventario}
+                                            >
                                             <FormControlLabel value={true} control={<Radio />} label="Si" />
                                             <FormControlLabel value={false} control={<Radio />} label="No" />
                                         </RadioGroup>

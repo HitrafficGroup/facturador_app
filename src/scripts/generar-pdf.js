@@ -80,16 +80,16 @@ const generarPdf = async(proforma) => {
     doc.setLineWidth(0.5);
     doc.roundedRect(100, 18, 85, 57, 5, 5); 
     doc.setFontSize(12)
-    doc.text("RUC.: 1104595671001",103,24)
+    doc.text(`RUC.: ${proforma.ci}001`,103,24)
     doc.setFont("helvetica", "bold");
     doc.text("PROFORMA",103,34)
     doc.setFontSize(8)
     doc.text("No.: 001-001-000000002",103,40)
     doc.setFont("helvetica", "normal");
-    doc.text("Matriz: Av Turuhuayco y Juan Estrobel",103,47)
-    doc.text("Sucursal: Av Turuhuayco y Juan Estrobel",103,54)
-    doc.text("Contribuyente Especial Nro: -- ",103,61)
-    doc.text("OBLIGADO LLEVAR CONTABILIDAD: NO",103,68)
+    doc.text(`Matriz: ${proforma.matriz}`,103,47)
+    doc.text(`Sucursal: ${proforma.sucursal}`,103,54)
+    doc.text(`Contribuyente Especial Nro: ${proforma.contribuyente_especial}`,103,61)
+    doc.text(`OBLIGADO LLEVAR CONTABILIDAD: ${proforma.contabilidad}`,103,68)
     autoTable(doc, {
         theme: 'plain',
         body: datos_cliente,

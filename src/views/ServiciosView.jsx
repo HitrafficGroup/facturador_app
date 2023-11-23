@@ -680,6 +680,7 @@ const service_defect =   {
     activo:false,
     venta:false,
     compra:false,
+    producto:false,
     establecimiento:{direccion:""},
     categoria:"",
     param1:"",
