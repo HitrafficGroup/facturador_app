@@ -8,6 +8,11 @@ import ProformasView from "./ProformasView";
 import ConfigView from "./ConfigView";
 import ServiciosView from "./ServiciosView";
 import FacturarView from "./FacturarView";
+import TablaProformasView from "./TablaProformasView";
+import FilledInput from '@mui/material/FilledInput';
+import InputAdornment from '@mui/material/InputAdornment';
+import DeleteIcon from '@mui/icons-material/Delete';
+import IconButton from '@mui/material/IconButton';
 export default function DashboardView(){
 
 
@@ -23,6 +28,7 @@ export default function DashboardView(){
                             <Route path="/proformas"  element={<ProformasView />} />
                             <Route path="/facturador"  element={<FacturarView />} />
                             <Route path="/configuraciones"  element={<ConfigView />} />
+                            <Route path="/tablas_proformas" element={<TablaProformasView/>}  />
                         </Routes>
                     </SimpleBar>
                 </Layout>

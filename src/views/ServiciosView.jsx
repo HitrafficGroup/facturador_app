@@ -225,7 +225,7 @@ export default function ServiciosView(){
                                                             {row.valor_unitario}
                                                         </TableCell>
                                                         <TableCell align={"center"}>
-                                                            {row.codigo}
+                                                            {row.codigo_principal}
                                                         </TableCell>
                                                         <TableCell align={"center"}>
                                                             {row.establecimiento.direccion}
@@ -260,7 +260,7 @@ export default function ServiciosView(){
             </Container>
 
             <Modal isOpen={modalServicio} >
-                    <ModalHeader  >Registrar Servicio <ShoppingBagIcon /> </ModalHeader>
+                    <ModalHeader >Registrar Servicio<ShoppingBagIcon /> </ModalHeader>
                         <ModalBody>
                         <Box sx={{ width: '100%' }}>
                         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -275,8 +275,8 @@ export default function ServiciosView(){
                                     <TextField
                                         id="outlined-required"
                                         label="Código principal"
-                                        value={formService.codigo}
-                                        name="codigo"
+                                        value={formService.codigo_principal}
+                                        name="codigo_principal"
                                         onChange={handleFormService}
                                         fullWidth  
                                     />
@@ -438,12 +438,12 @@ export default function ServiciosView(){
                     </Box>
                         </ModalBody>
                     <ModalFooter>
-                    <Button color="primary" onClick={agregarServicio}>
-                        Agregar
-                    </Button>
-                    <Button color="secondary" onClick={() => { setModalServicio(false) }} >
-                        Cancelar
-                    </Button>
+                        <Button color="primary" onClick={agregarServicio}>
+                            Agregar
+                        </Button>
+                        <Button color="secondary" onClick={() => { setModalServicio(false) }} >
+                            Cancelar
+                        </Button>
                     </ModalFooter>
                 </Modal>
 
@@ -464,8 +464,8 @@ export default function ServiciosView(){
                                     <TextField
                                         id="outlined-required"
                                         label="Código principal"
-                                        value={formService.codigo}
-                                        name="codigo"
+                                        value={formService.codigo_principal}
+                                        name="codigo_principal"
                                         onChange={handleFormService}
                                         fullWidth  
                                     />
@@ -672,7 +672,7 @@ CustomTabPanel.propTypes = {
     value: PropTypes.number.isRequired,
 };
 const service_defect =   {
-    codigo:"",
+    codigo_principal:"",
     codigo_aux:"",
     descripcion:"",
     valor_unitario:0,

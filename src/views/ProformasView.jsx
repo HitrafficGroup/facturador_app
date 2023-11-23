@@ -32,8 +32,8 @@ import Checkbox from '@mui/material/Checkbox';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import { generarPdf } from "../scripts/generar-pdf";
-import { useSelector} from 'react-redux';
-
+import { useSelector,useDispatch} from 'react-redux';
+import { setLoading } from "../features/menu/menuSlice";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -90,7 +90,7 @@ export default function ProformasView() {
     const allItems = useRef([{}]);
     const [modalServicio,setModalServicio] = useState(false);
     const [servicios,setServicios] = useState([]);
-    
+    const dispatch = useDispatch();
     const allservices = useRef([{}])
     
 
@@ -188,7 +188,7 @@ export default function ProformasView() {
     }
 
     const generarProforma =()=>{
-
+        dispatch(setLoading(true));
         let aux_productos =  JSON.parse(JSON.stringify(productos));
         if(aux_productos.length >0){
             let products_formated = aux_productos.map((item)=>{
@@ -232,7 +232,7 @@ export default function ProformasView() {
             //console.log(fechaFormateada)
             generarPdf(proforma_data);
         }
-
+        dispatch(setLoading(false));
     }
     const abrirModalServicios = ()=>{
         let items_formated = []
@@ -324,26 +324,26 @@ export default function ProformasView() {
         let aux_zero = 0.0
         let aux_noiva = 0.0
         let aux_totaliva = 0.0
-        datos_unidos.forEach((item)=>{
-            aux_subtotal = parseFloat(item.valor_unitario) + aux_subtotal
-            if(item.tarifa_iva === 1){
-                const_iva = 0.00
-                aux_zero = parseFloat(item.valor_unitario) + aux_zero
-            }else if(item.tarifa_iva === 2){
-                const_iva = 0.12
-                aux_totaliva =  parseFloat(item.valor_unitario) + aux_totaliva
-            }else if(item.tarifa_iva === 3){
-                const_iva = 0.00
-            }else if(item.tarifa_iva === 4){
-                const_iva = 0.00;
-                aux_noiva = parseFloat(item.valor_unitario) + aux_noiva;
-            }else{
-                const_iva = 0.08
-                aux_totaliva =  parseFloat(item.valor_unitario) + aux_totaliva
-            }
-            aux_iva = (parseFloat(item.valor_unitario)*const_iva) + aux_iva;
-            console.log(aux_iva)
-        })
+            datos_unidos.forEach((item)=>{
+                aux_subtotal = parseFloat(item.valor_unitario) + aux_subtotal
+                if(item.tarifa_iva === 1){
+                    const_iva = 0.00
+                    aux_zero = parseFloat(item.valor_unitario) + aux_zero
+                }else if(item.tarifa_iva === 2){
+                    const_iva = 0.12
+                    aux_totaliva =  parseFloat(item.valor_unitario) + aux_totaliva
+                }else if(item.tarifa_iva === 3){
+                    const_iva = 0.00
+                }else if(item.tarifa_iva === 4){
+                    const_iva = 0.00;
+                    aux_noiva = parseFloat(item.valor_unitario) + aux_noiva;
+                }else{
+                    const_iva = 0.08
+                    aux_totaliva =  parseFloat(item.valor_unitario) + aux_totaliva
+                }
+                aux_iva = (parseFloat(item.valor_unitario)*const_iva) + aux_iva;
+                console.log(aux_iva)
+            })
             setIva(aux_iva);
             setSubTotal(aux_subtotal);
             setSubZero(aux_zero);
@@ -464,6 +464,60 @@ export default function ProformasView() {
         setProductos(datos_unidos);
         setModalServicio(false);
     }
+    const agregarProforma = async()=>{
+        dispatch(setLoading(true));
+        let aux_productos =  JSON.parse(JSON.stringify(productos));
+        if(aux_productos.length >0){
+            let products_formated = aux_productos.map((item)=>{
+                return {
+                        codigo:item.codigo_principal,
+                        descripcion:item.descripcion,
+                        cantidad:item.cantidad,
+                        precio_unitario:item.valor_unitario,
+                        descuento:0,
+                        precio_total:parseFloat(item.valor_unitario)*parseFloat(item.cantidad)
+                    }
+            })
+           
+            let fecha_formated = new Date(value)
+            var dia = fecha_formated.getDate();
+            var mes = fecha_formated.getMonth() + 1; // Los meses en JavaScript van de 0 a 11, por lo que sumamos 1
+            var año = fecha_formated.getFullYear();
+            var fechaFormateada = dia + '/' + mes + '/' + año;
+            let contabilidad_txt = userState.contabilidad ?  "si":"no"
+            let proforma_data = {
+                products: products_formated,
+                profile: userState.profile,
+                profile_url: userState.profile_url,  
+                nombre: currentCliente.nombre,
+                fecha: fechaFormateada,
+                sub_siniva:subNoIva,
+                sub_iva:subIva,
+                sub_total:subtotal,
+                sub_zero:subZero,
+                total:total,
+                iva:iva,
+                ci:currentCliente.ci,
+                descuento:0,
+                ice:0,
+                matriz:userState.direcciones[0].direccion,
+                sucursal:userState.direcciones[0].direccion,
+                contabilidad: contabilidad_txt,
+                contribuyente_especial: "120231",
+                
+            }
+        }
+        //await setDoc(doc(db, "proformas", id), proforma_data);
+        setProductos([]);
+        setCurrentCliente({
+            ci:"0000000000000",
+            correos:["----------"],
+            nombre:"----- ----- ----- ----",
+            phone:"00000000000",
+            direccion:"--------- ---- ----------"
+        });
+        dispatch(setLoading(false));
+    }
 
     //const seleccionar
 
@@ -492,7 +546,6 @@ export default function ProformasView() {
 
                     </Grid>
                     <Grid item xs={12} md={6}>
-
                         <div className="proforma-info">
                             <Stack direction="column" justifyContent={"space-between"} spacing={2}>
                                 <Button sx={{ width: 190 }} variant="contained" onClick={() => { setModalCliente(true) }}  >Buscar Cliente</Button>
@@ -505,8 +558,6 @@ export default function ProformasView() {
                                 </Stack>
                             </Stack>
                         </div>
-
-
                     </Grid>
                     <Grid item xs={12} md={6}>
                         <div className="proforma-info">
@@ -582,6 +633,7 @@ export default function ProformasView() {
                                                             onChange={(event)=>{handleCantidad(event,row)}}
                                                             value={row.cantidad}
                                                             sx={{width:60}}
+                                                            disabled={!row.producto}
                                                         />
                                                     </TableCell>
                                                     <TableCell align={"left"}>
