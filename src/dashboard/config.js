@@ -6,6 +6,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import SettingsIcon from '@mui/icons-material/Settings';
 import EngineeringIcon from '@mui/icons-material/Engineering';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 //
 
 export const items = [
@@ -42,6 +43,15 @@ export const items = [
     icon: (
       <SvgIcon fontSize="small">
         <DescriptionIcon />
+      </SvgIcon>
+    )
+  },
+  {
+    title: 'Tabla de Proformas',
+    path: 'tablas_proformas',
+    icon: (
+      <SvgIcon fontSize="small">
+        <ListAltIcon/>
       </SvgIcon>
     )
   },

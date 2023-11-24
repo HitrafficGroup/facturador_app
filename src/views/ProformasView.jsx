@@ -65,13 +65,15 @@ export default function ProformasView() {
     const [value, setValue] = useState(dayjs(new Date()));
     const [productos, setProductos] = useState([])
     const [modalCliente, setModalCliente] = useState(false);
-    const [currentCliente, setCurrentCliente] = useState({
-        ci:"0000000000000",
-        correos:["----------"],
-        nombre:"----- ----- ----- ----",
-        phone:"00000000000",
-        direccion:"--------- ---- ----------"
-    });
+    let consumidor_final = {
+        ci: 999999999999,
+        nombre:"CONSUMIDOR FINAL",
+        correos:[userState.email],
+        phone:userState.phone,
+        direccion:userState.direcciones[0].direccion
+    
+    }
+    const [currentCliente, setCurrentCliente] = useState(consumidor_final);
     const [modalProducto, setModalProducto] = useState(false);
     const [items, setItems] = useState([{}]);
     const [page, setPage] = useState(0);
@@ -93,7 +95,7 @@ export default function ProformasView() {
     const dispatch = useDispatch();
     const allservices = useRef([{}])
     
-
+  
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -1031,4 +1033,5 @@ export default function ProformasView() {
             </Modal>
         </>
     );
+
 }

@@ -29,6 +29,7 @@ export default function DashboardView(){
                             <Route path="/facturador"  element={<FacturarView />} />
                             <Route path="/configuraciones"  element={<ConfigView />} />
                             <Route path="/tablas_proformas" element={<TablaProformasView/>}  />
+                            
                         </Routes>
                     </SimpleBar>
                 </Layout>

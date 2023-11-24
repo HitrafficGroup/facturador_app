@@ -16,7 +16,7 @@ import FilledInput from '@mui/material/FilledInput';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 export default function TablaProformasView(){
-    const [proformas,setProformas] = useState();
+    const [proformas,setProformas] = useState([]);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const allProformas = useRef([{}]);
@@ -57,23 +57,23 @@ export default function TablaProformasView(){
                                     <Table stickyHeader aria-label="sticky table">
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell sx={{width:60}} align={'center'}>
-                                                    Item
+                                                <TableCell sx={{width:100}} align={'left'}>
+                                                    Emisión
                                                 </TableCell>
-                                                <TableCell  sx={{width:60}} align={'center'}>
-                                                    Cantidad
+                                                <TableCell  sx={{width:160}} align={'left'}>
+                                                    Número
                                                 </TableCell>
                                                 <TableCell align={'left'}>
-                                                    Detalle
+                                                    Valor
                                                 </TableCell>
-                                                <TableCell align={'center'}>
-                                                    Precio
+                                                <TableCell align={'left'}>
+                                                    NID Cliente
                                                 </TableCell>
-                                                <TableCell align={'center'}>
-                                                    Desc
+                                                <TableCell align={'left'}>
+                                                    Cliente
                                                 </TableCell>
-                                                <TableCell align={'center'}>
-                                                    Total
+                                                <TableCell align={'left'}>
+                                                    Estado
                                                 </TableCell>
                                                 <TableCell align={'left'}>
     
