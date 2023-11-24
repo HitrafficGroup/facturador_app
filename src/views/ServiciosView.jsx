@@ -146,6 +146,16 @@ export default function ServiciosView(){
                             Listado de servicios habilitados
                         </div>
                     </Grid>
+                    <Grid item xs={12}>
+                            <div className="proforma-container">
+                                <div>
+                                    <p className="proforma-titulo" style={{ margin: 0 }}> <strong>TABLAS DE SERVICIOS</strong></p>
+                                </div>
+                                <div>
+                                    <p style={{ margin: 0 }} className="proforma-datos">Joan David Encarnacion Diaz <strong>1104595671 .- MECDEVS SAS</strong> </p>
+                                </div>
+                            </div>
+                        </Grid>
                     <Grid item xs={6} md={3} >
                         <CardService value={totalServices} />
                     </Grid>

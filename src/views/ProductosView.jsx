@@ -79,7 +79,7 @@ export default function ProductosView() {
         codigo: 0,
         nombre: "NINGUNO"
     });
-
+    
     const [value, setValue] = useState(0);
     const [param1, setParam1] = useState("")
     const [param2, setParam2] = useState("");
@@ -268,6 +268,16 @@ export default function ProductosView() {
                             Listado de productos habilitados
                         </div>
                     </Grid>
+                    <Grid item xs={12}>
+                            <div className="proforma-container">
+                                <div>
+                                    <p className="proforma-titulo" style={{ margin: 0 }}> <strong>TABLAS DE PRODUCTOS</strong></p>
+                                </div>
+                                <div>
+                                    <p style={{ margin: 0 }} className="proforma-datos">Joan David Encarnacion Diaz <strong>1104595671 .- MECDEVS SAS</strong> </p>
+                                </div>
+                            </div>
+                        </Grid>
                     <Grid item md={3} xs={6}>
                         <CardProduct value={totalProducts} />
                     </Grid>

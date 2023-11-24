@@ -34,6 +34,7 @@ import Paper from '@mui/material/Paper';
 import { generarPdf } from "../scripts/generar-pdf";
 import { useSelector,useDispatch} from 'react-redux';
 import { setLoading } from "../features/menu/menuSlice";
+import { v4 as uuidv4 } from 'uuid';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -469,6 +470,8 @@ export default function ProformasView() {
     const agregarProforma = async()=>{
         dispatch(setLoading(true));
         let aux_productos =  JSON.parse(JSON.stringify(productos));
+        let proforma_data = {}
+        let id = uuidv4();
         if(aux_productos.length >0){
             let products_formated = aux_productos.map((item)=>{
                 return {
@@ -480,14 +483,14 @@ export default function ProformasView() {
                         precio_total:parseFloat(item.valor_unitario)*parseFloat(item.cantidad)
                     }
             })
-           
+         
             let fecha_formated = new Date(value)
             var dia = fecha_formated.getDate();
             var mes = fecha_formated.getMonth() + 1; // Los meses en JavaScript van de 0 a 11, por lo que sumamos 1
             var año = fecha_formated.getFullYear();
             var fechaFormateada = dia + '/' + mes + '/' + año;
             let contabilidad_txt = userState.contabilidad ?  "si":"no"
-            let proforma_data = {
+                proforma_data = {
                 products: products_formated,
                 profile: userState.profile,
                 profile_url: userState.profile_url,  
@@ -506,18 +509,15 @@ export default function ProformasView() {
                 sucursal:userState.direcciones[0].direccion,
                 contabilidad: contabilidad_txt,
                 contribuyente_especial: "120231",
+                estado:"pendiente",
+                id:id,
+                numero_proforma:"001-001-000000001"
                 
             }
         }
-        //await setDoc(doc(db, "proformas", id), proforma_data);
+        await setDoc(doc(db, "proformas", id), proforma_data);
         setProductos([]);
-        setCurrentCliente({
-            ci:"0000000000000",
-            correos:["----------"],
-            nombre:"----- ----- ----- ----",
-            phone:"00000000000",
-            direccion:"--------- ---- ----------"
-        });
+        setCurrentCliente(consumidor_final);
         dispatch(setLoading(false));
     }
 
@@ -627,7 +627,7 @@ export default function ProformasView() {
                                                         {index + 1}
                                                     </TableCell>
                                                     <TableCell align={"center"}>
-                                                        <FilledInput
+                                                        {<FilledInput
                                                             hiddenLabel
                                                             id="filled-adornment-password"
                                                             type="number"
@@ -636,7 +636,7 @@ export default function ProformasView() {
                                                             value={row.cantidad}
                                                             sx={{width:60}}
                                                             disabled={!row.producto}
-                                                        />
+                                                        />}
                                                     </TableCell>
                                                     <TableCell align={"left"}>
                                                         {row.descripcion}
@@ -747,7 +747,7 @@ export default function ProformasView() {
                             </Button>
                         </Grid>
                         <Grid item xs={6} md={2}>
-                        <Button color="success" variant="contained" >
+                        <Button color="success" variant="contained" onClick={agregarProforma} >
                                 Guardar Proforma
                             </Button>
                         </Grid>

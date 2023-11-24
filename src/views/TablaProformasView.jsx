@@ -11,14 +11,17 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import { collection, query, onSnapshot, doc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { db } from "../firebase/firebase-config";
 import FilledInput from '@mui/material/FilledInput';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
+import SettingsIcon from '@mui/icons-material/Settings';
 export default function TablaProformasView(){
     const [proformas,setProformas] = useState([]);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [modalProforma,setModalProforma] = useState(false);
     const allProformas = useRef([{}]);
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -53,6 +56,16 @@ export default function TablaProformasView(){
                 <Container maxWidth="xl">
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
+                            <div className="proforma-container">
+                                <div>
+                                    <p className="proforma-titulo" style={{ margin: 0 }}> <strong>TABLAS DE PROFORMAS</strong></p>
+                                </div>
+                                <div>
+                                    <p style={{ margin: 0 }} className="proforma-datos">Joan David Encarnacion Diaz <strong>1104595671 .- MECDEVS SAS</strong> </p>
+                                </div>
+                            </div>
+                        </Grid>
+                        <Grid item xs={12}>
                             <TableContainer sx={{ maxHeight: 440 }}>
                                     <Table stickyHeader aria-label="sticky table">
                                         <TableHead>
@@ -86,35 +99,30 @@ export default function TablaProformasView(){
                                                     return (
                                                         <TableRow hover role="checkbox" tabIndex={-1} key={index}>
                                                             <TableCell align={"center"}>
-                                                                {index + 1}
+                                                                {row.fecha}
                                                             </TableCell>
                                                             <TableCell align={"center"}>
-                                                                <FilledInput
-                                                                    hiddenLabel
-                                                                    id="filled-adornment-password"
-                                                                    type="number"
-                                                                    size="small"
-                                                                    value={row.cantidad}
-                                                                    sx={{width:60}}
-                                                                    disabled={!row.producto}
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell align={"left"}>
-                                                                {row.descripcion}
+                                                               {row.numero_proforma}
                                                             </TableCell>
                                                             <TableCell align={"center"}>
-                                                                {parseFloat(row.valor_unitario)}
+                                                                {row.total}
                                                             </TableCell>
                                                             <TableCell align={"center"}>
-                                                                {0}%
+                                                                {row.ci}
                                                             </TableCell>
                                                             <TableCell align={"center"}>
-                                                                {parseFloat(row.valor_unitario)*parseFloat(row.cantidad)}
+                                                                {row.nombre}
+                                                            </TableCell>
+                                                            <TableCell align={"center"}>
+                                                                {row.estado}
                                                             </TableCell>
                                                             <TableCell align={"center"}>
                                                                 <Stack direction="row" spacing={1}>
                                                                     <IconButton aria-label="delete" color="rojo"  >
                                                                         <DeleteIcon />
+                                                                    </IconButton>
+                                                                    <IconButton aria-label="delete" color="gris"  >
+                                                                        <SettingsIcon />
                                                                     </IconButton>
                                                                 </Stack>
                                                             </TableCell>
@@ -136,6 +144,15 @@ export default function TablaProformasView(){
                         </Grid>
                     </Grid>
                     </Container>
+                    <Modal isOpen={modalProforma} >
+                        <ModalHeader>Registrar Nuevo Cliente</ModalHeader>
+                            <ModalBody>
+                                
+                            </ModalBody>
+                        <ModalFooter>
+                        </ModalFooter>
+                    </Modal>
+                   
         </>
     );
 }
