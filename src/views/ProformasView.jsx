@@ -34,6 +34,7 @@ import Paper from '@mui/material/Paper';
 import { generarPdf } from "../scripts/generar-pdf";
 import { useSelector,useDispatch} from 'react-redux';
 import { setLoading } from "../features/menu/menuSlice";
+import { updateNumberBill } from "../features/auth/userSlice";
 import { v4 as uuidv4 } from 'uuid';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -95,7 +96,7 @@ export default function ProformasView() {
     const [servicios,setServicios] = useState([]);
     const dispatch = useDispatch();
     const allservices = useRef([{}])
-    
+
   
 
     const handleChangePage = (event, newPage) => {
@@ -190,9 +191,10 @@ export default function ProformasView() {
 
     }
 
-    const generarProforma =()=>{
+    const generarProformaPdf =()=>{
         dispatch(setLoading(true));
         let aux_productos =  JSON.parse(JSON.stringify(productos));
+        let number_proforma =  `${userState.bill_code1}-${userState.bill_code2}-${userState.bill_code3}`
         if(aux_productos.length >0){
             let products_formated = aux_productos.map((item)=>{
                 return {
@@ -230,9 +232,10 @@ export default function ProformasView() {
                 sucursal:userState.direcciones[0].direccion,
                 contabilidad: contabilidad_txt,
                 contribuyente_especial: "120231",
+                numero_proforma:number_proforma,
                 
             }
-            //console.log(fechaFormateada)
+          
             generarPdf(proforma_data);
         }
         dispatch(setLoading(false));
@@ -264,7 +267,17 @@ export default function ProformasView() {
         setServicios(items_formated)
 
     }
+    const incrementarContador = (str)=>{
 
+        let numero = parseInt(str, 10);
+
+        // Incrementar el número
+        numero++;
+      
+        // Convertir el número de nuevo a un string y añadir ceros a la izquierda
+        let nuevoStr = String(numero).padStart(str.length, '0');
+        return nuevoStr;
+    }
 
     const abrirModalProductos = ()=>{
         let items_formated = []
@@ -470,8 +483,10 @@ export default function ProformasView() {
     const agregarProforma = async()=>{
         dispatch(setLoading(true));
         let aux_productos =  JSON.parse(JSON.stringify(productos));
+        let user_copy = JSON.parse(JSON.stringify(userState))
         let proforma_data = {}
         let id = uuidv4();
+        const user_ref = doc(db, "usuarios", userState.id);
         if(aux_productos.length >0){
             let products_formated = aux_productos.map((item)=>{
                 return {
@@ -489,6 +504,7 @@ export default function ProformasView() {
             var mes = fecha_formated.getMonth() + 1; // Los meses en JavaScript van de 0 a 11, por lo que sumamos 1
             var año = fecha_formated.getFullYear();
             var fechaFormateada = dia + '/' + mes + '/' + año;
+            let number_proforma =  `${userState.bill_code1}-${userState.bill_code2}-${userState.bill_code3}`
             let contabilidad_txt = userState.contabilidad ?  "si":"no"
                 proforma_data = {
                 products: products_formated,
@@ -511,11 +527,15 @@ export default function ProformasView() {
                 contribuyente_especial: "120231",
                 estado:"pendiente",
                 id:id,
-                numero_proforma:"001-001-000000001"
+                numero_proforma:number_proforma,
                 
             }
         }
+        let new_code = incrementarContador(user_copy['bill_code3']);
+        user_copy['bill_code3'] = new_code;
         await setDoc(doc(db, "proformas", id), proforma_data);
+        dispatch(updateNumberBill(new_code))
+        await updateDoc(user_ref, user_copy);
         setProductos([]);
         setCurrentCliente(consumidor_final);
         dispatch(setLoading(false));
@@ -531,6 +551,10 @@ export default function ProformasView() {
         <>
             <Container maxWidth="xl">
                 <Grid container spacing={2}>
+                    {/* <Grid item xs={12}>
+                        <p>{billNumber}</p>
+                        <button onClick={incrementarContador}> click</button>
+                    </Grid> */}
                     <Grid item xs={12}>
                         <div className="header-dash">
                             Sistema de generacion de proformas.
@@ -565,7 +589,7 @@ export default function ProformasView() {
                         <div className="proforma-info">
                             <Stack direction="column" justifyContent={"space-between"} spacing={2}>
                                 <Stack direction="row" spacing={2}>
-                                    <strong>Doc.# :</strong> <p>001-001-000000001</p>
+                                    <strong>Doc.# :</strong> <p>{userState.bill_code1}-{userState.bill_code2}-{userState.bill_code3}</p>
                                 </Stack>
                                 <Stack direction="row" alignItems={"start"} spacing={2}>
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -627,7 +651,7 @@ export default function ProformasView() {
                                                         {index + 1}
                                                     </TableCell>
                                                     <TableCell align={"center"}>
-                                                        {<FilledInput
+                                                        <FilledInput
                                                             hiddenLabel
                                                             id="filled-adornment-password"
                                                             type="number"
@@ -636,7 +660,7 @@ export default function ProformasView() {
                                                             value={row.cantidad}
                                                             sx={{width:60}}
                                                             disabled={!row.producto}
-                                                        />}
+                                                        />
                                                     </TableCell>
                                                     <TableCell align={"left"}>
                                                         {row.descripcion}
@@ -742,7 +766,7 @@ export default function ProformasView() {
                         
                         </Grid>
                         <Grid item xs={6} md={2}>
-                        <Button color="rojo" variant="contained" onClick={generarProforma} >
+                        <Button color="rojo" variant="contained" onClick={generarProformaPdf} >
                                 Generar PDF
                             </Button>
                         </Grid>

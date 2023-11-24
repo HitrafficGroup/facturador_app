@@ -97,14 +97,30 @@ export default function LoginView(){
         }else{
         
             let new_user = {
+                email:email,
+                password:password,
+                phone:telefono,
                 razon:razon,
                 ruc:ruc,
-                password:password,
-                email:email,
                 tipo:tipo,
                 usuario:usuario,
-                phone:telefono,
-                id:""
+                id:"",
+                profile:false,
+                profile_url:'',
+                signature:false,
+                signature_url:'',
+                signature_name:'',
+                ciudad:'',
+                contabilidad:true,
+                factura:true,
+                direccion_ruc:'',
+                nombre_comercial:'',
+                direcciones:[],
+                firma_password:'',
+                categorias:[],
+                bill_code1:"001",
+                bill_code2:"001",
+                bill_code3:"000000001"
             }
             createUserWithEmailAndPassword(auth, email, password)
             .then(async(userCredential) => {

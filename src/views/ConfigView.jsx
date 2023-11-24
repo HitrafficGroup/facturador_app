@@ -2,14 +2,13 @@ import { useState, useEffect } from "react";
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import FilledInput from '@mui/material/FilledInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
 import PersonIcon from '@mui/icons-material/Person';
-import { collection, query, where, onSnapshot, doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import { db, storage } from "../firebase/firebase-config";
 import Button from '@mui/material/Button';
 import { useSelector } from 'react-redux';
@@ -23,7 +22,6 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
-import Select from '@mui/material/Select';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import DoneIcon from '@mui/icons-material/Done';
@@ -41,6 +39,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { setLoading } from "../features/menu/menuSlice";
+
 export default function ConfigView() {
     
     const [showPassword, setShowPassword] = useState(false);
@@ -57,7 +56,9 @@ export default function ConfigView() {
     const [nombreComercial,setNombreComercial]  = useState("");
     const [modalDireccion,setModalDireccion] = useState(false);
     const [codeDireccion,setCodeDireccion] = useState("");
-
+    const [code1,setCode1] = useState("001")
+    const [code2,setCode2] = useState("001")
+    const [code3,setCode3] = useState("000000001")
     const dispatch = useDispatch();
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event) => {
@@ -89,12 +90,12 @@ export default function ConfigView() {
         setFactura(userState.factura)
         setPassword(userState.firma_password)
         setDirecciones(userState.direcciones)
-
+        setCode1(userState.bill_code1)
+        setCode2(userState.bill_code2)
+        setCode3(userState.bill_code3)
     }
 
-    const handleFactura =(event)=>{
-        setFactura(event.target.value);
-    }
+
     const handleChangeContabilidad = (event) => {
         setContabilidad(event.target.value);
     };
@@ -115,7 +116,6 @@ export default function ConfigView() {
             });
             user_copy['profile'] = true
             user_copy['profile_url'] = url_profile
-            
         } 
         if (signatureFile !== null) {
             const spaceRef = ref(storage, `firmas/${signatureFile.name}`);
@@ -130,17 +130,16 @@ export default function ConfigView() {
             user_copy['signature_url'] = url_profile
             user_copy['signature_name'] = signatureFile.name
         } 
-        
         user_copy['contabilidad'] = contabilidad
         user_copy['ciudad'] = ciudad
         user_copy['direccion_ruc'] = direccionRuc
         user_copy['nombre_comercial'] = nombreComercial
         user_copy['factura'] = factura
         user_copy['firma_password'] = password
-
-        
+        user_copy['bill_code1'] = code1
+        user_copy['bill_code2'] = code2
+        user_copy['bill_code3'] = code3
         dispatch(setUser(user_copy));
-        console.log(user_copy)
         // Set the "capital" field of the city 'DC'
         await updateDoc(user_ref, user_copy);
         dispatch(setLoading(false));
@@ -151,12 +150,10 @@ export default function ConfigView() {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         setSignatureFile(file)
-
     };
 
 
     const handleFileUpload = (file) => {
-        // Aquí puedes manejar el archivo subido, por ejemplo, enviarlo a un servidor o realizar alguna operación con él.
         const url = URL.createObjectURL(file);
         setImagenURL(url);
         setProfileFile(file);
@@ -187,6 +184,7 @@ export default function ConfigView() {
   
     }
     useEffect(() => {
+        //dispatch(setLoading(false));
         getData();
     }, []);
     return (
@@ -306,8 +304,10 @@ export default function ConfigView() {
                     <Grid item xs={12}>
                         <h5 style={{ textAlign: 'left', color: '#6C737F' }}>Configuracion de facturacion</h5>
                     </Grid>
-                    <Grid item xs={12} >
-                        <Button variant="contained" onClick={abrirModalDirecciones}>Agregar Direccion</Button>
+                    <Grid item xs={12} md={9}>
+                    </Grid>
+                    <Grid item  xs={12} md={3} >
+                        <Button variant="contained" onClick={abrirModalDirecciones}>Agregar Dirección</Button>
                     </Grid>
                     <Grid item xs={12} >
                     <TableContainer >
@@ -332,7 +332,7 @@ export default function ConfigView() {
                         </TableContainer>
                     </Grid>
                    
-                    <Grid item xs={12} md={6}>
+                    {/* <Grid item xs={12} md={6}>
                         <FormControl fullWidth variant="filled">
                             <InputLabel htmlFor="filled-adornment-password">Ha emitido facturas?</InputLabel>
                             <Select
@@ -346,36 +346,22 @@ export default function ConfigView() {
                                 <MenuItem value={true}>  Si, He emitido facturas anteriormente.</MenuItem>
                             </Select>
                         </FormControl>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
+                    </Grid> */}
+                    <Grid item xs={12} md={4}>
+                    <h5 style={{textAlign:"left",color:'#6C737F'}}>Número de factura actual: </h5>
                         <Stack direction="row" alignItems={"center"} spacing={1}>
-                            <TextField
-                                id="outlined-password-input"
-                                label=""
-                                type="text"
-                                autoComplete="current-password"
-                                sx={{ width: 100 }}
-                            />
+                            <input type="text" id="fname" name="code_1" style={{width:40}} value={code1} onChange={(event)=>{setCode1(event.target.value)}} ></input>
                             <strong>-</strong>
-                            <TextField
-                                id="outlined-password-input"
-                                label=""
-                                type="text"
-                                autoComplete="current-password"
-                                sx={{ width: 100 }}
-                            />
+                            <input type="text" id="fname" name="code_2" style={{width:40}} value={code2} onChange={(event)=>{setCode2(event.target.value)}} ></input>
                             <strong>-</strong>
-                            <TextField
-                                id="outlined-password-input"
-                                label=""
-                                type="text"
-                                fullWidth
-                                autoComplete="current-password"
-                            />
+                            <input type="text" id="fname" name="code_3" style={{width:"100%"}} value={code3} onChange={(event)=>{setCode3(event.target.value)}} ></input>
                         </Stack>
                     </Grid>
+                    <Grid item xs={12} md={8}>
+
+                    </Grid>
                     <Grid item xs={12}>
-                        <h5 style={{ textAlign: 'left', color: '#6C737F', marginTop: 7 }}>Configuracion de la firma electronica</h5>
+                        <h5 style={{ textAlign: 'left', color: '#6C737F', marginTop: 7 }}>Configuración de la firma electronica</h5>
                     </Grid>
                     <Grid item xs={12}>
                         <Stack direction="column" spacing={3}>
@@ -499,10 +485,3 @@ export default function ConfigView() {
 
 
 
-
-
-
-
-
-
-//Bely2201828138

@@ -32,9 +32,11 @@ import Checkbox from '@mui/material/Checkbox';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import { generarPdf } from "../scripts/generar-pdf";
-import { useSelector} from 'react-redux';
-
-
+import { useSelector,useDispatch} from 'react-redux';
+import { setLoading } from "../features/menu/menuSlice";
+import { updateNumberBill } from "../features/auth/userSlice";
+import { v4 as uuidv4 } from 'uuid';
+import { generarFacturaPDF } from "../scripts/generar-factura";
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#6366F1",
@@ -65,18 +67,20 @@ export default function FacturasView() {
     const [value, setValue] = useState(dayjs(new Date()));
     const [productos, setProductos] = useState([])
     const [modalCliente, setModalCliente] = useState(false);
-    const [currentCliente, setCurrentCliente] = useState({
-        ci:"0000000000000",
-        correos:["----------"],
-        nombre:"----- ----- ----- ----",
-        phone:"00000000000",
-        direccion:"--------- ---- ----------"
-    });
+    let consumidor_final = {
+        ci: 999999999999,
+        nombre:"CONSUMIDOR FINAL",
+        correos:[userState.email],
+        phone:userState.phone,
+        direccion:userState.direcciones[0].direccion
+    
+    }
+    const [currentCliente, setCurrentCliente] = useState(consumidor_final);
     const [modalProducto, setModalProducto] = useState(false);
     const [items, setItems] = useState([{}]);
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
     const [busqueda, setBusqueda] = useState(false);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const [clientes, setClientes] = useState([]);
     const [subtotal,setSubTotal] = useState(0.00);
     const [iva,setIva] = useState(0.00);
@@ -90,10 +94,10 @@ export default function FacturasView() {
     const allItems = useRef([{}]);
     const [modalServicio,setModalServicio] = useState(false);
     const [servicios,setServicios] = useState([]);
-    
+    const dispatch = useDispatch();
     const allservices = useRef([{}])
-    
 
+  
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -187,9 +191,10 @@ export default function FacturasView() {
 
     }
 
-    const generarProforma =()=>{
-
+    const generarProformaPdf =()=>{
+        dispatch(setLoading(true));
         let aux_productos =  JSON.parse(JSON.stringify(productos));
+        let number_proforma =  `${userState.bill_code1}-${userState.bill_code2}-${userState.bill_code3}`
         if(aux_productos.length >0){
             let products_formated = aux_productos.map((item)=>{
                 return {
@@ -209,6 +214,7 @@ export default function FacturasView() {
             var fechaFormateada = dia + '/' + mes + '/' + año;
             let contabilidad_txt = userState.contabilidad ?  "si":"no"
             let proforma_data = {
+                nombre_facturador: userState.razon.toUpperCase(),
                 products: products_formated,
                 profile: userState.profile,
                 profile_url: userState.profile_url,  
@@ -227,12 +233,13 @@ export default function FacturasView() {
                 sucursal:userState.direcciones[0].direccion,
                 contabilidad: contabilidad_txt,
                 contribuyente_especial: "120231",
+                numero_proforma:number_proforma,
                 
             }
-            //console.log(fechaFormateada)
-            generarPdf(proforma_data);
+          
+            generarFacturaPDF(proforma_data);
         }
-
+        dispatch(setLoading(false));
     }
     const abrirModalServicios = ()=>{
         let items_formated = []
@@ -261,7 +268,17 @@ export default function FacturasView() {
         setServicios(items_formated)
 
     }
+    const incrementarContador = (str)=>{
 
+        let numero = parseInt(str, 10);
+
+        // Incrementar el número
+        numero++;
+      
+        // Convertir el número de nuevo a un string y añadir ceros a la izquierda
+        let nuevoStr = String(numero).padStart(str.length, '0');
+        return nuevoStr;
+    }
 
     const abrirModalProductos = ()=>{
         let items_formated = []
@@ -324,26 +341,26 @@ export default function FacturasView() {
         let aux_zero = 0.0
         let aux_noiva = 0.0
         let aux_totaliva = 0.0
-        datos_unidos.forEach((item)=>{
-            aux_subtotal = parseFloat(item.valor_unitario) + aux_subtotal
-            if(item.tarifa_iva === 1){
-                const_iva = 0.00
-                aux_zero = parseFloat(item.valor_unitario) + aux_zero
-            }else if(item.tarifa_iva === 2){
-                const_iva = 0.12
-                aux_totaliva =  parseFloat(item.valor_unitario) + aux_totaliva
-            }else if(item.tarifa_iva === 3){
-                const_iva = 0.00
-            }else if(item.tarifa_iva === 4){
-                const_iva = 0.00;
-                aux_noiva = parseFloat(item.valor_unitario) + aux_noiva;
-            }else{
-                const_iva = 0.08
-                aux_totaliva =  parseFloat(item.valor_unitario) + aux_totaliva
-            }
-            aux_iva = (parseFloat(item.valor_unitario)*const_iva) + aux_iva;
-            console.log(aux_iva)
-        })
+            datos_unidos.forEach((item)=>{
+                aux_subtotal = parseFloat(item.valor_unitario) + aux_subtotal
+                if(item.tarifa_iva === 1){
+                    const_iva = 0.00
+                    aux_zero = parseFloat(item.valor_unitario) + aux_zero
+                }else if(item.tarifa_iva === 2){
+                    const_iva = 0.12
+                    aux_totaliva =  parseFloat(item.valor_unitario) + aux_totaliva
+                }else if(item.tarifa_iva === 3){
+                    const_iva = 0.00
+                }else if(item.tarifa_iva === 4){
+                    const_iva = 0.00;
+                    aux_noiva = parseFloat(item.valor_unitario) + aux_noiva;
+                }else{
+                    const_iva = 0.08
+                    aux_totaliva =  parseFloat(item.valor_unitario) + aux_totaliva
+                }
+                aux_iva = (parseFloat(item.valor_unitario)*const_iva) + aux_iva;
+                console.log(aux_iva)
+            })
             setIva(aux_iva);
             setSubTotal(aux_subtotal);
             setSubZero(aux_zero);
@@ -464,6 +481,66 @@ export default function FacturasView() {
         setProductos(datos_unidos);
         setModalServicio(false);
     }
+    const agregarProforma = async()=>{
+        dispatch(setLoading(true));
+        let aux_productos =  JSON.parse(JSON.stringify(productos));
+        let user_copy = JSON.parse(JSON.stringify(userState))
+        let proforma_data = {}
+        let id = uuidv4();
+        const user_ref = doc(db, "usuarios", userState.id);
+        if(aux_productos.length >0){
+            let products_formated = aux_productos.map((item)=>{
+                return {
+                        codigo:item.codigo_principal,
+                        descripcion:item.descripcion,
+                        cantidad:item.cantidad,
+                        precio_unitario:item.valor_unitario,
+                        descuento:0,
+                        precio_total:parseFloat(item.valor_unitario)*parseFloat(item.cantidad)
+                    }
+            })
+         
+            let fecha_formated = new Date(value)
+            var dia = fecha_formated.getDate();
+            var mes = fecha_formated.getMonth() + 1; // Los meses en JavaScript van de 0 a 11, por lo que sumamos 1
+            var año = fecha_formated.getFullYear();
+            var fechaFormateada = dia + '/' + mes + '/' + año;
+            let number_proforma =  `${userState.bill_code1}-${userState.bill_code2}-${userState.bill_code3}`
+            let contabilidad_txt = userState.contabilidad ?  "si":"no"
+                proforma_data = {
+                products: products_formated,
+                profile: userState.profile,
+                profile_url: userState.profile_url,  
+                nombre: currentCliente.nombre,
+                fecha: fechaFormateada,
+                sub_siniva:subNoIva,
+                sub_iva:subIva,
+                sub_total:subtotal,
+                sub_zero:subZero,
+                total:total,
+                iva:iva,
+                ci:currentCliente.ci,
+                descuento:0,
+                ice:0,
+                matriz:userState.direcciones[0].direccion,
+                sucursal:userState.direcciones[0].direccion,
+                contabilidad: contabilidad_txt,
+                contribuyente_especial: "120231",
+                estado:"pendiente",
+                id:id,
+                numero_proforma:number_proforma,
+                
+            }
+        }
+        let new_code = incrementarContador(user_copy['bill_code3']);
+        user_copy['bill_code3'] = new_code;
+        await setDoc(doc(db, "proformas", id), proforma_data);
+        dispatch(updateNumberBill(new_code))
+        await updateDoc(user_ref, user_copy);
+        setProductos([]);
+        setCurrentCliente(consumidor_final);
+        dispatch(setLoading(false));
+    }
 
     //const seleccionar
 
@@ -475,15 +552,19 @@ export default function FacturasView() {
         <>
             <Container maxWidth="xl">
                 <Grid container spacing={2}>
+                    {/* <Grid item xs={12}>
+                        <p>{billNumber}</p>
+                        <button onClick={incrementarContador}> click</button>
+                    </Grid> */}
                     <Grid item xs={12}>
                         <div className="header-dash">
-                            Sistema de generacion de facturas.
+                            Sistema de generación de facturas.
                         </div>
                     </Grid>
                     <Grid item xs={12}>
                         <div className="proforma-container">
                             <div>
-                                <p className="proforma-titulo" style={{ margin: 0 }}> <strong>FACTURA</strong></p>
+                                <p className="proforma-titulo" style={{ margin: 0 }}> <strong>FACTURAS</strong></p>
                             </div>
                             <div>
                                 <p style={{ margin: 0 }} className="proforma-datos">Joan David Encarnacion Diaz <strong>1104595671 .- MECDEVS SAS</strong> </p>
@@ -509,7 +590,7 @@ export default function FacturasView() {
                         <div className="proforma-info">
                             <Stack direction="column" justifyContent={"space-between"} spacing={2}>
                                 <Stack direction="row" spacing={2}>
-                                    <strong>Doc.# :</strong> <p>001-001-000000001</p>
+                                    <strong>Doc.# :</strong> <p>{userState.bill_code1}-{userState.bill_code2}-{userState.bill_code3}</p>
                                 </Stack>
                                 <Stack direction="row" alignItems={"start"} spacing={2}>
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -686,12 +767,12 @@ export default function FacturasView() {
                         
                         </Grid>
                         <Grid item xs={6} md={2}>
-                        <Button color="rojo" variant="contained" onClick={generarProforma} >
+                        <Button color="rojo" variant="contained" onClick={generarProformaPdf} >
                                 Generar PDF
                             </Button>
                         </Grid>
                         <Grid item xs={6} md={2}>
-                        <Button color="success" variant="contained" >
+                        <Button color="success" variant="contained" onClick={agregarProforma} >
                                 Guardar Proforma
                             </Button>
                         </Grid>
@@ -977,4 +1058,5 @@ export default function FacturasView() {
             </Modal>
         </>
     );
+
 }

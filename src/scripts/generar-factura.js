@@ -8,7 +8,7 @@ import no_logo from "../assets/no_logo.webp";
 
 
 
-const generarPdf = async(proforma) => {
+const generarFacturaPDF = async(proforma) => {
 
     var doc = new jsPDF({
         orientation: "portrait",
@@ -78,22 +78,35 @@ const generarPdf = async(proforma) => {
     ]
     
     doc.setLineWidth(0.5);
-    doc.roundedRect(100, 18, 85, 57, 5, 5); 
+    // rectangulo izquierdo 
+    doc.roundedRect(25, 75, 75, 35, 5, 5); 
+    doc.setFontSize(7)
+    doc.text(`${proforma.nombre_facturador}`,28,80)
+    doc.text(`Matriz: ${proforma.matriz}`,28,86)
+    doc.text(`Sucursal: ${proforma.sucursal}`,28,92)
+    doc.text(`Contribuyente Especial Nro: ${proforma.contribuyente_especial}`,28,98)
+    doc.text(`OBLIGADO LLEVAR CONTABILIDAD: ${proforma.contabilidad}`,28,104)
+    //rectangulo derecho
+    doc.roundedRect(102, 18, 83, 92, 5, 5); 
     doc.setFontSize(12)
-    doc.text(`RUC.: ${proforma.ci}001`,103,24)
+    doc.text(`RUC.: ${proforma.ci}001`,105,24)
     doc.setFont("helvetica", "bold");
-    doc.text("PROFORMA",103,34)
+    doc.text("FACTURA",105,34)
     doc.setFontSize(8)
-    doc.text(`No.: ${proforma.numero_proforma}`,103,40)
+    doc.text(`No.: ${proforma.numero_proforma}`,105,40)
     doc.setFont("helvetica", "normal");
-    doc.text(`Matriz: ${proforma.matriz}`,103,47)
-    doc.text(`Sucursal: ${proforma.sucursal}`,103,54)
-    doc.text(`Contribuyente Especial Nro: ${proforma.contribuyente_especial}`,103,61)
-    doc.text(`OBLIGADO LLEVAR CONTABILIDAD: ${proforma.contabilidad}`,103,68)
+    doc.text(`NÚMERO DE AUTORIZACIÓN`,105,47)
+    doc.text(`00000000000000000000000000000000000000000`,105,52)
+    doc.text(`AMBIENTE: PRODUCCIÓN`,105,78)
+    doc.text(`EMISIÓN: NORMAL`,105,84)
+    doc.text(`CLAVE DE ACCESO`,105,90)
+
+    
+
     autoTable(doc, {
         theme: 'plain',
         body: datos_cliente,
-        startY:80,
+        startY:115,
         margin:25
     })
     autoTable(doc, {
@@ -116,58 +129,41 @@ const generarPdf = async(proforma) => {
         styles: { lineColor: [0, 0, 0], lineWidth: 0.3,fontSize:8 },
         theme: 'grid',
         body: datos_factura,
-        margin:25,
-       
+        margin:25
     })
-    doc.rect(25, 80, 160, 15); 
-    if(proforma.profile){
-      
-  
-       
-    const httpsReference = ref(storage, proforma.profile_url); 
-    await getDownloadURL(httpsReference)
-        .then((url) => {
-      
-            const img = new Image()
-            img.src = url
-            console.log("todo chato hasta aca")
-      
-          
-            doc.addImage(img, 'PNG', 24, 14, 60, 60);
-         
-        })
-        .catch((error) => {
-            // A full list of error codes is available at
-            // https://firebase.google.com/docs/storage/web/handle-errors
-            switch (error.code) {
-            case 'storage/object-not-found':
-                // File doesn't exist
-                break;
-            case 'storage/unauthorized':
-                // User doesn't have permission to access the object
-                break;
-            case 'storage/canceled':
-                // User canceled the upload
-                break;
+    doc.rect(25, 115,160,15); 
+    if(proforma.profile){     
+        const httpsReference = ref(storage, proforma.profile_url); 
+        await getDownloadURL(httpsReference)
+            .then((url) => {
+                const img = new Image()
+                img.src = url
+                console.log("todo chato hasta aca")
+                doc.addImage(img, 'PNG', 24, 14, 60, 60);
+            })
+            .catch((error) => {
+                switch (error.code) {
+                case 'storage/object-not-found':
+                    break;
+                case 'storage/unauthorized':
+                    break;
+                case 'storage/canceled':
+                    break;
+                case 'storage/unknown':
+                    break;
+                }
+                
 
-            // ...
-
-            case 'storage/unknown':
-                // Unknown error occurred, inspect the server response
-                break;
-            }
-            
-
-        });
+            });
         
     }else{
         doc.addImage(no_logo, 'webp', 24, 14, 60,60);
     }
     
-    doc.save(`proforma.pdf`);
+    doc.save(`factura_final.pdf`);
 }
 
 
 
 
-export { generarPdf }
+export { generarFacturaPDF }

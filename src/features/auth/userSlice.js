@@ -25,9 +25,10 @@ export const userSlice = createSlice({
         nombre_comercial:'',
         direcciones:[],
         firma_password:'',
-        categorias:[]
-
-
+        categorias:[],
+        bill_code1:"001",
+        bill_code2:"002",
+        bill_code3:"000000001"
     },
     reducers: {
         setUser: (state,action)=>{
@@ -52,12 +53,19 @@ export const userSlice = createSlice({
             state.firma_password = action.payload.firma_password;
             state.direcciones = action.payload.direcciones;
             state.categorias = action.payload.categorias;
+            state.bill_code1 = action.payload.bill_code1;
+            state.bill_code2 = action.payload.bill_code2;
+            state.bill_code3 = action.payload.bill_code3;
         },
         updateCategorias:(state,action)=>{
             state.categorias = action.payload;
+        },
+        updateNumberBill:(state,action)=>{
+     
+            state.bill_code3 = action.payload;
         }
         
     }
 })
-export const {setUser,updateCategorias} = userSlice.actions
+export const {setUser,updateCategorias,updateNumberBill} = userSlice.actions
 export default userSlice.reducer
