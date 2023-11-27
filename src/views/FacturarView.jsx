@@ -37,6 +37,9 @@ import { setLoading } from "../features/menu/menuSlice";
 import { updateNumberBill } from "../features/auth/userSlice";
 import { v4 as uuidv4 } from 'uuid';
 import { generarFacturaPDF } from "../scripts/generar-factura";
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#6366F1",
@@ -96,6 +99,7 @@ export default function FacturasView() {
     const [servicios,setServicios] = useState([]);
     const dispatch = useDispatch();
     const allservices = useRef([{}])
+    const [pago,setPago] = useState(1)
 
   
 
@@ -140,6 +144,9 @@ export default function FacturasView() {
         setItems(items_selected)
        
         
+    }
+    const handlePago = (event)=>{
+        setPago(event.target.value);
     }
     const handleCantidad = (event,_data)=>{
         let aux_data =  JSON.parse(JSON.stringify(productos));
@@ -606,7 +613,25 @@ export default function FacturasView() {
                             </Stack>
                         </div>
                     </Grid>
-                    <Grid item xs={12} md={8}>
+                    <Grid item xs={12} md={2}>
+                        <FormControl fullWidth variant="filled">
+                                        <InputLabel htmlFor="filled-adornment-password">Metodo de pago</InputLabel>
+                                            <Select
+                                                labelId="demo-simple-select-label"
+                                                value={pago}
+                                                
+                                                name="tipo_identificacion"
+                                                onChange={handlePago}
+                                                label="Tipo de Persona"
+                                            >
+                                                <MenuItem value={1}>EFECTIVO</MenuItem>
+                                                <MenuItem value={2}>TRANSFERENCIA</MenuItem>
+                                                <MenuItem value={3}>TARJETA DE CREDITO</MenuItem>
+                                                <MenuItem value={4}>TARJETA DE DEBITO</MenuItem>
+                                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
 
                     </Grid>
                     <Grid item xs={12} md={2}>

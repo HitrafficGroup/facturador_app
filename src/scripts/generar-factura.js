@@ -14,9 +14,6 @@ const generarFacturaPDF = async(proforma) => {
         orientation: "portrait",
     })
   
-   
-    let custom_padding = 0.5
-    
 
     doc.setLineWidth(0.5);
  
@@ -66,17 +63,69 @@ const generarFacturaPDF = async(proforma) => {
 
     let datos_cliente  = [
         [
-            { content: 'Razon Social / Nombres y Apellidos:',styles: { halign: 'left',cellWidth:70,fontStyle:"bold"} },
-            { content: `${proforma.nombre}`,colSpan: 3, styles: { halign: 'left' } },
+            { content: 'Razon Social / Nombres y Apellidos:',styles: { halign: 'left',cellWidth:70,fontStyle:"bold",lineColor:10,lineWidth:{top: 0.3, right: 0, bottom: 0, left: 0.3}}},
+            { content: `${proforma.nombre}`,colSpan: 3, styles: { halign: 'left',lineColor:10,lineWidth:{top: 0.3, right: 0.3, bottom: 0, left: 0} }},
         ],
         [
-            { content: 'RUC / C.I.:', styles: { halign: 'left',fontStyle:"bold" } },
-            { content: `${proforma.ci}`, styles: { halign: 'center' } },
-            { content: 'Fecha Emisión:', styles: { halign: 'left',fontStyle:"bold" } },
-            { content: `${proforma.fecha}`, styles: { halign: 'center' } },
+            { content: 'RUC / C.I.:', styles: { halign: 'left',fontStyle:"bold" ,lineColor:10,lineWidth:{top: 0, right: 0, bottom: 0.3, left: 0.3}  } },
+            { content: `${proforma.ci}`, styles: { halign: 'center',lineColor:10,lineWidth:{top: 0, right: 0, bottom: 0.3, left: 0} } },
+            { content: 'Fecha Emisión:', styles: { halign: 'left',fontStyle:"bold" ,lineColor:10,lineWidth:{top: 0, right: 0, bottom: 0.3, left: 0} } },
+            { content: `${proforma.fecha}`, styles: { halign: 'center' ,lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0.3, left: 0} } },
         ]
     ]
     
+    //
+    let detalles_adicionales  = [
+        [
+            { content: 'Informacion Adicional',colSpan: 2,styles: { halign: 'center',cellWidth:70,fontStyle:"bold",lineColor:10,lineWidth:{top: 0.3, right: 0.3, bottom: 0, left: 0.3}}},
+        ],
+        [
+            { content: 'Método de pago:', styles: { halign: 'left',fontStyle:"bold" ,lineColor:10,lineWidth:{top: 0, right: 0, bottom: 0, left: 0.3}} },
+            { content: `${proforma.ci}`, styles: { halign: 'center' ,lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0, left: 0}} },
+        ],
+        [
+            { content: 'Dirección:', styles: { halign: 'left',fontStyle:"bold", lineColor:10,lineWidth:{top: 0, right: 0, bottom: 0, left: 0.3} } },
+            { content: `${proforma.ci}`, styles: { halign: 'center' , lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0, left: 0} } },
+        ],
+        [
+            { content: 'Teléfonos:', styles: { halign: 'left',fontStyle:"bold", lineColor:10,lineWidth:{top: 0, right: 0, bottom: 0, left: 0.3}  } },
+            { content: `${proforma.ci}`, styles: { halign: 'center', lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0, left: 0}  } },
+        ],
+        [
+            { content: 'Email:', styles: { halign: 'left',fontStyle:"bold" , lineColor:10,lineWidth:{top: 0, right: 0, bottom: 0, left: 0.3} } },
+            { content: `${proforma.ci}`, styles: { halign: 'center', lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0, left: 0}  } },
+        ],
+        [
+            { content: 'Observaciones:', styles: { halign: 'left',fontStyle:"bold" , lineColor:10,lineWidth:{top: 0, right: 0, bottom: 0.3, left: 0.3}  } },
+            { content: `${proforma.ci}`, styles: { halign: 'center', lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0.3, left: 0}  } },
+        ]
+    ]
+ 
+    if(proforma.profile){     
+        const httpsReference = ref(storage, proforma.profile_url); 
+        await getDownloadURL(httpsReference)
+            .then((url) => {
+                const img = new Image();
+                img.src = url;
+                console.log("todo chato hasta aca");
+                doc.addImage(img, 'PNG', 24, 14, 60, 60);
+            })
+            .catch((error) => {
+                switch (error.code) {
+                case 'storage/object-not-found':
+                    break;
+                case 'storage/unauthorized':
+                    break;
+                case 'storage/canceled':
+                    break;
+                case 'storage/unknown':
+                    break;
+                }
+            });
+        
+    }else{
+        doc.addImage(no_logo, 'webp', 24, 14, 60,60);
+    }
     doc.setLineWidth(0.5);
     // rectangulo izquierdo 
     doc.roundedRect(25, 75, 75, 35, 5, 5); 
@@ -100,17 +149,15 @@ const generarFacturaPDF = async(proforma) => {
     doc.text(`AMBIENTE: PRODUCCIÓN`,105,78)
     doc.text(`EMISIÓN: NORMAL`,105,84)
     doc.text(`CLAVE DE ACCESO`,105,90)
-
-    
-
     autoTable(doc, {
         theme: 'plain',
         body: datos_cliente,
+        styles: { fontSize:7 },
+        margin:{ left: 25,right:25,top:0,bottom:0},
         startY:115,
-        margin:25
     })
     autoTable(doc, {
-        styles: { lineColor: [0, 0, 0], lineWidth: 0.3,fontSize:8 },
+        styles: { lineColor: [0, 0, 0], lineWidth: 0.3,fontSize:7 },
         theme: 'grid',
         headStyles:{fillColor:"white",textColor:"black"},
         columns: [
@@ -121,44 +168,25 @@ const generarFacturaPDF = async(proforma) => {
             { header: 'Descuento', dataKey: 'descuento'},
             { header: 'Precio Total', dataKey: 'precio_total'}
           ],
-        margin:25,
+        margin:{ left: 25,right:25,top:0,bottom:0},
         body: proforma.products,
     })
-
     autoTable(doc, {
-        styles: { lineColor: [0, 0, 0], lineWidth: 0.3,fontSize:8 },
+        styles: { lineColor: [0, 0, 0], lineWidth: 0.3,fontSize:7 },
         theme: 'grid',
         body: datos_factura,
-        margin:25
+        margin:{ left: 25,right:25,top:0,bottom:0},
+       
     })
-    doc.rect(25, 115,160,15); 
-    if(proforma.profile){     
-        const httpsReference = ref(storage, proforma.profile_url); 
-        await getDownloadURL(httpsReference)
-            .then((url) => {
-                const img = new Image()
-                img.src = url
-                console.log("todo chato hasta aca")
-                doc.addImage(img, 'PNG', 24, 14, 60, 60);
-            })
-            .catch((error) => {
-                switch (error.code) {
-                case 'storage/object-not-found':
-                    break;
-                case 'storage/unauthorized':
-                    break;
-                case 'storage/canceled':
-                    break;
-                case 'storage/unknown':
-                    break;
-                }
-                
+    autoTable(doc, {
+        styles: {fontSize:7 },
+        theme:"plain",
+        body: detalles_adicionales,
+        margin:{ left: 25,right:25,top:0,bottom:0},
+    })
 
-            });
-        
-    }else{
-        doc.addImage(no_logo, 'webp', 24, 14, 60,60);
-    }
+    
+   
     
     doc.save(`factura_final.pdf`);
 }

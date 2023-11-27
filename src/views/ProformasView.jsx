@@ -698,34 +698,7 @@ export default function ProformasView() {
                         />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                        <TableContainer component={Paper}>
-                            <Table  aria-label="customized table">
-                                <TableHead>
-                                    <TableRow>
-                                        <StyledTableCell>Nombre</StyledTableCell>
-                                        <StyledTableCell align="left">Valor</StyledTableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    <StyledTableRow >
-                                        <StyledTableCell align="left">Direccion</StyledTableCell>
-                                        <StyledTableCell align="left">{currentCliente.direccion}</StyledTableCell>
-                                    </StyledTableRow>
-                                    <StyledTableRow >
-                                        <StyledTableCell align="left">Teléfonos</StyledTableCell>
-                                        <StyledTableCell align="left">{currentCliente.phone}</StyledTableCell>
-                                    </StyledTableRow>
-                                    <StyledTableRow >
-                                        <StyledTableCell align="left">Email</StyledTableCell>
-                                        <StyledTableCell align="left">{currentCliente.correos[0]}</StyledTableCell>
-                                    </StyledTableRow>
-                                    <StyledTableRow >
-                                        <StyledTableCell align="left">Observaciones</StyledTableCell>
-                                        <StyledTableCell align="left">Ninguna</StyledTableCell>
-                                    </StyledTableRow>
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                       
                     </Grid>
                     <Grid item xs={12} md={1}>
                     </Grid>
