@@ -81,23 +81,23 @@ const generarFacturaPDF = async(proforma) => {
         ],
         [
             { content: 'Método de pago:', styles: { halign: 'left',fontStyle:"bold" ,lineColor:10,lineWidth:{top: 0, right: 0, bottom: 0, left: 0.3}} },
-            { content: `${proforma.ci}`, styles: { halign: 'center' ,lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0, left: 0}} },
+            { content: `${proforma.metodo_pago}`, styles: { halign: 'center' ,lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0, left: 0}} },
         ],
         [
             { content: 'Dirección:', styles: { halign: 'left',fontStyle:"bold", lineColor:10,lineWidth:{top: 0, right: 0, bottom: 0, left: 0.3} } },
-            { content: `${proforma.ci}`, styles: { halign: 'center' , lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0, left: 0} } },
+            { content: `${proforma.direccion}`, styles: { halign: 'center' , lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0, left: 0} } },
         ],
         [
             { content: 'Teléfonos:', styles: { halign: 'left',fontStyle:"bold", lineColor:10,lineWidth:{top: 0, right: 0, bottom: 0, left: 0.3}  } },
-            { content: `${proforma.ci}`, styles: { halign: 'center', lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0, left: 0}  } },
+            { content: `${proforma.phone}`, styles: { halign: 'center', lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0, left: 0}  } },
         ],
         [
             { content: 'Email:', styles: { halign: 'left',fontStyle:"bold" , lineColor:10,lineWidth:{top: 0, right: 0, bottom: 0, left: 0.3} } },
-            { content: `${proforma.ci}`, styles: { halign: 'center', lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0, left: 0}  } },
+            { content: `${proforma.email}`, styles: { halign: 'center', lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0, left: 0}  } },
         ],
         [
             { content: 'Observaciones:', styles: { halign: 'left',fontStyle:"bold" , lineColor:10,lineWidth:{top: 0, right: 0, bottom: 0.3, left: 0.3}  } },
-            { content: `${proforma.ci}`, styles: { halign: 'center', lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0.3, left: 0}  } },
+            { content: `${proforma.observaciones}`, styles: { halign: 'center', lineColor:10,lineWidth:{top: 0, right: 0.3, bottom: 0.3, left: 0}  } },
         ]
     ]
  

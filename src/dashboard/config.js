@@ -7,9 +7,20 @@ import PostAddIcon from '@mui/icons-material/PostAdd';
 import SettingsIcon from '@mui/icons-material/Settings';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import HomeIcon from '@mui/icons-material/Home';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 //
 
 export const items = [
+  {
+    title: 'Home',
+    path: '',
+    icon: (
+      <SvgIcon fontSize="small">
+        <HomeIcon />
+      </SvgIcon>
+    )
+  },
   {
     title: 'Clientes',
     path: 'personas',
@@ -63,7 +74,17 @@ export const items = [
         <PostAddIcon />
       </SvgIcon>
     )
-  },{
+  },
+  {
+    title: 'Tabla de Facturas',
+    path: 'tablas_facturas',
+    icon: (
+      <SvgIcon fontSize="small">
+        <ReceiptIcon />
+      </SvgIcon>
+    )
+  },
+  {
     title: 'Configuraciones',
     path: 'configuraciones',
     icon: (

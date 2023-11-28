@@ -83,6 +83,11 @@
   height: 100%;
 }
 
+.texto_factura{
+  font-size: 10px;
+}
+
+
 
 .App-link {
   color: #61dafb;

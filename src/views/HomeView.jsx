@@ -5,11 +5,12 @@ export default function HomeView(){
 
     return(
         <>
-            <Container maxWidth="sm">
-                <h1>Home View</h1>
+            <Container maxWidth="xl">
                 <Grid container spacing={2}>
-                    <Grid item xs={8}>
-                        
+                    <Grid item xs={12}>
+                        <div className="header-dash">
+                            Panel de Administracion
+                        </div>
                     </Grid>
                 </Grid>
             </Container>

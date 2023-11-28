@@ -31,7 +31,6 @@ import PanToolAltIcon from '@mui/icons-material/PanToolAlt';
 import Checkbox from '@mui/material/Checkbox';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
-import { generarPdf } from "../scripts/generar-pdf";
 import { useSelector,useDispatch} from 'react-redux';
 import { setLoading } from "../features/menu/menuSlice";
 import { updateNumberBill } from "../features/auth/userSlice";
@@ -40,15 +39,17 @@ import { generarFacturaPDF } from "../scripts/generar-factura";
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      backgroundColor: "#6366F1",
-      color: theme.palette.common.white,
-    },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 14,
-    },
-  }));
+import { generarFacturaXML } from "../scripts/generar-xml";
+
+    const StyledTableCell = styled(TableCell)(({ theme }) => ({
+        [`&.${tableCellClasses.head}`]: {
+        backgroundColor: "#6366F1",
+        color: theme.palette.common.white,
+        },
+        [`&.${tableCellClasses.body}`]: {
+        fontSize: 14,
+        },
+    }));
   
   const StyledTableRow = styled(TableRow)(({ theme }) => ({
     '&:nth-of-type(odd)': {
@@ -75,7 +76,9 @@ export default function FacturasView() {
         nombre:"CONSUMIDOR FINAL",
         correos:[userState.email],
         phone:userState.phone,
-        direccion:userState.direcciones[0].direccion
+        direccion:userState.direcciones[0].direccion,
+        email:userState.email,
+        observaciones:"Ninguna"
     
     }
     const [currentCliente, setCurrentCliente] = useState(consumidor_final);
@@ -219,7 +222,7 @@ export default function FacturasView() {
             var mes = fecha_formated.getMonth() + 1; // Los meses en JavaScript van de 0 a 11, por lo que sumamos 1
             var año = fecha_formated.getFullYear();
             var fechaFormateada = dia + '/' + mes + '/' + año;
-            let contabilidad_txt = userState.contabilidad ?  "si":"no"
+            let contabilidad_txt = userState.contabilidad ?  "SI":"NO"
             let proforma_data = {
                 nombre_facturador: userState.razon.toUpperCase(),
                 products: products_formated,
@@ -241,6 +244,14 @@ export default function FacturasView() {
                 contabilidad: contabilidad_txt,
                 contribuyente_especial: "120231",
                 numero_proforma:number_proforma,
+                metodo_pago:pago,
+                estado:1,
+                correos:currentCliente.correos,
+                email:currentCliente.email,
+                phone:currentCliente.phone,
+                direccion:currentCliente.direccion,
+                observaciones:currentCliente.observaciones,
+                
                 
             }
           
@@ -278,11 +289,7 @@ export default function FacturasView() {
     const incrementarContador = (str)=>{
 
         let numero = parseInt(str, 10);
-
-        // Incrementar el número
         numero++;
-      
-        // Convertir el número de nuevo a un string y añadir ceros a la izquierda
         let nuevoStr = String(numero).padStart(str.length, '0');
         return nuevoStr;
     }
@@ -315,6 +322,12 @@ export default function FacturasView() {
         setItems(items_formated)
         setModalProducto(true);
    
+    }
+    const handleCurrentClient = (event)=>{
+        const { name, value } = event.target;
+        const nuevoObjeto = { ...currentCliente };
+        nuevoObjeto[name] = value;
+        setCurrentCliente(nuevoObjeto);
     }
     const handleSearchClient = (event) => {
         let textoMinusculas = event.target.value.toLowerCase();
@@ -488,7 +501,7 @@ export default function FacturasView() {
         setProductos(datos_unidos);
         setModalServicio(false);
     }
-    const agregarProforma = async()=>{
+    const agregarFactura = async()=>{
         dispatch(setLoading(true));
         let aux_productos =  JSON.parse(JSON.stringify(productos));
         let user_copy = JSON.parse(JSON.stringify(userState))
@@ -513,7 +526,7 @@ export default function FacturasView() {
             var año = fecha_formated.getFullYear();
             var fechaFormateada = dia + '/' + mes + '/' + año;
             let number_proforma =  `${userState.bill_code1}-${userState.bill_code2}-${userState.bill_code3}`
-            let contabilidad_txt = userState.contabilidad ?  "si":"no"
+            let contabilidad_txt = userState.contabilidad ?  "SI":"NO"
                 proforma_data = {
                 products: products_formated,
                 profile: userState.profile,
@@ -536,13 +549,21 @@ export default function FacturasView() {
                 estado:"pendiente",
                 id:id,
                 numero_proforma:number_proforma,
+                metodo_pago:pago,
+                estado:1,
+                correos:currentCliente.correos,
+                email:currentCliente.email,
+                phone:currentCliente.phone,
+                direccion:currentCliente.direccion,
+                observaciones:currentCliente.observaciones,
+                razon:currentCliente.nombre,
                 
             }
         }
         let new_code = incrementarContador(user_copy['bill_code3']);
         user_copy['bill_code3'] = new_code;
-        await setDoc(doc(db, "proformas", id), proforma_data);
-        dispatch(updateNumberBill(new_code))
+        await setDoc(doc(db, "facturas", id), proforma_data);
+        dispatch(updateNumberBill(new_code));
         await updateDoc(user_ref, user_copy);
         setProductos([]);
         setCurrentCliente(consumidor_final);
@@ -559,10 +580,6 @@ export default function FacturasView() {
         <>
             <Container maxWidth="xl">
                 <Grid container spacing={2}>
-                    {/* <Grid item xs={12}>
-                        <p>{billNumber}</p>
-                        <button onClick={incrementarContador}> click</button>
-                    </Grid> */}
                     <Grid item xs={12}>
                         <div className="header-dash">
                             Sistema de generación de facturas.
@@ -579,6 +596,7 @@ export default function FacturasView() {
                         </div>
 
                     </Grid>
+                  
                     <Grid item xs={12} md={6}>
                         <div className="proforma-info">
                             <Stack direction="column" justifyContent={"space-between"} spacing={2}>
@@ -615,20 +633,18 @@ export default function FacturasView() {
                     </Grid>
                     <Grid item xs={12} md={2}>
                         <FormControl fullWidth variant="filled">
-                                        <InputLabel htmlFor="filled-adornment-password">Metodo de pago</InputLabel>
-                                            <Select
-                                                labelId="demo-simple-select-label"
-                                                value={pago}
-                                                
-                                                name="tipo_identificacion"
-                                                onChange={handlePago}
-                                                label="Tipo de Persona"
-                                            >
-                                                <MenuItem value={1}>EFECTIVO</MenuItem>
-                                                <MenuItem value={2}>TRANSFERENCIA</MenuItem>
-                                                <MenuItem value={3}>TARJETA DE CREDITO</MenuItem>
-                                                <MenuItem value={4}>TARJETA DE DEBITO</MenuItem>
-                                            </Select>
+                            <InputLabel htmlFor="filled-adornment-password">Metodo de pago</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-label"
+                                    value={pago}
+                                    name="tipo_identificacion"
+                                    onChange={handlePago}
+                                    label="Tipo de Persona">
+                                        <MenuItem value={1}>EFECTIVO</MenuItem>
+                                        <MenuItem value={2}>TRANSFERENCIA</MenuItem>
+                                        <MenuItem value={3}>TARJETA DE CREDITO</MenuItem>
+                                        <MenuItem value={4}>TARJETA DE DEBITO</MenuItem>
+                                </Select>
                         </FormControl>
                     </Grid>
                     <Grid item xs={12} md={6}>
@@ -735,19 +751,19 @@ export default function FacturasView() {
                                 <TableBody>
                                     <StyledTableRow >
                                         <StyledTableCell align="left">Direccion</StyledTableCell>
-                                        <StyledTableCell align="left">{currentCliente.direccion}</StyledTableCell>
+                                        <StyledTableCell align="left"><input type="text" id="fname" style={{width:"100%"}} name="direccion"  value={currentCliente.direccion} onChange={handleCurrentClient}/></StyledTableCell>
                                     </StyledTableRow>
                                     <StyledTableRow >
                                         <StyledTableCell align="left">Teléfonos</StyledTableCell>
-                                        <StyledTableCell align="left">{currentCliente.phone}</StyledTableCell>
+                                        <StyledTableCell align="left"> <input type="text" id="fname" style={{width:"100%"}}   name="phone"  value={currentCliente.phone} onChange={handleCurrentClient} /></StyledTableCell>
                                     </StyledTableRow>
                                     <StyledTableRow >
                                         <StyledTableCell align="left">Email</StyledTableCell>
-                                        <StyledTableCell align="left">{currentCliente.correos[0]}</StyledTableCell>
+                                        <StyledTableCell align="left"> <input type="text" id="fname" style={{width:"100%"}}  name="email"  value={currentCliente.email} onChange={handleCurrentClient} /></StyledTableCell>
                                     </StyledTableRow>
                                     <StyledTableRow >
                                         <StyledTableCell align="left">Observaciones</StyledTableCell>
-                                        <StyledTableCell align="left">Ninguna</StyledTableCell>
+                                        <StyledTableCell align="left"><input type="text" id="fname" style={{width:"100%"}}  name="observaciones"  value={currentCliente.observaciones} onChange={handleCurrentClient} /></StyledTableCell>
                                     </StyledTableRow>
                                 </TableBody>
                             </Table>
@@ -797,8 +813,8 @@ export default function FacturasView() {
                             </Button>
                         </Grid>
                         <Grid item xs={6} md={2}>
-                        <Button color="success" variant="contained" onClick={agregarProforma} >
-                                Guardar Proforma
+                            <Button color="success" variant="contained" onClick={agregarFactura} >
+                                Generar Factura
                             </Button>
                         </Grid>
                 </Grid>

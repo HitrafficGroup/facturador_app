@@ -13,6 +13,9 @@ import FilledInput from '@mui/material/FilledInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
+import HomeView from "./HomeView";
+import TablasFacturasView from "./TablasFacturasView";
+
 export default function DashboardView(){
 
 
@@ -22,6 +25,7 @@ export default function DashboardView(){
                 <Layout>
                     <SimpleBar style={{ maxHeight: '90vh' }}>
                         <Routes>
+                            <Route path="/"  element={<HomeView />} />
                             <Route path="/personas"  element={<PersonasView />} />
                             <Route path="/productos"  element={<ProductosView />} />
                             <Route path="/servicios"  element={<ServiciosView />} />
@@ -29,7 +33,7 @@ export default function DashboardView(){
                             <Route path="/facturador"  element={<FacturarView />} />
                             <Route path="/configuraciones"  element={<ConfigView />} />
                             <Route path="/tablas_proformas" element={<TablaProformasView/>}  />
-                            
+                            <Route path="/tablas_facturas" element={<TablasFacturasView/>}  />
                         </Routes>
                     </SimpleBar>
                 </Layout>
