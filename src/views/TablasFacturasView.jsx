@@ -17,6 +17,7 @@ import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@mui/icons-material/Settings';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
 export default function TablasFacturasView() {
     const [facturas, setFacturas] = useState([]);
     const [page, setPage] = useState(0);
@@ -181,6 +182,32 @@ export default function TablasFacturasView() {
                             <p className="texto_factura"><strong>Razon Social / Nombres y Apellidos:</strong> CONSUMIDOR FINAL</p>
                             <p className="texto_factura"><strong>RUC/CI:</strong> 9999999999999 <strong>Fecha Emisión:</strong> 27/11/2023</p> 
                         </div>
+                        <TableContainer component={Paper}>
+                        <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
+                            <TableHead>
+                            <TableRow>
+                                <TableCell align="right">Codigo</TableCell>
+                                <TableCell align="right">Cant.</TableCell>
+                                <TableCell align="right">Descripción</TableCell>
+                                <TableCell align="right">Precio Unitario</TableCell>
+                                <TableCell align="right">Descuento</TableCell>
+                                <TableCell align="right">Precio Total</TableCell>
+                            </TableRow>
+                            </TableHead>
+                            <TableBody>
+                            {currentProforma.products.map((row,index) => (
+                                <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                    <TableCell align="right">{row.codigo}</TableCell>
+                                    <TableCell align="right">{row.cantidad}</TableCell>
+                                    <TableCell align="right">{row.descripcion}</TableCell>
+                                    <TableCell align="right">{row.precio_unitario}</TableCell>
+                                    <TableCell align="right">{row.descuento}</TableCell>
+                                    <TableCell align="right">{row.precio_total}</TableCell>
+                                </TableRow>
+                            ))}
+                            </TableBody>
+                        </Table>
+                        </TableContainer>
                 </ModalBody>
                 <ModalFooter>
                     <Stack spacing={2} direction={"row"}>
@@ -191,5 +218,6 @@ export default function TablasFacturasView() {
             </Modal>
 
         </>
+        //tambien 
     );
 }

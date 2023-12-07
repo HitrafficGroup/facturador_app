@@ -6,15 +6,15 @@ function generarFacturaXML(datos_factura){
     let xw = new XMLWriter;
     xw.startDocument();
     xw.startElement('factura');
-    xw.writeAttribute('id', 'comprobante');
-    xw.writeAttribute('version', '1.0.1');
+    xw.writeAttribute('id', 'comprobante')
+    xw.writeAttribute('version', '1.0.1')
     xw.startElement('infoTributaria',)
     xw.writeElement('ambiente',1) //2 para produccion 1 para pruebas
     xw.writeElement('tipoEmision',1)
     xw.writeElement('razonSocial',datos_factura.nombre)
     xw.writeElement('nombreComercial',datos_factura.nombre)
     xw.writeElement('ruc',datos_factura.ci)
-    xw.writeElement('claveAcceso',"2511202301179001691900120911110007376250443020716") // pendiente a determinar como se obtiene
+    xw.writeElement('claveAcceso',datos_factura.clave_acceso) // pendiente a determinar como se obtiene
     xw.writeElement('codDoc',"01")
     xw.writeElement('estab',datos_factura.ci)
     xw.writeElement('ptoEmi',"111")
@@ -27,7 +27,7 @@ function generarFacturaXML(datos_factura){
     xw.writeElement('contribuyenteEspecial',"5368")
     xw.writeElement('obligadoContabilidad',datos_factura.contabilidad)
     xw.writeElement('tipoIdentificacionComprador',"04")
-    xw.writeElement('guiaRemision',datos_factura.number_proforma)
+    xw.writeElement('guiaRemision',datos_factura.numero_proforma)
     xw.writeElement('razonSocialComprador',datos_factura.razon)
     xw.writeElement('identificacionComprador',datos_factura.ci)
     xw.writeElement('direccionComprador',datos_factura.direccion)
@@ -69,9 +69,39 @@ function generarFacturaXML(datos_factura){
     xw.endElement()
     //etiqueta info tributaria
     xw.endElement()
+    xw.startElement('detalles')
+    for(let i =0 ; i< datos_factura.products.length ;i++){
+            xw.startElement('detalle')
+            xw.writeElement('codigoPrincipal',datos_factura.products[i].codigo)
+            xw.writeElement('codigoAuxiliar',datos_factura.products[i].codigo)
+            xw.writeElement('descripcion',datos_factura.products[i].descripcion)
+            xw.writeElement('cantidad',datos_factura.products[i].cantidad)
+            xw.writeElement('precioUnitario',datos_factura.products[i].precio_unitario)
+            xw.writeElement('descuento',datos_factura.products[i].descuento)
+            xw.writeElement('precioTotalSinImpuesto',datos_factura.products[i].precio_total)
+            xw.startElement('impuestos')
+                xw.startElement('impuesto')
+                xw.writeElement('codigo',"3")
+                xw.writeElement('codigoPorcentaje',"3072")
+                xw.writeElement('tarifa',"5")
+                xw.writeElement('baseImponible',"295000")
+                xw.writeElement('valor',"14750.5")
+                xw.endElement()
+                xw.startElement('impuesto')
+                xw.writeElement('codigo',"5")
+                xw.writeElement('codigoPorcentaje',"5001")
+                xw.writeElement('tarifa',"0.02")
+                xw.writeElement('baseImponible',"12000")
+                xw.writeElement('valor',"240.5")
+                xw.endElement()
+            xw.endElement()
+
+            xw.endElement()
+    }
+    xw.endElement()
     xw.endElement()
     xw.endDocument();
-    
+  
     console.log(xw.toString())
 
 }

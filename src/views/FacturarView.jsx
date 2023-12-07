@@ -4,6 +4,7 @@ import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import dayjs from 'dayjs';
+import Barcode from 'react-barcode';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -35,7 +36,7 @@ import { useSelector,useDispatch} from 'react-redux';
 import { setLoading } from "../features/menu/menuSlice";
 import { updateNumberBill } from "../features/auth/userSlice";
 import { v4 as uuidv4 } from 'uuid';
-import { generarFacturaPDF } from "../scripts/generar-factura";
+import { generarFacturaPDF,generarClavedeAcceso } from "../scripts/generar-factura";
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -79,7 +80,7 @@ export default function FacturasView() {
         direccion:userState.direcciones[0].direccion,
         email:userState.email,
         observaciones:"Ninguna"
-    
+        
     }
     const [currentCliente, setCurrentCliente] = useState(consumidor_final);
     const [modalProducto, setModalProducto] = useState(false);
@@ -201,64 +202,7 @@ export default function FacturasView() {
 
     }
 
-    const generarProformaPdf =()=>{
-        dispatch(setLoading(true));
-        let aux_productos =  JSON.parse(JSON.stringify(productos));
-        let number_proforma =  `${userState.bill_code1}-${userState.bill_code2}-${userState.bill_code3}`
-        if(aux_productos.length >0){
-            let products_formated = aux_productos.map((item)=>{
-                return {
-                        codigo:item.codigo_principal,
-                        descripcion:item.descripcion,
-                        cantidad:item.cantidad,
-                        precio_unitario:item.valor_unitario,
-                        descuento:0,
-                        precio_total:parseFloat(item.valor_unitario)*parseFloat(item.cantidad)
-                    }
-            })
-           
-            let fecha_formated = new Date(value)
-            var dia = fecha_formated.getDate();
-            var mes = fecha_formated.getMonth() + 1; // Los meses en JavaScript van de 0 a 11, por lo que sumamos 1
-            var año = fecha_formated.getFullYear();
-            var fechaFormateada = dia + '/' + mes + '/' + año;
-            let contabilidad_txt = userState.contabilidad ?  "SI":"NO"
-            let proforma_data = {
-                nombre_facturador: userState.razon.toUpperCase(),
-                products: products_formated,
-                profile: userState.profile,
-                profile_url: userState.profile_url,  
-                nombre: currentCliente.nombre,
-                fecha: fechaFormateada,
-                sub_siniva:subNoIva,
-                sub_iva:subIva,
-                sub_total:subtotal,
-                sub_zero:subZero,
-                total:total,
-                iva:iva,
-                ci:currentCliente.ci,
-                descuento:0,
-                ice:0,
-                matriz:userState.direcciones[0].direccion,
-                sucursal:userState.direcciones[0].direccion,
-                contabilidad: contabilidad_txt,
-                contribuyente_especial: "120231",
-                numero_proforma:number_proforma,
-                metodo_pago:pago,
-                estado:1,
-                correos:currentCliente.correos,
-                email:currentCliente.email,
-                phone:currentCliente.phone,
-                direccion:currentCliente.direccion,
-                observaciones:currentCliente.observaciones,
-                
-                
-            }
-          
-            generarFacturaPDF(proforma_data);
-        }
-        dispatch(setLoading(false));
-    }
+
     const abrirModalServicios = ()=>{
         let items_formated = []
         if(productos.length === 0){
@@ -501,11 +445,11 @@ export default function FacturasView() {
         setProductos(datos_unidos);
         setModalServicio(false);
     }
-    const agregarFactura = async()=>{
+    const agregarFactura = async(_case)=>{
         dispatch(setLoading(true));
         let aux_productos =  JSON.parse(JSON.stringify(productos));
         let user_copy = JSON.parse(JSON.stringify(userState))
-        let proforma_data = {}
+        let factura_data = {}
         let id = uuidv4();
         const user_ref = doc(db, "usuarios", userState.id);
         if(aux_productos.length >0){
@@ -521,13 +465,31 @@ export default function FacturasView() {
             })
          
             let fecha_formated = new Date(value)
-            var dia = fecha_formated.getDate();
+            var dia = fecha_formated.getDate().toString();
             var mes = fecha_formated.getMonth() + 1; // Los meses en JavaScript van de 0 a 11, por lo que sumamos 1
-            var año = fecha_formated.getFullYear();
+            var año = fecha_formated.getFullYear().toString();
+            mes = mes.toString()
+            if(dia<9){
+                dia = '0'+dia
+            }
+            if(mes<9){
+                mes = '0'+mes
+            }
+            
+            let data_clave = {
+                fecha:dia+mes+año,
+                tipo:'01',
+                ruc:currentCliente.ci+'001',
+                tipo_ambiente:1,
+                serie:userState.bill_code1+userState.bill_code2,
+                comprobante:userState.bill_code3,
+                tipo_emision:1
+            }
+            let clave_acceso = generarClavedeAcceso(data_clave)
             var fechaFormateada = dia + '/' + mes + '/' + año;
             let number_proforma =  `${userState.bill_code1}-${userState.bill_code2}-${userState.bill_code3}`
             let contabilidad_txt = userState.contabilidad ?  "SI":"NO"
-                proforma_data = {
+            factura_data = {
                 products: products_formated,
                 profile: userState.profile,
                 profile_url: userState.profile_url,  
@@ -549,6 +511,7 @@ export default function FacturasView() {
                 estado:"pendiente",
                 id:id,
                 numero_proforma:number_proforma,
+                secuencial:userState.bill_code3,
                 metodo_pago:pago,
                 estado:1,
                 correos:currentCliente.correos,
@@ -557,22 +520,32 @@ export default function FacturasView() {
                 direccion:currentCliente.direccion,
                 observaciones:currentCliente.observaciones,
                 razon:currentCliente.nombre,
+                clave_acceso:clave_acceso,
+                nombre_facturador:userState.razon
                 
             }
         }
-        let new_code = incrementarContador(user_copy['bill_code3']);
-        user_copy['bill_code3'] = new_code;
-        await setDoc(doc(db, "facturas", id), proforma_data);
-        dispatch(updateNumberBill(new_code));
-        await updateDoc(user_ref, user_copy);
-        setProductos([]);
-        setCurrentCliente(consumidor_final);
+        if(_case === 1 ){
+            generarFacturaXML(factura_data);
+            let new_code = incrementarContador(user_copy['bill_code3']);
+            user_copy['bill_code3'] = new_code;
+            await setDoc(doc(db, "facturas", id), factura_data);
+            dispatch(updateNumberBill(new_code));
+            await updateDoc(user_ref, user_copy);
+            setProductos([]);
+            setCurrentCliente(consumidor_final);
+            dispatch(setLoading(false));
+        }else{
+            generarFacturaPDF(factura_data);
+        }
+       
         dispatch(setLoading(false));
     }
 
     //const seleccionar
 
     useEffect(() => {
+
         getData();
     }, []);
 
@@ -808,12 +781,12 @@ export default function FacturasView() {
                         
                         </Grid>
                         <Grid item xs={6} md={2}>
-                        <Button color="rojo" variant="contained" onClick={generarProformaPdf} >
+                        <Button color="rojo" variant="contained" onClick={()=>{agregarFactura(2)}} >
                                 Generar PDF
                             </Button>
                         </Grid>
                         <Grid item xs={6} md={2}>
-                            <Button color="success" variant="contained" onClick={agregarFactura} >
+                            <Button color="success" variant="contained" onClick={()=>{agregarFactura(1)}} >
                                 Generar Factura
                             </Button>
                         </Grid>
@@ -1087,7 +1060,7 @@ export default function FacturasView() {
                         </Grid>
                 </ModalBody>
                 <ModalFooter>
-                <Stack direction="row" spacing={2}>
+                    <Stack direction="row" spacing={2}>
                         <Button color="primary" variant="contained" onClick={agregarServicios}>
                             terminar seleccion
                         </Button>
@@ -1097,6 +1070,7 @@ export default function FacturasView() {
                     </Stack>
                 </ModalFooter>
             </Modal>
+            <img style={{display:"none"}} id="barcode"/>
         </>
     );
 
