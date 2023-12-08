@@ -28,7 +28,12 @@ export const userSlice = createSlice({
         categorias:[],
         bill_code1:"001",
         bill_code2:"002",
-        bill_code3:"000000001"
+        bill_code3:"000000001",
+        defect_direction:{
+            direccion:"",
+            codigo:"",
+            nombreComercial:""
+        }
     },
     reducers: {
         setUser: (state,action)=>{
@@ -56,6 +61,7 @@ export const userSlice = createSlice({
             state.bill_code1 = action.payload.bill_code1;
             state.bill_code2 = action.payload.bill_code2;
             state.bill_code3 = action.payload.bill_code3;
+            state.defect_direction = action.payload.defect_direction;
         },
         updateCategorias:(state,action)=>{
             state.categorias = action.payload;

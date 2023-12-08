@@ -4,7 +4,8 @@ import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import dayjs from 'dayjs';
-import Barcode from 'react-barcode';
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -102,9 +103,9 @@ export default function FacturasView() {
     const [modalServicio,setModalServicio] = useState(false);
     const [servicios,setServicios] = useState([]);
     const dispatch = useDispatch();
-    const allservices = useRef([{}])
-    const [pago,setPago] = useState(1)
-
+    const allservices = useRef([{}]);
+    const [pago,setPago] = useState(1);
+    const [currentEstablecimiento ,setCurrentEstablecimiento] = useState(userState.direcciones[0]);
   
 
     const handleChangePage = (event, newPage) => {
@@ -466,7 +467,7 @@ export default function FacturasView() {
          
             let fecha_formated = new Date(value)
             var dia = fecha_formated.getDate().toString();
-            var mes = fecha_formated.getMonth() + 1; // Los meses en JavaScript van de 0 a 11, por lo que sumamos 1
+            var mes = fecha_formated.getMonth() + 1; 
             var año = fecha_formated.getFullYear().toString();
             mes = mes.toString()
             if(dia<9){
@@ -504,8 +505,9 @@ export default function FacturasView() {
                 ci:currentCliente.ci,
                 descuento:0,
                 ice:0,
-                matriz:userState.direcciones[0].direccion,
-                sucursal:userState.direcciones[0].direccion,
+                matriz:currentEstablecimiento.direccion,
+                sucursal:currentEstablecimiento.direccion,
+                codigo_establecimiento:currentEstablecimiento.codigo,
                 contabilidad: contabilidad_txt,
                 contribuyente_especial: "120231",
                 estado:"pendiente",
@@ -521,19 +523,21 @@ export default function FacturasView() {
                 observaciones:currentCliente.observaciones,
                 razon:currentCliente.nombre,
                 clave_acceso:clave_acceso,
-                nombre_facturador:userState.razon
+                nombre_facturador:userState.razon,
+                punto_emision: userState.bill_code2
                 
             }
+            console.log(factura_data)
         }
         if(_case === 1 ){
             generarFacturaXML(factura_data);
-            let new_code = incrementarContador(user_copy['bill_code3']);
-            user_copy['bill_code3'] = new_code;
-            await setDoc(doc(db, "facturas", id), factura_data);
-            dispatch(updateNumberBill(new_code));
-            await updateDoc(user_ref, user_copy);
-            setProductos([]);
-            setCurrentCliente(consumidor_final);
+            // let new_code = incrementarContador(user_copy['bill_code3']);
+            // user_copy['bill_code3'] = new_code;
+            // await setDoc(doc(db, "facturas", id), factura_data);
+            // dispatch(updateNumberBill(new_code));
+            // await updateDoc(user_ref, user_copy);
+            // setProductos([]);
+            // setCurrentCliente(consumidor_final);
             dispatch(setLoading(false));
         }else{
             generarFacturaPDF(factura_data);
@@ -620,7 +624,21 @@ export default function FacturasView() {
                                 </Select>
                         </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={12} md={4}>
+                        <Autocomplete
+                                    disablePortal
+                                    id="combo-box-demo"
+                                    fullWidth
+                                    options={userState.direcciones}
+                                    onChange={(event, newValue) => {
+                                    setCurrentEstablecimiento(newValue);
+                                    }}
+                                    getOptionLabel={(option) => option.direccion}
+                                    defaultValue={userState.direcciones[0]}
+                                    renderInput={(params) => <TextField {...params} label="Establecimiento" />}
+                                />
+                    </Grid>
+                    <Grid item xs={12} md={2}>
 
                     </Grid>
                     <Grid item xs={12} md={2}>

@@ -12,7 +12,6 @@ import TableRow from '@mui/material/TableRow';
 import { collection, query, onSnapshot, doc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { db } from "../firebase/firebase-config";
-import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@mui/icons-material/Settings';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
@@ -22,9 +21,8 @@ export default function TablasFacturasView() {
     const [facturas, setFacturas] = useState([]);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [modalProforma, setModalProforma] = useState(false);
     const [modalVisualizar, setModalVisualizar] = useState(false);
-    const [currentProforma, setCurrentProforma] = useState({})
+    const [currentFactura,setCurrentFactura] = useState({products:[]})
     const allFacturas = useRef([{}]);
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -35,7 +33,7 @@ export default function TablasFacturasView() {
         setPage(0);
     };
     const abrirModalVisualizar = (_data) => {
-        setCurrentProforma(_data);
+        setCurrentFactura(_data);
         setModalVisualizar(true);
     }
     const getData = () => {
@@ -121,9 +119,7 @@ export default function TablasFacturasView() {
                                                     </TableCell>
                                                     <TableCell align={"center"}>
                                                         <Stack direction="row" spacing={1}>
-                                                            <IconButton aria-label="delete" color="rojo"  >
-                                                                <DeleteIcon />
-                                                            </IconButton>
+                                                        
                                                             <IconButton aria-label="delete" color="gris"  >
                                                                 <SettingsIcon />
                                                             </IconButton>
@@ -150,34 +146,35 @@ export default function TablasFacturasView() {
                     </Grid>
                 </Grid>
             </Container>
-            <Modal isOpen={modalVisualizar} size="lg" >
-                <ModalHeader>Previsualizacion de la Factura</ModalHeader>
-                <ModalBody>
-               
-                    <Stack spacing={2} direction={"row"}>
-                        <Stack spacing={2} direction={"column"}>
-                            <img width={100} height={100} src="https://firebasestorage.googleapis.com/v0/b/facturero-app.appspot.com/o/profiles%2FLogo%20transparente.png?alt=media&token=47c7abf9-70c4-4724-ba81-6ada0781c40f" ></img>
-                            <div style={{ width: 300 }}>
-                                <Stack spacing={2} direction={"column"}>
-                                    <p className="texto_factura" >JOAN DAVID ENCARNACION DIAZ</p>
-                                    <p className="texto_factura" >Matriz: Av Turuhuayco y Juan Estrobel</p>
-                                    <p className="texto_factura" >Sucursal: Av Turuhuayco y Juan Estrobel</p>
-                                    <p className="texto_factura" >Contribuyente Especial Nro: 120231</p>
-                                    <p className="texto_factura" >OBLIGADO LLEVAR CONTABILIDAD: no</p>
-                                </Stack>
+                <Modal isOpen={modalVisualizar} size="lg" >
+                    <ModalHeader>Previsualizacion de la Factura</ModalHeader>
+                    <ModalBody>
+                                <div className="factura-container">
+                                    <div className="factura-detalles">
+                                        <img width={100} height={100} src="https://firebasestorage.googleapis.com/v0/b/facturero-app.appspot.com/o/profiles%2FLogo%20transparente.png?alt=media&token=47c7abf9-70c4-4724-ba81-6ada0781c40f" ></img>
+                                        <div >
+                                            <Stack spacing={2} direction={"column"}>
+                                                <p className="texto_factura" >JOAN DAVID ENCARNACION DIAZ</p>
+                                                <p className="texto_factura" >Matriz: Av Turuhuayco y Juan Estrobel</p>
+                                                <p className="texto_factura" >Sucursal: Av Turuhuayco y Juan Estrobel</p>
+                                                <p className="texto_factura" >Contribuyente Especial Nro: 120231</p>
+                                                <p className="texto_factura" >OBLIGADO LLEVAR CONTABILIDAD: no</p>
+                                            </Stack>
+                                        </div>
+                                    </div>
+                                <div className="factura-datos">
+                                    <Stack spacing={2} direction={"column"}>
+                                        <p className="texto_factura" ><strong>RUC:</strong> 1104595671001</p>
+                                        <p className="texto_factura" ><strong>PROFORMA No:</strong> 001-001-000000002</p>
+                                        <p className="texto_factura" ><strong>Matriz:</strong> Av Turuhuayco y Juan Estrobel</p>
+                                        <p className="texto_factura" ><strong>Sucursal:</strong> Av Turuhuayco y Juan Estrobel</p>
+                                        <p className="texto_factura" ><strong>Contribuyente Especial:</strong>--</p>
+                                        <p className="texto_factura" ><strong>OBLIGADO A LLEVAR CONTABILIDAD:</strong>NO</p>
+                                    </Stack>
+                                </div>
                             </div>
-                        </Stack>
-                        <div style={{ borderRadius: 10, border: "2px solid black", padding: 18 }}>
-                            <Stack spacing={2} direction={"column"}>
-                                <p className="texto_factura" ><strong>RUC:</strong> 1104595671001</p>
-                                <p className="texto_factura" ><strong>PROFORMA No:</strong> 001-001-000000002</p>
-                                <p className="texto_factura" ><strong>Matriz:</strong> Av Turuhuayco y Juan Estrobel</p>
-                                <p className="texto_factura" ><strong>Sucursal:</strong> Av Turuhuayco y Juan Estrobel</p>
-                                <p className="texto_factura" ><strong>Contribuyente Especial:</strong>--</p>
-                                <p className="texto_factura" ><strong>OBLIGADO A LLEVAR CONTABILIDAD:</strong>NO</p>
-                            </Stack>
-                        </div>
-                    </Stack>
+                   
+              
                         <div style={{borderRadius: 10, border: "2px solid black", padding: 18, margin:8}}>
                             <p className="texto_factura"><strong>Razon Social / Nombres y Apellidos:</strong> CONSUMIDOR FINAL</p>
                             <p className="texto_factura"><strong>RUC/CI:</strong> 9999999999999 <strong>Fecha Emisión:</strong> 27/11/2023</p> 
@@ -195,7 +192,7 @@ export default function TablasFacturasView() {
                             </TableRow>
                             </TableHead>
                             <TableBody>
-                            {currentProforma.products.map((row,index) => (
+                            {currentFactura.products.map((row,index) => (
                                 <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                                     <TableCell align="right">{row.codigo}</TableCell>
                                     <TableCell align="right">{row.cantidad}</TableCell>

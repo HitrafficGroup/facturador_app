@@ -11,13 +11,13 @@ function generarFacturaXML(datos_factura){
     xw.startElement('infoTributaria',)
     xw.writeElement('ambiente',1) //2 para produccion 1 para pruebas
     xw.writeElement('tipoEmision',1)
-    xw.writeElement('razonSocial',datos_factura.nombre)
-    xw.writeElement('nombreComercial',datos_factura.nombre)
+    xw.writeElement('razonSocial',datos_factura.nombre_facturador)
+    xw.writeElement('nombreComercial',datos_factura.nombre_facturador)
     xw.writeElement('ruc',datos_factura.ci)
     xw.writeElement('claveAcceso',datos_factura.clave_acceso) // pendiente a determinar como se obtiene
     xw.writeElement('codDoc',"01")
-    xw.writeElement('estab',datos_factura.ci)
-    xw.writeElement('ptoEmi',"111")
+    xw.writeElement('estab',datos_factura.codigo_establecimiento)
+    xw.writeElement('ptoEmi',datos_factura.punto_emision)
     xw.writeElement('secuencial',datos_factura.secuencial)
     xw.writeElement('dirMatriz',datos_factura.matriz)
     xw.endElement()

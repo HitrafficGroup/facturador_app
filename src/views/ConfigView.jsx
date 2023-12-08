@@ -39,12 +39,14 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { setLoading } from "../features/menu/menuSlice";
-
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Swal from "sweetalert2";
 export default function ConfigView() {
     
     const [showPassword, setShowPassword] = useState(false);
     const [ciudades, setCiudades] = useState([]);
-    const [age, setAge] = useState('');
+    const [currentDireccion,setCurrentDireccion] = useState({});
     const [ciudad,setCiudad] = useState('');
     const [factura, setFactura] = useState(false)
     const [password, setPassword] = useState("");
@@ -52,10 +54,12 @@ export default function ConfigView() {
     const [profileFile, setProfileFile] = useState(null);
     const [imagenURL, setImagenURL] = useState(null);
     const [contabilidad,setContabilidad] = useState(false);
+    const [modalEditarDirecciones,setModalEditarDirecciones] = useState(false);
     const [direccionRuc,setDireccionRuc]  = useState("");
     const [nombreComercial,setNombreComercial]  = useState("");
     const [modalDireccion,setModalDireccion] = useState(false);
     const [codeDireccion,setCodeDireccion] = useState("");
+ 
     const [code1,setCode1] = useState("001")
     const [code2,setCode2] = useState("001")
     const [code3,setCode3] = useState("000000001")
@@ -66,6 +70,7 @@ export default function ConfigView() {
     };
     const [direcciones,setDirecciones] = useState([{}])
     const userState = useSelector(state => state.auth);
+    const [defectDirection,setDefectDirection] = useState(userState.defect_direction);
     const getData = () => {
 
         let final_data = []
@@ -139,6 +144,7 @@ export default function ConfigView() {
         user_copy['bill_code1'] = code1
         user_copy['bill_code2'] = code2
         user_copy['bill_code3'] = code3
+        user_copy['defect_direction'] = defectDirection
         dispatch(setUser(user_copy));
         // Set the "capital" field of the city 'DC'
         await updateDoc(user_ref, user_copy);
@@ -158,12 +164,75 @@ export default function ConfigView() {
         setImagenURL(url);
         setProfileFile(file);
     };
-    const abrirModalDirecciones = ()=>{
+    const abrirModalDirecciones = (__data)=>{
+        setCurrentDireccion(__data);
         setModalDireccion(true);
     }
+    const abrirModalEditarDirecciones = (__data)=>{
+        setCurrentDireccion(__data)
+        setDireccionRuc(__data.direccion);
+        setCodeDireccion(__data.codigo);
+        setNombreComercial(__data.nombreComercial);
+        setModalEditarDirecciones(true);
+    }
+    const actualizarDirecciones = async()=>{
+        dispatch(setLoading(true));
+        let user_copy = JSON.parse(JSON.stringify(userState))
+        const aux_directions = JSON.parse(JSON.stringify(direcciones));
+        let data_modify = aux_directions.map((item)=> {
+            if(item.direccion === currentDireccion.direccion){
+                item.direccion = direccionRuc
+                item.nombreComercial = nombreComercial
+                item.codigo = codeDireccion
+            }
+            return item
+        })
+        const user_ref = doc(db, "usuarios", userState.id);
+
+        await updateDoc(user_ref, {
+            direcciones: data_modify
+        });
+        user_copy['direcciones'] = data_modify;
+        dispatch(setUser(user_copy));
+        setDirecciones(data_modify);
+        setModalEditarDirecciones(false);
+        dispatch(setLoading(false));
+    }
+    
+    const eliminarDireccion = async(__data)=>{
+        const aux_directions = JSON.parse(JSON.stringify(direcciones))
+        if(defectDirection.direccion === __data.direccion){
+            Swal.fire({
+                icon: "error",
+                title: "Ne se Elimino",
+                text: "No se puede eliminar la direccion que esta por defecto!",
+              });
+        }else if(aux_directions < 2){
+            Swal.fire({
+                icon: "error",
+                title: "Ne se Elimino",
+                text: "Debe Existir Minimo 1 direccion!",
+            });
+        }
+        else{
+            dispatch(setLoading(true));
+            let user_copy = JSON.parse(JSON.stringify(userState))
+            const user_ref = doc(db, "usuarios", userState.id);
+            let data_modify = aux_directions.filter(item=> item.direccion !== __data.direccion)
+            await updateDoc(user_ref, {
+                direcciones: data_modify
+            });
+            user_copy['direcciones'] = data_modify;
+            dispatch(setUser(user_copy));
+            setDirecciones(data_modify);
+            dispatch(setLoading(false));
+        }
+    }
+
     const agregarDirecciones = async()=>{
         dispatch(setLoading(true));
         const user_ref = doc(db, "usuarios", userState.id);
+        
         const aux_directions = JSON.parse(JSON.stringify(direcciones))
         let user_copy = JSON.parse(JSON.stringify(userState))
 
@@ -267,6 +336,7 @@ export default function ConfigView() {
                         <Grid item xs={12} md={6}>
                             <Autocomplete
                                 disablePortal
+                                disableClearable
                                 id="combo-box-demo"
                                 fullWidth
                                 onChange={(event, newValue) => {
@@ -302,33 +372,57 @@ export default function ConfigView() {
                 </Stack>
                 <Grid container marginTop={4} spacing={1}>
                     <Grid item xs={12}>
-                        <h5 style={{ textAlign: 'left', color: '#6C737F' }}>Configuracion de facturacion</h5>
+                        <h5 style={{ textAlign: 'left', color: '#6C737F' }}>Configuración de facturación</h5>
                     </Grid>
                     <Grid item xs={12} md={9}>
+                    <Autocomplete
+                                disablePortal
+                                id="combo-box-demo"
+                                fullWidth
+                                onChange={(event, newValue) => {
+                                    setDefectDirection(newValue);
+                                }}
+                                disableClearable
+                                value={defectDirection}
+                                options={direcciones}
+                                getOptionLabel={(option) => option.direccion}
+                                renderInput={(params) => <TextField {...params} label="Direccion Por defecto" />}
+                            />
                     </Grid>
                     <Grid item  xs={12} md={3} >
-                        <Button variant="contained" onClick={abrirModalDirecciones}>Agregar Dirección</Button>
+                        <Button variant="contained" sx={{height:"100%"}} onClick={()=>{abrirModalDirecciones({})}}>Agregar Dirección</Button>
                     </Grid>
                     <Grid item xs={12} >
-                    <TableContainer >
-                        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                            <TableHead>
-                            <TableRow>
-                                <TableCell align="left">Direccion</TableCell>
-                                <TableCell align="left">Nombre Comercial</TableCell>
-                                <TableCell align="left">Codigo</TableCell>
-                            </TableRow>
-                            </TableHead>
-                            <TableBody>
-                            {direcciones.map((row,index) => (
-                                <TableRow key={index}>
-                                    <TableCell align="left">{row.direccion}</TableCell>
-                                    <TableCell align="left">{row.nombreComercial}</TableCell>
-                                    <TableCell align="left">{row.codigo}</TableCell>
+                        <TableContainer >
+                            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                                <TableHead>
+                                <TableRow>
+                                    <TableCell align="left">DIRECCIÓN</TableCell>
+                                    <TableCell align="left">Nombre Comercial</TableCell>
+                                    <TableCell align="left">CÓDIGO</TableCell>
+                                    <TableCell align="left"></TableCell>
                                 </TableRow>
-                            ))}
-                            </TableBody>
-                        </Table>
+                                </TableHead>
+                                <TableBody>
+                                {direcciones.map((row,index) => (
+                                    <TableRow key={index}>
+                                        <TableCell align="left">{row.direccion}</TableCell>
+                                        <TableCell align="left">{row.nombreComercial}</TableCell>
+                                        <TableCell align="left">{row.codigo}</TableCell>
+                                        <TableCell align="center">
+                                            <Stack direction={"row"} spacing={2}>
+                                                <IconButton aria-label="fingerprint" onClick={()=>{abrirModalEditarDirecciones(row)}}  color="warning">
+                                                    <EditIcon />
+                                                </IconButton>
+                                                <IconButton aria-label="fingerprint" onClick={()=>{eliminarDireccion(row)}} color="rojo">
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </Stack>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                                </TableBody>
+                            </Table>
                         </TableContainer>
                     </Grid>
                    
@@ -405,7 +499,7 @@ export default function ConfigView() {
             </Container>
       
 
-            <Modal isOpen={modalDireccion}  >
+            <Modal isOpen={modalDireccion} size="sm"  >
                 <ModalHeader>Registrar Nueva Direccion  </ModalHeader>
                 <ModalBody>
                 <Grid container spacing={1}>
@@ -455,18 +549,63 @@ export default function ConfigView() {
                 </Stack>
                 </ModalFooter>
             </Modal>
-         
+            
+            <Modal isOpen={modalEditarDirecciones}  size="sm" >
+                <ModalHeader>Editar Dirección</ModalHeader>
+                <ModalBody>
+                <Grid container spacing={1}>
+                        <Grid item xs={12}>
+                            <TextField
+                                id="outlined-password-input"
+                                label="Direccion Registrada"
+                                type="text"
+                                autoComplete="current-password"
+                                value={direccionRuc}
+                                onChange={(event) => {
+                                    setDireccionRuc(event.target.value);
+                                }}
+                                fullWidth
+                                />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                id="outlined-password-input"
+                                label="Nombre Comercial"
+                                type="text"
+                                autoComplete="current-password"
+                                value={nombreComercial}
+                                onChange={(event) => {
+                                    setNombreComercial(event.target.value);
+                                }}
+                                fullWidth
+                                />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                id="outlined-password-input"
+                                label="Codigo de Establecimiento"
+                                type="text"
+                                autoComplete="current-password"
+                                value={codeDireccion}
+                                onChange={(event) => {
+                                      setCodeDireccion(event.target.value);
+                                }}
+                                fullWidth
+                                />
+                        </Grid>
+                        
+                </Grid>
+                </ModalBody>
+                <ModalFooter>
+                    <Stack direction="row" style={{width:"100%"}} spacing={2}>
+                        <Button fullWidth sx={{ marginTop: 5 }}  onClick={actualizarDirecciones} variant="contained">Guardar</Button>
+                        <Button fullWidth sx={{ marginTop: 5 }} onClick={()=>{setModalEditarDirecciones(false)}} color="rojo" variant="contained">Cancelar</Button>
+                    </Stack>
+                </ModalFooter>
+            </Modal>
         </>
     );
 }
-
-
-
-
-
-
-
-
 
 
 

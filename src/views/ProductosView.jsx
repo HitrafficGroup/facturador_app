@@ -72,12 +72,12 @@ export default function ProductosView() {
     const [inventario, setInventario] = useState(false);
     const [categoria, setCategoria] = useState('');
     const [categorias,setCategorias] = useState(userState.categorias);
-    const [tarifa, setTarifa] = useState(1);
+    const [tarifa, setTarifa] = useState(2);
     const [modalCategorias,setModalCategorias] = useState(false);
     const [totalProducts,setTotalProducts] = useState(0)
     const [ice, setIce] = useState({
         codigo: 0,
-        nombre: "NINGUNO"
+        nombre: "Ninguno"
     });
     
     const [value, setValue] = useState(0);
@@ -87,6 +87,7 @@ export default function ProductosView() {
     const [value1, setValue1] = useState("");
     const [value2, setValue2] = useState("");
     const [value3, setValue3] = useState("");
+    const [tipoImpuesto,setTipoImpuesto] = useState(2);
     const allproducts = useRef([{}]);
     const [currentProducto, setCurrentProducto] = useState({
         codigo_principal: "",
@@ -111,12 +112,8 @@ export default function ProductosView() {
     });
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
-    const handleClick = (event) => {
-      setAnchorEl(event.currentTarget);
-    };
-    const closeMenu = () => {
-      setAnchorEl(null);
-    };
+
+
 
 
     const handleChangePage = (event, newPage) => {
@@ -140,11 +137,6 @@ export default function ProductosView() {
         });
         setEstablecimientos(userState.direcciones)
    }
-
-
-    const handleChange = (event) => {
-        setTarifa(event.target.value);
-    };
 
 
     const agregarCategorias = async() =>{
@@ -432,7 +424,7 @@ export default function ProductosView() {
                         </Box>
                         <CustomTabPanel value={value} index={0}>
                             <Grid container spacing={2}>
-                                <Grid item md={6} xs={12}>
+                                <Grid item md={8} xs={12}>
                                     <TextField
                                         required
                                         id="outlined-required"
@@ -443,6 +435,21 @@ export default function ProductosView() {
                                             setCodigoPrincipal(event.target.value);
                                         }}
                                     />
+                                </Grid>
+                                <Grid item md={4} xs={6}>
+                                    <FormControl fullWidth variant="filled">
+                                        <InputLabel htmlFor="filled-adornment-password">Tipo de Impuesto</InputLabel>
+                                        <Select
+                                            labelId="demo-simple-select-label"
+                                            value={tipoImpuesto}
+                                            label="Tipo de Persona"
+                                            onChange={(e)=>{setTipoImpuesto(e.target.value)}}
+                                        >
+                                            <MenuItem value={2}>IVA</MenuItem>
+                                            <MenuItem value={3}>ICE</MenuItem>
+                                           
+                                        </Select>
+                                    </FormControl>
                                 </Grid>
                                
                                 <Grid item md={12} xs={12}>
@@ -487,20 +494,23 @@ export default function ProductosView() {
                                             labelId="demo-simple-select-label"
                                             value={tarifa}
                                             label="Tipo de Persona"
-                                            onChange={handleChange}
+                                            onChange={(e)=>{setTarifa(e.target.value)}}
+                                            disabled={tipoImpuesto === 3? true:false}
                                         >
-                                            <MenuItem value={1}>0%</MenuItem>
+                                            <MenuItem value={0}>0%</MenuItem>
                                             <MenuItem value={2}>12%</MenuItem>
-                                            <MenuItem value={3}>No Objeto de impuesto</MenuItem>
-                                            <MenuItem value={4}>Extento de IVA</MenuItem>
-                                            <MenuItem value={5}>8%</MenuItem>
+                                            <MenuItem value={3}>14%</MenuItem>
+                                            <MenuItem value={6}>No Objeto de impuesto</MenuItem>
+                                            <MenuItem value={7}>Extento de IVA</MenuItem>
+                                            <MenuItem value={8}>IVA Diferenciado</MenuItem>
                                         </Select>
                                     </FormControl>
                                 </Grid>
-                                <Grid item md={8} xs={6}>
+                                <Grid item md={12} xs={6}>
                                     <Autocomplete
                                         disablePortal
                                         id="combo-box-demo"
+                                        disabled={tipoImpuesto === 2? true:false}
                                         value={ice}
                                         options={data}
                                         getOptionLabel={(option) =>
@@ -513,21 +523,7 @@ export default function ProductosView() {
                                         renderInput={(params) => <TextField {...params} label="Tarifado ICE" />}
                                     />
                                 </Grid>
-                                <Grid item md={4} xs={6}>
-                                    <FormControl>
-                                        <FormLabel id="demo-row-radio-buttons-group-label">Activo</FormLabel>
-                                        <RadioGroup
-                                            row
-                                            aria-labelledby="demo-row-radio-buttons-group-label"
-                                            name="row-radio-buttons-group"
-                                            value={activo}
-                                            onChange={handleActivo}
-                                        >
-                                            <FormControlLabel value={true} control={<Radio />} label="Si" />
-                                            <FormControlLabel value={false} control={<Radio />} label="No" />
-                                        </RadioGroup>
-                                    </FormControl>
-                                </Grid>
+                                
                             </Grid>
                         </CustomTabPanel>
                         <CustomTabPanel value={value} index={1}>
