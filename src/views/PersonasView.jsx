@@ -327,10 +327,10 @@ export default function PersonasView(){
                                                 onChange={handleFormCliente}
                                                 label="Tipo de Persona"
                                             >
-                                                <MenuItem value={1}>RUC</MenuItem>
-                                                <MenuItem value={2}>Cedula de identidad</MenuItem>
-                                                <MenuItem value={3}>Pasaporte</MenuItem>
-                                                <MenuItem value={4}>Identificación del exterior</MenuItem>
+                                                <MenuItem value={'04'}>RUC</MenuItem>
+                                                <MenuItem value={'05'}>Cedula</MenuItem>
+                                                <MenuItem value={'06'}>Pasaporte</MenuItem>
+                                                <MenuItem value={'08'}>Identificación del exterior</MenuItem>
                                             </Select>
                             </FormControl>
                         </Grid>
@@ -449,7 +449,7 @@ export default function PersonasView(){
 
             
             <Modal isOpen={modalEditar} >
-                <ModalHeader >Registrar Nuevo cliente </ModalHeader>
+                <ModalHeader >Editar Datos </ModalHeader>
                 <ModalBody>
                     <Grid container spacing={2}>
                         <Grid item md={6} xs={12}>
@@ -479,10 +479,10 @@ export default function PersonasView(){
                                                 onChange={handleFormCliente}
                                                 label="Tipo de Persona"
                                             >
-                                                <MenuItem value={1}>RUC</MenuItem>
-                                                <MenuItem value={2}>Cedula de identidad</MenuItem>
-                                                <MenuItem value={3}>Pasaporte</MenuItem>
-                                                <MenuItem value={4}>Identificación del exterior</MenuItem>
+                                                <MenuItem value={'04'}>RUC</MenuItem>
+                                                <MenuItem value={'05'}>Cedula de identidad</MenuItem>
+                                                <MenuItem value={'06'}>Pasaporte</MenuItem>
+                                                <MenuItem value={'08'}>Identificación del exterior</MenuItem>
                                             </Select>
                             </FormControl>
                         </Grid>

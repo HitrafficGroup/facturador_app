@@ -326,12 +326,13 @@ export default function FacturasView() {
                 aux_iva = (parseFloat(item.valor_unitario)*const_iva) + aux_iva;
                 console.log(aux_iva)
             })
-            setIva(aux_iva);
-            setSubTotal(aux_subtotal);
-            setSubZero(aux_zero);
-            setSubNoIva(aux_noiva);
-            setSubIva(aux_totaliva);
-            setTotal(aux_iva+aux_subtotal);
+            setIva(aux_iva.toFixed(2));
+            setSubTotal(aux_subtotal.toFixed(2));
+            setSubZero(aux_zero.toFixed(2));
+            setSubNoIva(aux_noiva.toFixed(2));
+            setSubIva(aux_totaliva.toFixed(2));
+            let aux_total1 =aux_iva+aux_subtotal
+            setTotal(aux_total1.toFixed(2))
             setProductos(datos_unidos);
             setModalProducto(false);
         }
@@ -364,12 +365,13 @@ export default function FacturasView() {
             aux_iva = ((parseFloat(item.valor_unitario)*parseFloat(item['cantidad']))*const_iva) + aux_iva;
             console.log(aux_iva)
         })
-        setIva(aux_iva);
-        setSubTotal(aux_subtotal)
-        setSubZero(aux_zero)
-        setSubNoIva(aux_noiva)
-        setSubIva(aux_totaliva)
-        setTotal(aux_iva+aux_subtotal)
+        setIva(aux_iva.toFixed(2));
+        setSubTotal(aux_subtotal.toFixed(2))
+        setSubZero(aux_zero.toFixed(2))
+        setSubNoIva(aux_noiva.toFixed(2))
+        setSubIva(aux_totaliva.toFixed(2))
+        let aux_total1 =aux_iva+aux_subtotal
+        setTotal(aux_total1.toFixed(2))
         setProductos(datos_filtrados);
     }
     const getData = () => {
@@ -453,19 +455,56 @@ export default function FacturasView() {
         let factura_data = {}
         let id = uuidv4();
         const user_ref = doc(db, "usuarios", userState.id);
+        let impuestos_data = []
         if(aux_productos.length >0){
             let products_formated = aux_productos.map((item)=>{
                 return {
                         codigo:item.codigo_principal,
                         descripcion:item.descripcion,
                         cantidad:item.cantidad,
-                        precio_unitario:item.valor_unitario,
+                        valor_unitario:item.valor_unitario,
                         descuento:0,
-                        precio_total:parseFloat(item.valor_unitario)*parseFloat(item.cantidad)
+                        precio_total:parseFloat(item.valor_unitario)*parseFloat(item.cantidad),
+                        tipo_impuesto:item.tipo_impuesto,
+                        ice:item.ice,
+                        tarifa_iva:item.tarifa_iva
                     }
             })
-         
-            let fecha_formated = new Date(value)
+            let twelve = 0
+            let zero = 0
+            aux_productos.forEach((item)=>{
+                if(item.tipo_impuesto === 2 ){
+                    if(item.tarifa_iva === 2){
+                        twelve += parseFloat(item.valor_unitario)
+                    }else if(item.tarifa_iva === 0 ){
+                        zero += parseFloat(item.valor_unitario)
+                    }
+                }
+            })
+            if(twelve !== 0 ){
+                impuestos_data.push({
+                    codigo:2,
+                    tipo_impuesto:2,
+                    base: twelve,
+                    valor: twelve * 0.12
+
+                })
+            }
+            if(zero !== 0){
+                impuestos_data.push({
+                    codigo:2,
+                    tipo_impuesto:0,
+                    base: zero,
+                    valor: zero * 0.12
+
+                })
+            }
+        
+            console.log("lista de impuestos: ",impuestos_data);
+
+
+            let fecha_formated = new Date(value);
+        
             var dia = fecha_formated.getDate().toString();
             var mes = fecha_formated.getMonth() + 1; 
             var año = fecha_formated.getFullYear().toString();
@@ -484,7 +523,8 @@ export default function FacturasView() {
                 tipo_ambiente:1,
                 serie:userState.bill_code1+userState.bill_code2,
                 comprobante:userState.bill_code3,
-                tipo_emision:1
+                tipo_emision:1,
+                
             }
             let clave_acceso = generarClavedeAcceso(data_clave)
             var fechaFormateada = dia + '/' + mes + '/' + año;
@@ -524,7 +564,8 @@ export default function FacturasView() {
                 razon:currentCliente.nombre,
                 clave_acceso:clave_acceso,
                 nombre_facturador:userState.razon,
-                punto_emision: userState.bill_code2
+                punto_emision: userState.bill_code2,
+                nombre_comercial:currentEstablecimiento.nombreComercial
                 
             }
             console.log(factura_data)
@@ -549,7 +590,7 @@ export default function FacturasView() {
     //const seleccionar
 
     useEffect(() => {
-
+        dispatch(setLoading(false));
         getData();
     }, []);
 

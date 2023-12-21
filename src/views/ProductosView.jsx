@@ -14,6 +14,7 @@ import IconButton from '@mui/material/IconButton';
 import { collection, query, onSnapshot, doc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase-config";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import Button from '@mui/material/Button';
@@ -24,7 +25,6 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import InputLabel from '@mui/material/InputLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Select from '@mui/material/Select';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -38,14 +38,10 @@ import AddIcon from '@mui/icons-material/Add';
 import { setLoading } from "../features/menu/menuSlice";
 import SettingsIcon from '@mui/icons-material/Settings';
 import CardProduct from "../components/card-product";
-import Input from '@mui/material/Input';
-import Menu from '@mui/material/Menu';
-import CategoryIcon from '@mui/icons-material/Category';
 import MenuItem from '@mui/material/MenuItem';
 import FilledInput from '@mui/material/FilledInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import ArticleIcon from '@mui/icons-material/Article';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
@@ -67,14 +63,14 @@ export default function ProductosView() {
     const [unidadMedida, setUnidadMedida] = useState('');
     const [activo, setActivo] = useState(true);
     const [stock, setStock] = useState('');
-    const [establecimiento, setEstablecimiento] = useState('');
     const [establecimientos, setEstablecimientos] = useState({});
     const [inventario, setInventario] = useState(false);
     const [categoria, setCategoria] = useState('');
     const [categorias,setCategorias] = useState(userState.categorias);
+    const [establecimiento, setEstablecimiento] = useState(userState.defect_direction);
     const [tarifa, setTarifa] = useState(2);
     const [modalCategorias,setModalCategorias] = useState(false);
-    const [totalProducts,setTotalProducts] = useState(0)
+    const [totalProducts,setTotalProducts] = useState(0);
     const [ice, setIce] = useState({
         codigo: 0,
         nombre: "Ninguno"
@@ -109,11 +105,12 @@ export default function ProductosView() {
         value2: "",
         param3: "",
         value3: "",
+        tipo_impuesto:2,
     });
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
 
-
+    
 
 
     const handleChangePage = (event, newPage) => {
@@ -133,9 +130,10 @@ export default function ProductosView() {
             });
             setProductos(products_aux);
             allproducts.current = products_aux;
-            setTotalProducts(products_aux.length)
+            setTotalProducts(products_aux.length);
         });
-        setEstablecimientos(userState.direcciones)
+        setEstablecimientos(userState.direcciones);
+        setEstablecimiento(userState.defect_direction);
    }
 
 
@@ -170,9 +168,7 @@ export default function ProductosView() {
     const handleInventario = (event) => {
         setInventario(event.target.value);
     };
-    const handleActivo = (event) => {
-        setActivo(event.target.value);
-    };
+ 
 
     const abrirModalEditar = (item) => {
         setModalEditar(true);
@@ -204,6 +200,7 @@ export default function ProductosView() {
             stock: stock,
             id: id,
             producto:true,
+            tipo_impuesto: tipoImpuesto,
         }
         await setDoc(doc(db, "productos", id), new_producto);
         dispatch(setLoading(false));
@@ -229,16 +226,12 @@ export default function ProductosView() {
         setCurrentProducto(nuevoObjeto);
     };
     const handleSearch=(event)=>{
-
-    
         let textoMinusculas = event.target.value.toLowerCase();
         const filtrados = allproducts.current.filter((elemento) => {
             const nombreMinusculas = elemento.descripcion.toLowerCase();
-
             return nombreMinusculas.includes(textoMinusculas);
-          });
-
-          setProductos(filtrados);
+        });
+        setProductos(filtrados);
     }
 
 

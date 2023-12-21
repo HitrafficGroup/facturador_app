@@ -12,7 +12,7 @@ function generarFacturaXML(datos_factura){
     xw.writeElement('ambiente',1) //2 para produccion 1 para pruebas
     xw.writeElement('tipoEmision',1)
     xw.writeElement('razonSocial',datos_factura.nombre_facturador)
-    xw.writeElement('nombreComercial',datos_factura.nombre_facturador)
+    xw.writeElement('nombreComercial',datos_factura.nombre_comercial)
     xw.writeElement('ruc',datos_factura.ci)
     xw.writeElement('claveAcceso',datos_factura.clave_acceso) // pendiente a determinar como se obtiene
     xw.writeElement('codDoc',"01")
@@ -34,25 +34,50 @@ function generarFacturaXML(datos_factura){
     xw.writeElement('totalSinImpuestos',datos_factura.total)
     xw.writeElement('totalDescuento',datos_factura.descuento)
     xw.startElement('totalConImpuestos')
-    xw.startElement('totalImpuesto')
-    xw.writeElement('codigo',"3")
-    xw.writeElement('codigoPorcentaje',"3072")
-    xw.writeElement('baseImponible',"295000")
-    xw.writeElement('valor',"14750.00")
-    xw.endElement()
-    xw.startElement('totalImpuesto')
-    xw.writeElement('codigo',"2")
-    xw.writeElement('codigoPorcentaje',"2")
-    xw.writeElement('descuentoAdicional',"5.00")
-    xw.writeElement('baseImponible',"12.00")
-    xw.writeElement('valor',"14750.00")
-    xw.endElement()
-    xw.startElement('totalImpuesto')
-    xw.writeElement('codigo',"5")
-    xw.writeElement('codigoPorcentaje',"2")
-    xw.writeElement('baseImponible',"2")
-    xw.writeElement('valor',"2")
-    xw.endElement()
+        for(let i = 0; i <datos_factura.products.length ;i++){
+            var item = datos_factura.products[i]
+            var valor = item.valor_unitario;
+          
+            var numeroFlotante = parseFloat(valor);
+            var numeroRedondeado = numeroFlotante.toFixed(2);
+           
+            if(item.tipo_impuesto === 2){
+                var valor_iva = numeroFlotante *0.12;
+                var iva_formateado = valor_iva.toFixed(2);
+                xw.startElement('totalImpuesto')
+                xw.writeElement('codigo',"2")
+                xw.writeElement('codigoPorcentaje',item.tarifa_iva)
+                xw.writeElement('baseImponible',numeroRedondeado)
+                xw.writeElement('valor',iva_formateado)
+                xw.endElement()
+            }else{
+                xw.startElement('totalImpuesto')
+                xw.writeElement('codigo',"3")
+                xw.writeElement('codigoPorcentaje',"1213")
+                xw.writeElement('baseImponible',numeroRedondeado)
+                xw.writeElement('valor',valor_iva)
+                xw.endElement()
+            }
+        }
+        // xw.startElement('totalImpuesto')
+        // xw.writeElement('codigo',"3")
+        // xw.writeElement('codigoPorcentaje',"3072")
+        // xw.writeElement('baseImponible',"295000")
+        // xw.writeElement('valor',"14750.00")
+        // xw.endElement()
+        // xw.startElement('totalImpuesto')
+        // xw.writeElement('codigo',"2")
+        // xw.writeElement('codigoPorcentaje',"2")
+        // xw.writeElement('descuentoAdicional',"5.00")
+        // xw.writeElement('baseImponible',"12.00")
+        // xw.writeElement('valor',"14750.00")
+        // xw.endElement()
+        // xw.startElement('totalImpuesto')
+        // xw.writeElement('codigo',"5")
+        // xw.writeElement('codigoPorcentaje',"2")
+        // xw.writeElement('baseImponible',"2")
+        // xw.writeElement('valor',"2")
+        // xw.endElement()
     xw.endElement()
     // termina la seccion de los impuestos
     xw.writeElement('propina',"0.00")
@@ -76,7 +101,7 @@ function generarFacturaXML(datos_factura){
             xw.writeElement('codigoAuxiliar',datos_factura.products[i].codigo)
             xw.writeElement('descripcion',datos_factura.products[i].descripcion)
             xw.writeElement('cantidad',datos_factura.products[i].cantidad)
-            xw.writeElement('precioUnitario',datos_factura.products[i].precio_unitario)
+            xw.writeElement('precioUnitario',datos_factura.products[i].valor_unitario)
             xw.writeElement('descuento',datos_factura.products[i].descuento)
             xw.writeElement('precioTotalSinImpuesto',datos_factura.products[i].precio_total)
             xw.startElement('impuestos')
